@@ -1,0 +1,37 @@
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Local configuration
+local.properties
+/local.properties
+
+# IDE (Android Studio)
+*.iml
+.idea/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# NDK / C++
+.cxx/
+.externalNativeBuild/
+
+# Output / artifacts
+captures/
+output.json
+
+# Compose previews
+*.preview.json
+
+# APKs / AABs
+*.apk
+*.aab
