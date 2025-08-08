@@ -45,6 +45,15 @@
 | Other        | Kotlin Coroutines, Flow     |
 | Testing      | JUnit5, Mockk, Espresso     |
 
+## Project Modules
+
+- `:app` – Main app module
+- `:core` – Shared utils, theme, design system
+- `:feature_auth` – Auth flow
+- `:feature_warranties` – Warranty list, details
+- `:data` – Data sources, repositories
+- `:domain` – Use cases, business logic
+
 ## Kotlin code style:
 Kotlin code follows the official [Kotlin Coding Conventions](https://kotlinlang.org/docs/coding-conventions.html).
 
@@ -57,19 +66,21 @@ This project follows the Git Flow branching model:
 - **`release/x.x.x`** — pre-release stabilization branches, branched from `develop`. After release, merged into both `main` and `develop`.
 - **`hotfix/*`** — urgent fixes for production, branched from main, merged into both main and develop.
 
-### Committing Guidelines
+## Committing Guidelines:
 We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) to maintain a clear and consistent commit history.
-Commit message format:
-<type>[optional scope]: <description> [TASK-ID]
 
-[optional body]
-[optional footer(s)]
+**Commit message format:**
 
-where:
-<type> — commit type (see list below)
-[optional scope] — scope of change (module, feature, etc.)
-<description> — brief description, in lowercase
-[TASK-ID] — Trello task number (e.g., [CHORE-1], [FEAT-5], [FIX-12])
+> \<type>[optional scope]: \<description> [TASK-ID]
+>
+> [optional body]
+> [optional footer(s)]
+
+**where:**
+- `<type>` — commit type (see list below).
+- `[optional scope]` — scope of change (module, feature, etc.).
+- `<description>` — brief description, in lowercase.
+- `[TASK-ID]` — Trello task number (e.g., [CHORE-1], [FEAT-5], [FIX-12]).
 
 **Examples:**
 
@@ -79,7 +90,7 @@ fix(api): correct warranty expiration date calculation [FIX-54]
 chore(deps): update Retrofit to 3.1.0 [CHORE-154]
 ```
 
-Types:
+**Types:**
 - `feat` — new feature
 - `fix` — bug fix
 - `docs` — documentation
