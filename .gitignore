@@ -35,3 +35,5 @@ output.json
 # APKs / AABs
 *.apk
 *.aab
+
+app/google-services.json
