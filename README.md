@@ -48,16 +48,16 @@
 ## Project Modules
 
 - `:app` – Main app module
-- `:core` – Shared utils, theme, design system
+- `:core:ui` – Theme, design system
+- `:core:data` – Data sources, repositories
+- `:core:domain` – Use cases, business logic
 - `:feature_auth` – Auth flow
 - `:feature_warranties` – Warranty list, details
-- `:data` – Data sources, repositories
-- `:domain` – Use cases, business logic
 
 ## Kotlin code style:
 Kotlin code follows the official [Kotlin Coding Conventions](https://kotlinlang.org/docs/coding-conventions.html).
 
-### Branching Strategy
+## Branching Strategy
 This project follows the Git Flow branching model:
 - **`main`** — production-ready code. Only release and hotfix branches are merged here.
 - **`develop`** — main development branch. All feature and bugfix branches are merged here.
