@@ -20,4 +20,9 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Guarantify"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(":app")
+include(":core:ui")
+include(":core:data")
+include(":core:domain")
