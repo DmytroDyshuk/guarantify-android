@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.core.splashscreen)
 
     testImplementation(libs.junit)
 
