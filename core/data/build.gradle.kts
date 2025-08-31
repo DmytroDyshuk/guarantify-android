@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.google.services)
     alias(libs.plugins.room)
 }
 
@@ -46,7 +45,6 @@ dependencies {
     implementation(projects.core.domain)
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
 
     //Hilt
     implementation(libs.hilt.android)

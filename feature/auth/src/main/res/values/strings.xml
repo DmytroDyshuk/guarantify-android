@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="web_client_id">933795868425-umom9p3neb6trmlrqcoqsff9bnudgoao.apps.googleusercontent.com</string>
+
     <string name="auth_welcome_title">Welcome to</string>
     <string name="aut_guarantify_title">Guarantify</string>
     <string name="auth_description_header">Keep all your warranties in one place:</string>
