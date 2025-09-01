@@ -41,7 +41,7 @@ fun ContinueWithGoogleButton(
             contentColor = audiBrilliantBlack
         ),
         border = BorderStroke(1.dp, darkGrayishCyan),
-        onClick = { onClick }
+        onClick = { onClick() }
     ) {
         Icon(
             modifier = Modifier.padding(horizontal = 10.dp),

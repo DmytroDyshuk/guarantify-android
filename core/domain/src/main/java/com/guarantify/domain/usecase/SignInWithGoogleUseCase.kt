@@ -4,7 +4,7 @@ import com.guarantify.domain.model.AuthResult
 import com.guarantify.domain.repository.GoogleAuthRepository
 import javax.inject.Inject
 
-class GoogleAuthUserUseCase @Inject constructor(
+class SignInWithGoogleUseCase @Inject constructor(
     private val googleAuthRepository: GoogleAuthRepository
 ) {
     suspend operator fun invoke(idToken: String): AuthResult? =

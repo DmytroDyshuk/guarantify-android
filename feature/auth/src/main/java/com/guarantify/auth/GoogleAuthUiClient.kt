@@ -1,5 +1,6 @@
 package com.guarantify.auth
 
+import android.app.Activity
 import android.content.Context
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -10,7 +11,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 class GoogleAuthUiClient(private val context: Context) {
     private val credentialManager = CredentialManager.create(context)
 
-    suspend fun signIn(): String? {
+    suspend fun getIdTokenCredential(): String? {
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setServerClientId(context.getString(R.string.web_client_id))

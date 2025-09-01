@@ -47,6 +47,8 @@ android {
 
 dependencies {
     implementation(projects.core.ui)
+    implementation(projects.core.data)
+    implementation(projects.core.domain)
     implementation(projects.feature.auth)
 
     implementation(libs.androidx.core.ktx)
@@ -67,6 +69,7 @@ dependencies {
     //Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
 
     testImplementation(libs.junit)
 
