@@ -14,7 +14,7 @@ fun BulletPointText(
     modifier: Modifier = Modifier,
     bulletColor: Color = Color.Black,
     textColor: Color = Color.Black,
-    textStyle: TextStyle = AppTypography.bodyLarge,
+    textStyle: TextStyle = AppTypography.bodyMedium,
     text: String
 ) {
     Row(

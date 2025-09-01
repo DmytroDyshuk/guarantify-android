@@ -1,5 +1,6 @@
 package com.guarantify.auth
 
+import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,6 +23,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guarantify.auth.components.BulletPointText
+import com.guarantify.auth.components.ContinueWithGoogleButton
 import com.guarantify.ui.theme.AppTypography
 import com.guarantify.ui.theme.GuarantifyTheme
 import com.guarantify.ui.theme.displayFontFamily
@@ -63,7 +66,7 @@ fun AuthScreenContent() {
             Text(
                 text = stringResource(R.string.auth_description_header),
                 color = Color.Black,
-                style = AppTypography.bodyLarge
+                style = AppTypography.bodyMedium
             )
             BulletPointText(
                 modifier = Modifier.padding(horizontal = 8.dp),
@@ -81,15 +84,24 @@ fun AuthScreenContent() {
             Text(
                 text = stringResource(R.string.auth_description_footer),
                 color = Color.Black,
-                style = AppTypography.bodyLarge
+                style = AppTypography.bodyMedium
             )
         }
+
 
         Image(
             modifier = Modifier.padding(top = 24.dp),
             painter = painterResource(R.drawable.auth_flat_design_picture),
             contentDescription = null
         )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        ContinueWithGoogleButton(
+            modifier = Modifier.padding(bottom = 16.dp)
+        ) {
+
+        }
 
     }
 }

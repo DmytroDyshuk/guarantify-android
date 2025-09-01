@@ -9,4 +9,6 @@
     <string name="auth_description_bullet_point_2">Track expiration dates</string>
     <string name="auth_description_bullet_point_3">Get smart purchase insights</string>
     <string name="auth_description_footer">Guarantify makes it easy to never lose a warranty again.</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="content_description_google_logo">Google Logo</string>
 </resources>
