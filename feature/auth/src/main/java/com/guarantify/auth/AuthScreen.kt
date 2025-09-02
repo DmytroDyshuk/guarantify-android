@@ -2,16 +2,25 @@ package com.guarantify.auth
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +37,7 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.guarantify.auth.components.BulletPointText
 import com.guarantify.auth.components.ContinueWithGoogleButton
+import com.guarantify.auth.state.AuthUiState
 import com.guarantify.auth.viewmodel.AuthViewModel
 import com.guarantify.ui.theme.AppTypography
 import com.guarantify.ui.theme.GuarantifyTheme
@@ -41,7 +51,10 @@ fun AuthScreen(authViewModel: AuthViewModel = hiltViewModel()) {
     val googleAuthUiClient = remember { GoogleAuthUiClient(context) }
     val coroutineScope = rememberCoroutineScope()
 
+    val uiState by authViewModel.uiState.collectAsState()
+
     AuthScreenContent(
+        uiState = uiState,
         onGoogleButtonClick = {
             coroutineScope.launch {
                 try {
@@ -59,75 +72,95 @@ fun AuthScreen(authViewModel: AuthViewModel = hiltViewModel()) {
 
 @Composable
 fun AuthScreenContent(
+    uiState: AuthUiState,
     onGoogleButtonClick: () -> Unit
 ) {
-    Column(
+    Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 64.dp),
-            textAlign = TextAlign.Center,
-            style = AppTypography.displayMedium,
-            fontWeight = FontWeight.SemiBold,
-            text = buildAnnotatedString {
-                append(stringResource(R.string.auth_welcome_title))
-                append(" ")
-                withStyle(
-                    style = SpanStyle(
-                        fontFamily = displayFontFamily,
-                        fontSize = AppTypography.displayMedium.fontSize,
-                        fontWeight = FontWeight.Bold,
-                        color = primaryLight
-                    )
-                ) {
-                    append(stringResource(R.string.aut_guarantify_title))
-                }
-            }
-        )
-
-        Column(modifier = Modifier.padding(vertical = 24.dp, horizontal = 8.dp)) {
-            Text(
-                text = stringResource(R.string.auth_description_header),
-                color = Color.Black,
-                style = AppTypography.bodyMedium
-            )
-            BulletPointText(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                text = stringResource(R.string.auth_description_bullet_point_1)
-            )
-            BulletPointText(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                text = stringResource(R.string.auth_description_bullet_point_2)
-            )
-            BulletPointText(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                text = stringResource(R.string.auth_description_bullet_point_3)
-            )
-            Spacer(Modifier.height(24.dp))
-            Text(
-                text = stringResource(R.string.auth_description_footer),
-                color = Color.Black,
-                style = AppTypography.bodyMedium
-            )
-        }
-
-
-        Image(
-            modifier = Modifier.padding(top = 24.dp),
-            painter = painterResource(R.drawable.auth_flat_design_picture),
-            contentDescription = null
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        ContinueWithGoogleButton(
-            modifier = Modifier.padding(bottom = 32.dp)
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            onGoogleButtonClick()
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 64.dp),
+                textAlign = TextAlign.Center,
+                style = AppTypography.displayMedium,
+                fontWeight = FontWeight.SemiBold,
+                text = buildAnnotatedString {
+                    append(stringResource(R.string.auth_welcome_title))
+                    append(" ")
+                    withStyle(
+                        style = SpanStyle(
+                            fontFamily = displayFontFamily,
+                            fontSize = AppTypography.displayMedium.fontSize,
+                            fontWeight = FontWeight.Bold,
+                            color = primaryLight
+                        )
+                    ) {
+                        append(stringResource(R.string.aut_guarantify_title))
+                    }
+                }
+            )
+
+            Column(modifier = Modifier.padding(vertical = 24.dp, horizontal = 8.dp)) {
+                Text(
+                    text = stringResource(R.string.auth_description_header),
+                    color = Color.Black,
+                    style = AppTypography.bodyMedium
+                )
+                BulletPointText(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    text = stringResource(R.string.auth_description_bullet_point_1)
+                )
+                BulletPointText(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    text = stringResource(R.string.auth_description_bullet_point_2)
+                )
+                BulletPointText(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    text = stringResource(R.string.auth_description_bullet_point_3)
+                )
+                Spacer(Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.auth_description_footer),
+                    color = Color.Black,
+                    style = AppTypography.bodyMedium
+                )
+            }
+
+            Image(
+                modifier = Modifier.padding(top = 24.dp),
+                painter = painterResource(R.drawable.auth_flat_design_picture),
+                contentDescription = null
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            ContinueWithGoogleButton(
+                modifier = Modifier.padding(bottom = 32.dp)
+            ) {
+                onGoogleButtonClick()
+            }
         }
 
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.1f))
+                    .clickable(
+                        enabled = true,
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }) {
+
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(modifier = Modifier.width(64.dp))
+            }
+        }
     }
 }
 
