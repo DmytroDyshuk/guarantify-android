@@ -1,6 +1,7 @@
 package com.guarantify.auth
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.guarantify.auth.components.BulletPointText
 import com.guarantify.auth.components.ContinueWithGoogleButton
@@ -62,8 +64,34 @@ fun AuthScreen(authViewModel: AuthViewModel = hiltViewModel()) {
                     idToken?.let {
                         authViewModel.continueWithGoogle(it)
                     }
-                } catch (e: GetCredentialCancellationException) {
-                    Log.d("AuthScreen", "User cancelled Google sign-in")
+                } catch (e: Exception) {
+                    when (e) {
+                        is NoCredentialException -> {
+                            Toast.makeText(
+                                context,
+                                "No Google accounts available",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+
+                        is GetCredentialCancellationException -> {
+                            Log.d("AuthScreen", "User cancelled Google sign-in")
+                            Toast.makeText(
+                                context,
+                                "Sign-in cancelled",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        else -> {
+                            Log.d("AuthScreen", "Exception: ${e.message}")
+                            Toast.makeText(
+                                context,
+                                "Something went wrong, please try again",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
                 }
             }
         }
