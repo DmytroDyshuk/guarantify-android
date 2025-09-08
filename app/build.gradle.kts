@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -50,6 +49,8 @@ dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.data)
     implementation(projects.core.domain)
+    implementation(projects.core.destinations)
+    implementation(projects.feature.homeNavigation)
     implementation(projects.feature.auth)
 
     implementation(libs.androidx.core.ktx)
@@ -61,9 +62,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.core.splashscreen)
-
-    //Serialization
-    implementation(libs.kotlinx.serialization.json)
 
     //Navigation
     implementation(libs.navigation.compose)

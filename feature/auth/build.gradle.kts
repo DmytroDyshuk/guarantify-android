@@ -4,32 +4,18 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
     namespace = "com.guarantify.auth"
     compileSdk = 36
 
-    defaultConfig {
-        minSdk = 26
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
@@ -38,9 +24,12 @@ android {
 dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.domain)
+    implementation(projects.core.destinations)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+
+    //Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
@@ -52,6 +41,12 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+
+    //Serialization
+    implementation(libs.kotlinx.serialization.json)
+
+    //Navigation
+    implementation(libs.navigation.compose)
 
     //Credential
     implementation(libs.credentials)
