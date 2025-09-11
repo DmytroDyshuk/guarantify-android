@@ -20,7 +20,9 @@ android {
 }
 
 dependencies {
-    implementation(projects.core.destinations)
+    implementation(projects.feature.warranties)
+    implementation(projects.feature.insights)
+    implementation(projects.feature.settings)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

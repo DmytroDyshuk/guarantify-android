@@ -1,4 +1,4 @@
-package com.guarantify.destinations
+package com.guarantify.app.navigation
 
 import kotlinx.serialization.Serializable
 

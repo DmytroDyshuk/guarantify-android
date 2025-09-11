@@ -49,7 +49,6 @@ dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.data)
     implementation(projects.core.domain)
-    implementation(projects.core.destinations)
     implementation(projects.feature.homeNavigation)
     implementation(projects.feature.auth)
 
