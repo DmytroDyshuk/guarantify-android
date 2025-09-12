@@ -13,7 +13,7 @@ import com.guarantify.home_navigation.HomeScreenContainer
 @Composable
 fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
-    isAuthorized: Boolean = false //TODO
+    isAuthorized: Boolean = true //TODO
 ) {
     val startDestination = if (isAuthorized) {
         RootDestinations.Home

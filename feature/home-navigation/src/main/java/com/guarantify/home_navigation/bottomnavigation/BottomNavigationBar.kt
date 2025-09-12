@@ -14,6 +14,8 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.guarantify.home_navigation.BottomNavItem
+import com.guarantify.home_navigation.HomeDestinations
+import com.guarantify.warranties.navigation.WarrantiesDestinations
 
 @Composable
 fun NavigationBottomBar(
@@ -23,14 +25,24 @@ fun NavigationBottomBar(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination: NavDestination? = navBackStackEntry?.destination
 
-    val isTopLevelDestination = BottomNavItem.entries.map { bottomNavItem ->
-        bottomNavItem.route::class
-    }.any { routeClass ->
-        currentDestination?.hierarchy?.any { it.hasRoute(routeClass) } == true
+    //TODO: test the reliability of the display bottom bar logic
+//    val isTopLevelDestination = BottomNavItem.entries.map { bottomNavItem ->
+//        bottomNavItem.route::class
+//    }.any { routeClass ->
+//        currentDestination?.hierarchy?.any { it.hasRoute(routeClass) } == true
+//    }
+//    val isStartDestination =
+//        currentDestination?.parent?.startDestinationRoute == currentDestination?.route
+//    val showBottomBar = isTopLevelDestination && isStartDestination
+
+    val topLevelDestinations = setOf(
+        WarrantiesDestinations.WarrantiesScreen::class,
+        HomeDestinations.Insights::class,
+        HomeDestinations.Settings::class
+    )
+    val showBottomBar = topLevelDestinations.any {
+        currentDestination?.hasRoute(it) == true
     }
-    val isStartDestination =
-        currentDestination?.parent?.startDestinationRoute == currentDestination?.route
-    val showBottomBar = isTopLevelDestination && isStartDestination
 
     AnimatedVisibility(showBottomBar) {
         NavigationBar(
@@ -60,7 +72,6 @@ fun NavigationBottomBar(
                             restoreState = true
                         }
                     }
-
                 )
             }
         }
