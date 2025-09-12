@@ -20,7 +20,21 @@ enum class BottomNavItem(
     val icon: Int,
     val route: HomeDestinations
 ) {
-    //TODO: add WarrantiesList, Insights, Settings bottom navigation items
+    Warranties(
+        label = "Warranties",
+        icon = R.drawable.outline_receipt_24,
+        route = HomeDestinations.Warranties
+    ),
+    Insights(
+        label = "Insights",
+        icon = R.drawable.outline_search_insights_24,
+        route = HomeDestinations.Insights
+    ),
+    Settings(
+        label = "Settings",
+        icon = R.drawable.outline_settings_24,
+        route = HomeDestinations.Settings
+    )
 }
 
 

@@ -19,7 +19,9 @@ fun HomeScreenContainer() {
     val homeNavController = rememberNavController()
     Scaffold(
         bottomBar = {
-            NavigationBottomBar()
+            NavigationBottomBar(
+                navController = homeNavController
+            )
         }
     ) {
         NavHost(
