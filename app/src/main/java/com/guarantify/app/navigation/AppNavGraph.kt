@@ -8,16 +8,19 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.guarantify.auth.navigation.AuthDestinations
 import com.guarantify.auth.navigation.authGraph
+import com.guarantify.domain.model.AuthState
 import com.guarantify.home_navigation.HomeScreenContainer
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
-    isAuthorized: Boolean = true //TODO
+    authState: AuthState
 ) {
-    val startDestination = if (isAuthorized) {
-        RootDestinations.Home
-    } else RootDestinations.Auth
+
+    val startDestination = when (authState) {
+        is AuthState.Authenticated -> RootDestinations.Home
+        is AuthState.Unauthenticated -> RootDestinations.Auth
+    }
 
     NavHost(
         navController = navController,
