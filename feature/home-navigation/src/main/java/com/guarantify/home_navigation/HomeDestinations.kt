@@ -22,7 +22,7 @@ enum class BottomNavItem(
 ) {
     Warranties(
         label = "Warranties",
-        icon = R.drawable.outline_receipt_24,
+        icon = R.drawable.outline_receipt_long_24,
         route = HomeDestinations.Warranties
     ),
     Insights(
