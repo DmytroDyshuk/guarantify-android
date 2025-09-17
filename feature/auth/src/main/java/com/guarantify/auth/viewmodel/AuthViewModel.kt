@@ -22,7 +22,6 @@ class AuthViewModel @Inject constructor(
 
     fun continueWithGoogle(idToken: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
             try {
                 val authResult = googleAuthUserCase(idToken)
                 _uiState.update {
@@ -41,6 +40,10 @@ class AuthViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setLoading() {
+        _uiState.update { it.copy(isLoading = true) }
     }
 
 }

@@ -3,9 +3,6 @@ package com.guarantify.auth
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -58,6 +55,7 @@ fun AuthScreen(authViewModel: AuthViewModel = hiltViewModel()) {
     AuthScreenContent(
         uiState = uiState,
         onGoogleButtonClick = {
+            authViewModel.setLoading()
             coroutineScope.launch {
                 try {
                     val idToken = googleAuthUiClient.getIdTokenCredential()
@@ -166,27 +164,19 @@ fun AuthScreenContent(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            ContinueWithGoogleButton(
-                modifier = Modifier.padding(bottom = 32.dp)
-            ) {
-                onGoogleButtonClick()
-            }
-        }
-
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.1f))
-                    .clickable(
-                        enabled = true,
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }) {
-
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(modifier = Modifier.width(64.dp))
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .width(32.dp)
+                        .padding(bottom = 48.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            } else {
+                ContinueWithGoogleButton(
+                    modifier = Modifier.padding(bottom = 48.dp)
+                ) {
+                    onGoogleButtonClick()
+                }
             }
         }
     }
