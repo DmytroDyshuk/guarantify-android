@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -26,17 +27,19 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             GuarantifyTheme {
-                val uiState by viewModel.uiState.collectAsState()
+                Surface {
+                    val uiState by viewModel.uiState.collectAsState()
 
-                when (uiState) {
-                    is MainActivityUiState.Success -> {
-                        (uiState as? MainActivityUiState.Success)?.authState?.let {
-                            AppNavGraph(authState = it)
+                    when (uiState) {
+                        is MainActivityUiState.Success -> {
+                            (uiState as? MainActivityUiState.Success)?.authState?.let {
+                                AppNavGraph(authState = it)
+                            }
                         }
-                    }
 
-                    MainActivityUiState.Loading -> {
-                        LoadingScreen()
+                        MainActivityUiState.Loading -> {
+                            LoadingScreen()
+                        }
                     }
                 }
             }
