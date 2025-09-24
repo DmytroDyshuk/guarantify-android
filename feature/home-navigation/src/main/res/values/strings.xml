@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="warranties_topbar_title">Warranties</string>
+    <string name="insights_topbar_title">Insights</string>
+    <string name="settings_topbar_title">Settings</string>
+</resources>

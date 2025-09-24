@@ -22,7 +22,6 @@ android {
 dependencies {
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
 
     //Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -31,6 +30,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.material3)
+    debugImplementation(libs.androidx.ui.tooling)
 
     //Navigation
     implementation(libs.navigation.compose)

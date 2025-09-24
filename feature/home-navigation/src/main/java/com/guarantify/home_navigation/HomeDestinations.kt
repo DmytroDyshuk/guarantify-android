@@ -36,5 +36,3 @@ enum class BottomNavItem(
         route = HomeDestinations.Settings
     )
 }
-
-

@@ -34,6 +34,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.material3)
+    debugImplementation(libs.androidx.ui.tooling)
 
     //Hilt
     implementation(libs.hilt.android)

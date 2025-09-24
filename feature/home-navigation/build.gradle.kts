@@ -25,7 +25,6 @@ dependencies {
     implementation(projects.feature.settings)
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
 
     //Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))
