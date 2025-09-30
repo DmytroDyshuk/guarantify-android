@@ -20,26 +20,50 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.guarantify.settings.components.SettingButton
 import com.guarantify.settings.components.SwitchSettingButton
+import com.guarantify.ui.components.ConfirmationDialog
 import com.guarantify.ui.theme.GuarantifyTheme
 import com.guarantify.ui.theme.darkGrayishCyan
 
 @Composable
-fun SettingsScreen() {
-    SettingsScreenContent()
+fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
+    SettingsScreenContent(
+        onSignOutClicked = {
+            viewModel.onSignOutClicked()
+        }
+    )
 }
 
 @Composable
-fun SettingsScreenContent() {
+fun SettingsScreenContent(
+    onSignOutClicked: () -> Unit
+) {
     val scrollState = rememberScrollState()
     var checked by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
+        when {
+            showDialog -> {
+                ConfirmationDialog(
+                    icon = ImageVector.vectorResource(R.drawable.rounded_logout_24),
+                    title = stringResource(R.string.log_out_dialog_title),
+                    text = stringResource(R.string.log_out_dialog_text),
+                    onDismissRequest = { showDialog = false },
+                    onConfirmation = {
+                        onSignOutClicked()
+                        showDialog = false
+                    }
+                )
+            }
+        }
+        
         Text(
             modifier = Modifier.padding(start = 12.dp, top = 12.dp),
             text = stringResource(R.string.settings_appearance_title),
@@ -67,7 +91,7 @@ fun SettingsScreenContent() {
         SettingButton(
             headlineText = stringResource(R.string.settings_logout_button),
             leadingIcon = ImageVector.vectorResource(R.drawable.rounded_logout_24),
-            onClick = { }
+            onClick = { showDialog = true }
         )
         SettingButton(
             headlineText = stringResource(R.string.settings_delete_account_button),
@@ -159,7 +183,9 @@ fun SettingsScreenContent() {
 fun PreviewSettingsScreen() {
     GuarantifyTheme {
         Surface {
-            SettingsScreen()
+            SettingsScreenContent(
+                onSignOutClicked = {}
+            )
         }
     }
 }

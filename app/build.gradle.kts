@@ -52,6 +52,7 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.feature.homeNavigation)
     implementation(projects.feature.auth)
+    implementation(projects.feature.settings)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

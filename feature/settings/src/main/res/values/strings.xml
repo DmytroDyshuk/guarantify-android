@@ -18,4 +18,7 @@
     <string name="settings_contact_us_button">Contact Us</string>
     <string name="settings_report_bug_button">Report a Bug</string>
     <string name="settings_rate_app_button">Rate this App</string>
+
+    <string name="log_out_dialog_title">Are you sure?</string>
+    <string name="log_out_dialog_text">You will no longer be logged in on this device.</string>
 </resources>
