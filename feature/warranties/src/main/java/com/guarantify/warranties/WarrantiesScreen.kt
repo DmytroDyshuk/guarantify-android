@@ -13,8 +13,7 @@ import androidx.compose.ui.graphics.Color
 fun WarrantiesScreen() {
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.Blue),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Text(
