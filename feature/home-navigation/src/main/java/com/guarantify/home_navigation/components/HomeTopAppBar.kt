@@ -1,5 +1,6 @@
 package com.guarantify.home_navigation.components
 
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,7 +15,7 @@ fun HomeTopAppBar(
     modifier: Modifier = Modifier,
     title: String
 ) {
-    TopAppBar(
+    CenterAlignedTopAppBar(
         modifier = modifier,
         title = { Text(text = title) },
         colors = TopAppBarDefaults.topAppBarColors(
