@@ -13,8 +13,7 @@ import androidx.compose.ui.graphics.Color
 fun InsightsScreen() {
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.Red),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Text(
