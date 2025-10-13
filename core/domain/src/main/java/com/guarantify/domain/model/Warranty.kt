@@ -12,5 +12,5 @@ data class Warranty(
     val shopName: String,
     val photoUrl: String?,
     val notes: String?,
-    val synced: Boolean = false
+    val isSynced: Boolean = false
 )
