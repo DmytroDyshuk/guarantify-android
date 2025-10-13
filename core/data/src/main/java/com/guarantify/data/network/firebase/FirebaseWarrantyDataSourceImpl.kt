@@ -35,6 +35,13 @@ class FirebaseWarrantyDataSourceImpl(
     }
 
     override suspend fun getUpdatedSince(timestamp: Long): List<WarrantyDto> {
-        TODO("Not yet implemented")
+        val snapshot = firebaseFirestore
+            .collection("users")
+            .document(userId)
+            .collection("warranties")
+            .whereGreaterThan("updatedAt", timestamp)
+            .get()
+            .await()
+        return snapshot.documents.mapNotNull { it.toObject(WarrantyDto::class.java) }
     }
 }
