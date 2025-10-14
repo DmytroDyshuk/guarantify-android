@@ -6,7 +6,8 @@ import java.time.LocalDate
 
 fun Warranty.toDto(): WarrantyDto {
     return WarrantyDto(
-        id = this.id,
+        localId = this.localId,
+        remoteId = this.remoteId,
         userId = this.userId,
         title = this.title,
         purchaseDate = this.purchaseDate.toString(),
@@ -22,7 +23,8 @@ fun Warranty.toDto(): WarrantyDto {
 @Suppress("NewApi")
 fun WarrantyDto.toDomain(): Warranty {
     return Warranty(
-        id = id,
+        localId = localId,
+        remoteId = remoteId,
         userId = userId,
         title = title,
         purchaseDate = LocalDate.parse(purchaseDate),

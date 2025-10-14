@@ -31,6 +31,7 @@ class FirebaseWarrantyDataSourceImpl(
             .collection(FirestoreConstants.COLLECTION_WARRANTIES)
             .get()
             .await()
+
         return snapshot.documents.mapNotNull { it.toObject(WarrantyDto::class.java) }
     }
 
@@ -42,6 +43,7 @@ class FirebaseWarrantyDataSourceImpl(
             .whereGreaterThan(FirestoreConstants.FIELD_UPDATED_AT, timestamp)
             .get()
             .await()
+
         return snapshot.documents.mapNotNull { it.toObject(WarrantyDto::class.java) }
     }
 }
