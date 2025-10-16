@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 data class Warranty(
     val localId: Int,
-    val remoteId: String?,
+    val remoteId: String = "",
     val userId: String,
     val title: String,
     val purchaseDate: LocalDate,
@@ -12,6 +12,5 @@ data class Warranty(
     val expirationDate: LocalDate,
     val shopName: String? = null,
     val photoUrl: String? = null,
-    val notes: String? = null,
-    val isSynced: Boolean = false
+    val notes: String? = null
 )

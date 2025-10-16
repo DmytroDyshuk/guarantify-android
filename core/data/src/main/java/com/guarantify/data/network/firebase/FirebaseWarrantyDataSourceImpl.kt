@@ -19,7 +19,7 @@ class FirebaseWarrantyDataSourceImpl(
             .collection(FirestoreConstants.COLLECTION_USERS)
             .document(userId)
             .collection(FirestoreConstants.COLLECTION_WARRANTIES)
-            .document(warranty.id)
+            .document(warranty.remoteId)
             .set(warranty.copy(updatedAt = System.currentTimeMillis()))
             .await()
     }
@@ -45,5 +45,15 @@ class FirebaseWarrantyDataSourceImpl(
             .await()
 
         return snapshot.documents.mapNotNull { it.toObject(WarrantyDto::class.java) }
+    }
+
+    override suspend fun deleteWarranty(remoteId: String) {
+        firebaseFirestore
+            .collection(FirestoreConstants.COLLECTION_USERS)
+            .document(userId)
+            .collection(FirestoreConstants.COLLECTION_WARRANTIES)
+            .document(remoteId)
+            .delete()
+            .await()
     }
 }

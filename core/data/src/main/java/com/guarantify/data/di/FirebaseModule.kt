@@ -17,7 +17,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class FirebaseModule {
-
     @Provides
     @Singleton
     fun provideAuthFirebase(): FirebaseAuth = Firebase.auth
@@ -38,5 +37,4 @@ class FirebaseModule {
         firebaseFirestore: FirebaseFirestore,
         firebaseAuth: FirebaseAuth
     ): FirebaseWarrantyDataSource = FirebaseWarrantyDataSourceImpl(firebaseFirestore, firebaseAuth)
-
 }
