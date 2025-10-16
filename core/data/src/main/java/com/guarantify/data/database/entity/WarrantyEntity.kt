@@ -5,8 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "warranties")
 data class WarrantyEntity(
-    @PrimaryKey(autoGenerate = true) val localId: Int = 0,
-    val remoteId: String = "",
+    @PrimaryKey val id: String,
     val userId: String,
     val title: String,
     val purchaseDate: String,

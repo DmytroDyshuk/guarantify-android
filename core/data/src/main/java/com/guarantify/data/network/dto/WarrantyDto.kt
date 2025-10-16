@@ -4,8 +4,7 @@ import androidx.annotation.Keep
 
 @Keep
 data class WarrantyDto(
-    val localId: Int = 0,
-    val remoteId: String = "",
+    val id: String = "",
     val userId: String = "",
     val title: String = "",
     val purchaseDate: String = "",

@@ -14,7 +14,7 @@ interface WarrantyDao {
     fun getAllWarranties(): Flow<List<WarrantyEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun createWarranty(warranty: WarrantyEntity)
+    suspend fun createOrUpdateWarranty(warranty: WarrantyEntity)
 
     @Delete
     suspend fun deleteWarranty(warranty: WarrantyEntity)

@@ -19,8 +19,8 @@ class FirebaseWarrantyDataSourceImpl(
             .collection(FirestoreConstants.COLLECTION_USERS)
             .document(userId)
             .collection(FirestoreConstants.COLLECTION_WARRANTIES)
-            .document(warranty.remoteId)
-            .set(warranty.copy(updatedAt = System.currentTimeMillis()))
+            .document(warranty.id)
+            .set(warranty)
             .await()
     }
 
@@ -32,7 +32,10 @@ class FirebaseWarrantyDataSourceImpl(
             .get()
             .await()
 
-        return snapshot.documents.mapNotNull { it.toObject(WarrantyDto::class.java) }
+        return snapshot.documents.mapNotNull {
+            val dto = it.toObject(WarrantyDto::class.java)
+            dto?.copy(id = it.id)
+        }
     }
 
     override suspend fun getUpdatedSince(timestamp: Long): List<WarrantyDto> {
