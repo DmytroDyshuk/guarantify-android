@@ -47,7 +47,10 @@ class FirebaseWarrantyDataSourceImpl(
             .get()
             .await()
 
-        return snapshot.documents.mapNotNull { it.toObject(WarrantyDto::class.java) }
+        return snapshot.documents.mapNotNull {
+            val dto = it.toObject(WarrantyDto::class.java)
+            dto?.copy(id = it.id)
+        }
     }
 
     override suspend fun deleteWarranty(remoteId: String) {
