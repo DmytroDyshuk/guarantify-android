@@ -4,6 +4,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import com.guarantify.data.network.firebase.FirebaseWarrantyDataSource
 import com.guarantify.data.network.firebase.FirebaseWarrantyDataSourceImpl
 import com.guarantify.data.repository.GoogleAuthRepositoryImpl
@@ -23,7 +24,7 @@ class FirebaseModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+    fun provideFirebaseFirestore(): FirebaseFirestore = Firebase.firestore
 
     @Provides
     @Singleton

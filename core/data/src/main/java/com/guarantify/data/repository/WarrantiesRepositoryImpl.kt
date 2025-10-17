@@ -44,7 +44,7 @@ class WarrantiesRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun deleteWarranty(warrantyId: String): Result<Unit> {
+    override suspend fun deleteWarranty(warranty: Warranty): Result<Unit> {
         TODO("Not yet implemented")
     }
 

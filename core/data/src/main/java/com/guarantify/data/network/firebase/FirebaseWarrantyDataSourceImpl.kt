@@ -53,12 +53,12 @@ class FirebaseWarrantyDataSourceImpl(
         }
     }
 
-    override suspend fun deleteWarranty(remoteId: String) {
+    override suspend fun deleteWarranty(id: String) {
         firebaseFirestore
             .collection(FirestoreConstants.COLLECTION_USERS)
             .document(userId)
             .collection(FirestoreConstants.COLLECTION_WARRANTIES)
-            .document(remoteId)
+            .document(id)
             .delete()
             .await()
     }

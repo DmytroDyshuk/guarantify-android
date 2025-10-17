@@ -21,21 +21,6 @@ fun Warranty.toDto(): WarrantyDto {
     )
 }
 
-fun Warranty.toEntity(): WarrantyEntity {
-    return WarrantyEntity(
-        id = this.id,
-        userId = this.userId,
-        title = this.title,
-        purchaseDate = this.purchaseDate.toString(),
-        warrantyPeriod = this.warrantyPeriod,
-        expirationDate = this.expirationDate.toString(),
-        shopName = this.shopName,
-        photoUrl = this.photoUrl,
-        notes = this.notes,
-        updatedAt = this.updatedAt
-    )
-}
-
 fun Warranty.toEntityWithGeneratedIdIfNeeded(): WarrantyEntity {
     val localId = this.id.ifBlank { UUID.randomUUID().toString() }
 
