@@ -5,8 +5,8 @@ import com.guarantify.domain.model.Warranty
 import kotlinx.coroutines.flow.Flow
 
 interface WarrantiesRepository {
+    val latestWarranties: Flow<List<Warranty>>
     suspend fun createOrUpdateWarranty(warranty: Warranty): Result<Unit>
-    fun getWarranties(userId: String): Flow<List<Warranty>>
     suspend fun deleteWarranty(warrantyId: String): Result<Unit>
     suspend fun syncWarranties()
 }
