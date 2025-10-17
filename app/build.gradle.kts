@@ -53,6 +53,7 @@ dependencies {
     implementation(projects.feature.homeNavigation)
     implementation(projects.feature.auth)
     implementation(projects.feature.settings)
+    implementation(projects.feature.warranties)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
