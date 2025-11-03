@@ -3,9 +3,10 @@ package com.guarantify.data.network.firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.guarantify.data.network.dto.WarrantyDto
+import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
 
-class FirebaseWarrantyDataSourceImpl(
+class FirebaseWarrantyDataSourceImpl @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
 ) : FirebaseWarrantyDataSource {

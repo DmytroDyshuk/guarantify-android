@@ -14,7 +14,7 @@ import kotlin.jvm.java
 
 @Module
 @InstallIn(SingletonComponent::class)
-class DatabaseModule {
+object DatabaseModule {
 
     @Provides
     @Singleton

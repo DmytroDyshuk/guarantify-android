@@ -4,6 +4,7 @@ import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.network.firebase.FirebaseWarrantyDataSource
 import com.guarantify.data.repository.WarrantiesRepositoryImpl
 import com.guarantify.domain.repository.WarrantiesRepository
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,14 +14,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 
 @Module
 @InstallIn(SingletonComponent::class)
-class WarrantiesRepositoryModule {
-    @Provides
+interface WarrantiesRepositoryModule {
+
+    @Binds
     @Singleton
-    fun provideWarrantiesRepository(
-        firebaseWarrantyDataSource: FirebaseWarrantyDataSource,
-        warrantyDao: WarrantyDao,
-        @IoDispatcher ioDispatcher: CoroutineDispatcher
-    ): WarrantiesRepository {
-        return WarrantiesRepositoryImpl(firebaseWarrantyDataSource, warrantyDao, ioDispatcher)
-    }
+    fun bindWarrantiesRepository(impl: WarrantiesRepositoryImpl): WarrantiesRepository
+
 }

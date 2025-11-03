@@ -6,13 +6,14 @@ import com.guarantify.domain.model.AuthResult
 import com.guarantify.domain.model.AuthState
 import com.guarantify.domain.model.UserData
 import com.guarantify.domain.repository.GoogleAuthRepository
+import jakarta.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
-class GoogleAuthRepositoryImpl(
+class GoogleAuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth
 ) : GoogleAuthRepository {
 
