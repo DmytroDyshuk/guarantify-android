@@ -9,7 +9,8 @@ data class Warranty(
     val purchaseDate: LocalDate,
     val warrantyPeriod: Int,
     val expirationDate: LocalDate,
-    val shopName: String? = null,
+    val storeName: String? = null,
+    val brand: String? = null,
     val photoUrl: String? = null,
     val notes: String? = null,
     val updatedAt: Long = 0
