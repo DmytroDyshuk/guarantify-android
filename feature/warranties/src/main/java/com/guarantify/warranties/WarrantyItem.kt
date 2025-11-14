@@ -20,11 +20,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.guarantify.domain.model.Warranty
 import com.guarantify.ui.theme.GuarantifyTheme
+import java.time.LocalDate
 
 @Composable
 fun WarrantyItem(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    warranty: Warranty
 ) {
     Column(
         modifier = modifier
@@ -36,7 +39,7 @@ fun WarrantyItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Samsung Galaxy S23",
+                text = warranty.title,
                 maxLines = 1,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
             )
@@ -52,20 +55,22 @@ fun WarrantyItem(
                     .background(color = Color.Green, shape = CircleShape)
             )
         }
-        Text(//TODO: show if not null
-            text = "Brand: Samsung",
-            style = MaterialTheme.typography.labelSmall
-        )
+        warranty.brand?.let { brand ->
+            Text(
+                text = "Brand: $brand",
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
         Text(
-            text = "Store: El Dorado",
+            text = "Store: ${warranty.storeName}",
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600)
         )
-        Text(
+        Text(//TODO
             modifier = Modifier.padding(top = 16.dp),
             text = "Valid until: October 15, 2025",
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
         )
-        Text(
+        Text(//TODO
             text = "Purchased: October 16, 2023",
             style = MaterialTheme.typography.labelMedium
         )
@@ -81,7 +86,14 @@ fun WarrantyItem(
 fun PreviewWarrantyItem() {
     GuarantifyTheme {
         Surface {
-            WarrantyItem()
+            WarrantyItem(
+                warranty = Warranty(
+                    userId = "123",
+                    title = "Samsung Galaxy S23 Ultra",
+                    purchaseDate = LocalDate.now(),
+                    expirationDate = LocalDate.now()
+                )
+            )
         }
     }
 }

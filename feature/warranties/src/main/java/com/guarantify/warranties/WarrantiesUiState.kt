@@ -2,8 +2,9 @@ package com.guarantify.warranties
 
 import com.guarantify.domain.model.Warranty
 
-data class WarrantiesUiState(
-    val isLoading: Boolean = false,
-    val warranties: List<Warranty> = emptyList(),
-    val errorMessage: String? = null
-)
+sealed interface WarrantiesUiState {
+    object Loading : WarrantiesUiState
+    data class Success(val warranties: List<Warranty>) : WarrantiesUiState
+    data class Error(val message: String) : WarrantiesUiState
+    object Empty : WarrantiesUiState
+}

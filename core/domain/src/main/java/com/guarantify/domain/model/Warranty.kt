@@ -7,7 +7,6 @@ data class Warranty(
     val userId: String,
     val title: String,
     val purchaseDate: LocalDate,
-    val warrantyPeriod: Int,
     val expirationDate: LocalDate,
     val storeName: String? = null,
     val brand: String? = null,

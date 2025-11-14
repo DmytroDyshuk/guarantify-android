@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="warranties_screen_empty_message">You have not added any warranties yet. You can do this using the “+” button in the lower right corner.</string>
+</resources>

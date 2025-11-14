@@ -8,7 +8,6 @@ data class WarrantyDto(
     val userId: String = "",
     val title: String = "",
     val purchaseDate: String = "",
-    val warrantyPeriod: Int = 0,
     val expirationDate: String = "",
     val storeName: String? = null,
     val brand: String? = null,
