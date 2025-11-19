@@ -46,4 +46,7 @@ dependencies {
     testImplementation(libs.junit.jupiter.engine)
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.platform.launcher)
+
+    //Mockk
+    testImplementation(libs.mockk)
 }
