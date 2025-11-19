@@ -18,6 +18,8 @@ import com.guarantify.domain.model.Warranty
 import com.guarantify.ui.components.LoadingScreen
 import com.guarantify.warranties.components.WarrantyItem
 import com.guarantify.warranties.model.WarrantiesUiState
+import com.guarantify.warranties.model.WarrantyUiModel
+import com.guarantify.warranties.viewmodel.WarrantiesViewModel
 
 @Composable
 fun WarrantiesScreen(viewModel: WarrantiesViewModel = hiltViewModel()) {
@@ -44,7 +46,7 @@ fun WarrantiesScreen(viewModel: WarrantiesViewModel = hiltViewModel()) {
 @Composable
 fun WarrantiesScreenContent(
     modifier: Modifier = Modifier,
-    warranties: List<Warranty>
+    warranties: List<WarrantyUiModel>
 ) {
     val listState = rememberLazyListState()
 

@@ -1,4 +1,4 @@
-package com.guarantify.warranties
+package com.guarantify.warranties.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

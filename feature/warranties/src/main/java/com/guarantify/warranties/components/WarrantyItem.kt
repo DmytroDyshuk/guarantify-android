@@ -20,14 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.guarantify.domain.model.Warranty
 import com.guarantify.ui.theme.GuarantifyTheme
-import java.time.LocalDate
+import com.guarantify.warranties.model.WarrantyUiModel
 
 @Composable
 fun WarrantyItem(
     modifier: Modifier = Modifier,
-    warranty: Warranty
+    warranty: WarrantyUiModel
 ) {
     Column(
         modifier = modifier
@@ -44,15 +43,15 @@ fun WarrantyItem(
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
             )
             Spacer(Modifier.weight(weight = 1f))
-            Text(//TODO: show if days < 100
+            Text(
                 modifier = Modifier.padding(end = 8.dp),
-                text = "45 days remaining",
+                text = warranty.remainingDays,
                 style = MaterialTheme.typography.labelLarge
             )
-            Box(//TODO: change color with days remaining, default-green < 100-yellow, < 50-orange, < 25-red
+            Box(
                 modifier = Modifier
                     .size(12.dp)
-                    .background(color = Color.Green, shape = CircleShape)
+                    .background(color = warranty.status, shape = CircleShape)
             )
         }
         warranty.brand?.let { brand ->
@@ -61,17 +60,19 @@ fun WarrantyItem(
                 style = MaterialTheme.typography.labelSmall
             )
         }
+        warranty.storeName?.let { storeName ->
+            Text(
+                text = "Store: $storeName",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600)
+            )
+        }
         Text(
-            text = "Store: ${warranty.storeName}",
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600)
-        )
-        Text(//TODO
             modifier = Modifier.padding(top = 16.dp),
-            text = "Valid until: October 15, 2025",
+            text = warranty.formattedExpirationDate,
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
         )
-        Text(//TODO
-            text = "Purchased: October 16, 2023",
+        Text(
+            text = warranty.formattedPurchaseDate,
             style = MaterialTheme.typography.labelMedium
         )
         HorizontalDivider(
@@ -87,11 +88,15 @@ fun PreviewWarrantyItem() {
     GuarantifyTheme {
         Surface {
             WarrantyItem(
-                warranty = Warranty(
-                    userId = "123",
+                warranty = WarrantyUiModel(
+                    id = "123",
                     title = "Samsung Galaxy S23 Ultra",
-                    purchaseDate = LocalDate.now(),
-                    expirationDate = LocalDate.now()
+                    formattedPurchaseDate = "Purchased: October 16, 2023",
+                    formattedExpirationDate = "Valid until: October 15, 2025",
+                    storeName = "",
+                    brand = "Samsung",
+                    remainingDays = "Expires today",
+                    status = Color.Red
                 )
             )
         }
