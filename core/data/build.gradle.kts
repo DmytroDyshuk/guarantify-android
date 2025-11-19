@@ -22,10 +22,6 @@ android {
     }
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
 dependencies {
     implementation(projects.core.domain)
 
@@ -50,7 +46,4 @@ dependencies {
     testImplementation(libs.junit.jupiter.engine)
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.platform.launcher)
-
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }
