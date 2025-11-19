@@ -3,6 +3,9 @@ package com.guarantify.warranties
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guarantify.domain.repository.WarrantiesRepository
+import com.guarantify.ui.di.AppDateFormatProvider
+import com.guarantify.warranties.mapper.toWarrantyUiModel
+import com.guarantify.warranties.model.WarrantiesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,7 +17,8 @@ import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class WarrantiesViewModel @Inject constructor(
-    private val warrantiesRepository: WarrantiesRepository
+    private val warrantiesRepository: WarrantiesRepository,
+    private val dateFormatter: AppDateFormatProvider
 ) : ViewModel() {
 
     val uiState: StateFlow<WarrantiesUiState> = warrantiesRepository.latestWarranties
@@ -22,7 +26,8 @@ class WarrantiesViewModel @Inject constructor(
             if (warranties.isEmpty()) {
                 WarrantiesUiState.Empty
             } else {
-                WarrantiesUiState.Success(warranties = warranties)
+                val uiWarranties = warranties.map { it.toWarrantyUiModel(dateFormatter.longDate) }
+                WarrantiesUiState.Success(warranties = uiWarranties)
             }
         }
         .distinctUntilChanged()

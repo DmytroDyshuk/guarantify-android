@@ -16,6 +16,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.guarantify.domain.model.Warranty
 import com.guarantify.ui.components.LoadingScreen
+import com.guarantify.warranties.components.WarrantyItem
+import com.guarantify.warranties.model.WarrantiesUiState
 
 @Composable
 fun WarrantiesScreen(viewModel: WarrantiesViewModel = hiltViewModel()) {

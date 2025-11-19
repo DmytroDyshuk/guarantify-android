@@ -1,4 +1,4 @@
-package com.guarantify.warranties
+package com.guarantify.warranties.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

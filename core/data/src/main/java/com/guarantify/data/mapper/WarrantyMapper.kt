@@ -69,7 +69,6 @@ fun WarrantyEntity.toDto(): WarrantyDto {
     )
 }
 
-@Suppress("NewApi")
 fun WarrantyEntity.toDomain(): Warranty {
     return Warranty(
         id = this.id,
