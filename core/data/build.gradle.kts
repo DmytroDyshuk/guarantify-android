@@ -49,4 +49,7 @@ dependencies {
 
     //Mockk
     testImplementation(libs.mockk)
+
+    //Coroutines test
+    testImplementation(libs.kotlinx.coroutines.test)
 }

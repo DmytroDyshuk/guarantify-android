@@ -24,11 +24,13 @@ class WarrantiesRepositoryImpl @Inject constructor(
     private val warrantyDao: WarrantyDao,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : WarrantiesRepository {
-    override val latestWarranties: Flow<List<Warranty>> =
-        warrantyDao.getAllWarranties()
+    override val latestWarranties: Flow<List<Warranty>>
+        get() = warrantyDao.getAllWarranties()
             .map { entities -> entities.map { it.toDomain() } }
-            .catch { e -> Log.e(WARRANTIES_REPO, "${e.message}") }
-
+            .catch { e ->
+                Log.e(WARRANTIES_REPO, "${e.message}")
+                emit(emptyList())
+            }
     override suspend fun createOrUpdateWarranty(warranty: Warranty): Result<Unit> =
         withContext(ioDispatcher) {
             val warrantyEntity = warranty.toEntityWithGeneratedIdIfNeeded()
