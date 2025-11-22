@@ -17,6 +17,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.just
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -31,13 +32,10 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class WarrantiesRepositoryImplTest {
-
     @MockK
     private lateinit var firebaseDataSource: FirebaseWarrantyDataSource
-
     @MockK(relaxed = true)
     private lateinit var warrantyDao: WarrantyDao
-
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var repository: WarrantiesRepositoryImpl
@@ -153,6 +151,53 @@ class WarrantiesRepositoryImplTest {
         coVerify(exactly = 0) {
             warrantyDao.createOrUpdateWarranty(match { it.isSynced })
         }
+    }
+
+    @Test
+    fun `deleteWarranty should delete warranty with dao and firebase`() = runTest {
+        // ARRANGE
+        val warranty = Warranty(
+            id = "1",
+            userId = "1",
+            title = "Samsung Galaxy S21",
+            purchaseDate = LocalDate.now(),
+            expirationDate = LocalDate.now(),
+            storeName = "Samsung"
+        )
+
+        coEvery { warrantyDao.deleteWarranty(any()) } just Runs
+        coEvery { firebaseDataSource.deleteWarranty(any()) } just Runs
+
+        // ACT
+        repository.deleteWarranty(warranty)
+
+        // ASSERT
+        coVerify(exactly = 1) {
+            warrantyDao.deleteWarranty(match { it.id == warranty.id })
+        }
+        coVerify(exactly = 1) {
+            firebaseDataSource.deleteWarranty(any())
+        }
+    }
+
+    @Test
+    fun `deleteWarranty should delete locally even if firebase fails`() = runTest {
+        val warranty = Warranty(
+            id = "1",
+            userId = "1",
+            title = "Samsung Galaxy S21",
+            purchaseDate = LocalDate.now(),
+            expirationDate = LocalDate.now(),
+            storeName = "Samsung"
+        )
+
+        coEvery { warrantyDao.deleteWarranty(any()) } just Runs
+        coEvery { firebaseDataSource.deleteWarranty(any()) } throws RuntimeException("No Internet")
+
+        repository.deleteWarranty(warranty)
+
+        coVerify { warrantyDao.deleteWarranty(any()) }
+        verify { Log.e(any(), any(), any()) }
     }
 
 }

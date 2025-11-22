@@ -46,8 +46,17 @@ class WarrantiesRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun deleteWarranty(warranty: Warranty): Result<Unit> {
-        TODO("Not yet implemented")
+    override suspend fun deleteWarranty(warranty: Warranty) {
+        withContext(ioDispatcher) {
+            val warrantyEntity = warranty.toEntityWithGeneratedIdIfNeeded()
+            warrantyDao.deleteWarranty(warrantyEntity)
+
+            try {
+                firebaseWarrantyDataSource.deleteWarranty(warranty.id)
+            } catch (e: Exception) {
+                Log.e(WARRANTIES_REPO, "Failed to delete warranty on firebase: ${warranty.id}", e)
+            }
+        }
     }
 
     override suspend fun syncWarranties() {
