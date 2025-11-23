@@ -18,4 +18,7 @@ interface WarrantyDao {
 
     @Delete
     suspend fun deleteWarranty(warranty: WarrantyEntity)
+
+    @Query("SELECT * FROM warranties WHERE isSynced = 0")
+    suspend fun getUnsyncedWarranties(): List<WarrantyEntity>
 }
