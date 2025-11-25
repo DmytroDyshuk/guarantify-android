@@ -24,6 +24,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.guarantify.ui.components.LoadingScreen
+import com.guarantify.ui.components.NoResultsScreen
 import com.guarantify.warranties.components.WarrantyItem
 import com.guarantify.warranties.model.WarrantiesUiState
 import com.guarantify.warranties.model.WarrantyUiModel
@@ -38,12 +39,9 @@ fun WarrantiesScreen(viewModel: WarrantiesViewModel = hiltViewModel()) {
         WarrantiesUiState.Empty -> {
             WarrantiesEmptyScreenContent()
         }
-
         is WarrantiesUiState.Error -> {
-            //TODO: show toast? or just a string text?
-            val errorMessage = (uiState as WarrantiesUiState.Error).message
+            NoResultsScreen()
         }
-
         is WarrantiesUiState.Success -> {
             val warrantiesList = (uiState as WarrantiesUiState.Success).warranties
             WarrantiesScreenContent(warranties = warrantiesList)
