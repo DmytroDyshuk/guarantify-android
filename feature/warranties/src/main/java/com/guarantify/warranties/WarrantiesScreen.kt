@@ -1,10 +1,14 @@
 package com.guarantify.warranties
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,9 +16,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.guarantify.domain.model.Warranty
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.guarantify.ui.components.LoadingScreen
 import com.guarantify.warranties.components.WarrantyItem
 import com.guarantify.warranties.model.WarrantiesUiState
@@ -64,13 +72,36 @@ fun WarrantiesScreenContent(
 fun WarrantiesEmptyScreenContent(
     modifier: Modifier = Modifier
 ) {
-    Box(
+    val lottieComposition by rememberLottieComposition(
+        spec = LottieCompositionSpec.RawRes(R.raw.add_warranty)
+    )
+
+    Column(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(28.dp)
     ) {
-        Text(
-            text = stringResource(R.string.warranties_screen_empty_message),
-            style = MaterialTheme.typography.labelMedium
+        LottieAnimation(
+            modifier = Modifier
+                .size(260.dp),
+            composition = lottieComposition,
+            iterations = LottieConstants.IterateForever,
+            speed = 0.8f
         )
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = stringResource(R.string.warranties_screen_empty_message),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Button(
+            onClick = {
+                //TODO: should open create warranty screen
+            }
+        ) {
+            Text(
+                text = stringResource(R.string.add_first_warranty)
+            )
+        }
     }
+
 }

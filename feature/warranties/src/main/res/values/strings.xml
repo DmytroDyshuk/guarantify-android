@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="warranties_screen_empty_message">You have not added any warranties yet. You can do this using the “+” button in the lower right corner.</string>
+    <string name="warranties_screen_empty_message">Keep your warranties so you don\'t miss important dates and can quickly find your receipts.</string>
+    <string name="add_first_warranty">Add first warranty</string>
 </resources>
