@@ -2,7 +2,9 @@ package com.guarantify.warranties
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,9 +41,11 @@ fun WarrantiesScreen(viewModel: WarrantiesViewModel = hiltViewModel()) {
         WarrantiesUiState.Empty -> {
             WarrantiesEmptyScreenContent()
         }
+
         is WarrantiesUiState.Error -> {
             NoResultsScreen()
         }
+
         is WarrantiesUiState.Success -> {
             val warrantiesList = (uiState as WarrantiesUiState.Success).warranties
             WarrantiesScreenContent(warranties = warrantiesList)
@@ -77,20 +81,22 @@ fun WarrantiesEmptyScreenContent(
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(28.dp)
+        verticalArrangement = Arrangement.Center
     ) {
         LottieAnimation(
             modifier = Modifier
-                .size(260.dp),
+                .size(200.dp),
             composition = lottieComposition,
             iterations = LottieConstants.IterateForever,
             speed = 0.8f
         )
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             modifier = Modifier.padding(horizontal = 16.dp),
             text = stringResource(R.string.warranties_screen_empty_message),
             style = MaterialTheme.typography.bodyLarge
         )
+        Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
                 //TODO: should open create warranty screen
