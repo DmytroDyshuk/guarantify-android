@@ -13,15 +13,15 @@ fun Warranty.toWarrantyUiModel(dateFormatter: DateTimeFormatter): WarrantyUiMode
     val statusColor = when {
         daysRemaining < 0 -> Color.Gray
         daysRemaining < 25 -> Color.Red
-        daysRemaining < 50 -> Color(0xFFFF9800)
-        daysRemaining < 100 -> Color.Yellow
+        daysRemaining < 100 -> Color(0xFFFF9800)
         else -> Color.Green
     }
 
     val remainingDaysText = when {
         daysRemaining < 0 -> "Expired"
         daysRemaining == 0L -> "Expires today"
-        else -> "$daysRemaining days remaining"
+        daysRemaining > 365 -> "Valid"
+        else -> "$daysRemaining days left"
     }
 
     return WarrantyUiModel(
