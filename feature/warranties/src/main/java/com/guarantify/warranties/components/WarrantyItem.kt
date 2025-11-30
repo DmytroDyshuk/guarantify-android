@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guarantify.ui.theme.GuarantifyTheme
@@ -31,50 +33,56 @@ fun WarrantyItem(
     val subtitleText = listOfNotNull(warranty.brand, warranty.storeName)
         .joinToString(" • ")
 
-    Column(
+    Card(
         modifier = modifier
             .fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            Text(
-                text = warranty.title,
-                maxLines = 1,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700)
-            )
-            Spacer(Modifier.weight(weight = 1f))
-            Text(
-                modifier = Modifier.padding(end = 8.dp),
-                text = warranty.remainingDays,
-                style = MaterialTheme.typography.labelSmall
-            )
-            Box(
+            Row(
                 modifier = Modifier
-                    .size(12.dp)
-                    .background(color = warranty.status, shape = CircleShape)
-            )
-        }
-        if (subtitleText.isNotEmpty()) {
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = warranty.title,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.W700),
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.weight(weight = 1f))
+                Text(
+                    modifier = Modifier.padding(end = 8.dp),
+                    text = warranty.remainingDays,
+                    style = MaterialTheme.typography.labelSmall
+                )
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(color = warranty.status, shape = CircleShape)
+                )
+            }
+            if (subtitleText.isNotEmpty()) {
+                Text(
+                    text = subtitleText,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
             Text(
-                text = subtitleText,
-                style = MaterialTheme.typography.bodyMedium
+                text = warranty.formattedExpirationDate,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
+            )
+            Text(
+                text = warranty.formattedPurchaseDate,
+                style = MaterialTheme.typography.bodySmall
             )
         }
-        Text(
-            modifier = Modifier.padding(top = 8.dp),
-            text = warranty.formattedExpirationDate,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
-        )
-        Text(
-            text = warranty.formattedPurchaseDate,
-            style = MaterialTheme.typography.bodySmall
-        )
-        HorizontalDivider(
-            modifier = Modifier.padding(top = 12.dp)
-        )
     }
 }
 
