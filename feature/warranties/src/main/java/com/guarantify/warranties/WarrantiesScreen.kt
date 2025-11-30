@@ -2,6 +2,7 @@ package com.guarantify.warranties
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -62,7 +63,9 @@ fun WarrantiesScreenContent(
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        state = listState
+        state = listState,
+        contentPadding = PaddingValues(horizontal = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(items = warranties, key = { it.id }) {
             WarrantyItem(warranty = it)

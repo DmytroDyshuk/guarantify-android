@@ -28,6 +28,9 @@ fun WarrantyItem(
     modifier: Modifier = Modifier,
     warranty: WarrantyUiModel
 ) {
+    val subtitleText = listOfNotNull(warranty.brand, warranty.storeName)
+        .joinToString(" • ")
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -46,7 +49,7 @@ fun WarrantyItem(
             Text(
                 modifier = Modifier.padding(end = 8.dp),
                 text = warranty.remainingDays,
-                style = MaterialTheme.typography.labelLarge
+                style = MaterialTheme.typography.labelSmall
             )
             Box(
                 modifier = Modifier
@@ -54,30 +57,23 @@ fun WarrantyItem(
                     .background(color = warranty.status, shape = CircleShape)
             )
         }
-        warranty.brand?.let { brand ->
+        if (subtitleText.isNotEmpty()) {
             Text(
-                text = "Brand: $brand",
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-        warranty.storeName?.let { storeName ->
-            Text(
-                text = "Store: $storeName",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.W600)
+                text = subtitleText,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
         Text(
-            modifier = Modifier.padding(top = 16.dp),
+            modifier = Modifier.padding(top = 8.dp),
             text = warranty.formattedExpirationDate,
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.W600)
         )
         Text(
             text = warranty.formattedPurchaseDate,
-            style = MaterialTheme.typography.labelMedium
+            style = MaterialTheme.typography.bodySmall
         )
         HorizontalDivider(
-            modifier = Modifier.padding(top = 8.dp),
-            thickness = 2.dp
+            modifier = Modifier.padding(top = 12.dp)
         )
     }
 }
