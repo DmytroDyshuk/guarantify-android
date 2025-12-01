@@ -1,4 +1,4 @@
-package com.guarantify.warranties.model
+package com.guarantify.warranties.list.model
 
 import androidx.compose.ui.graphics.Color
 import com.guarantify.domain.model.WarrantyStatus

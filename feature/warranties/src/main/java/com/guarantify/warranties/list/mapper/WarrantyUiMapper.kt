@@ -1,8 +1,8 @@
-package com.guarantify.warranties.mapper
+package com.guarantify.warranties.list.mapper
 
 import androidx.compose.ui.graphics.Color
 import com.guarantify.domain.model.Warranty
-import com.guarantify.warranties.model.WarrantyUiModel
+import com.guarantify.warranties.list.model.WarrantyUiModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit

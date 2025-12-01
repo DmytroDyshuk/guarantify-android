@@ -17,6 +17,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.ui)
 
     implementation(libs.androidx.core.ktx)
 
@@ -31,6 +32,9 @@ dependencies {
 
     //Navigation
     implementation(libs.navigation.compose)
+
+    //Lottie
+    implementation(libs.lottie.compose)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

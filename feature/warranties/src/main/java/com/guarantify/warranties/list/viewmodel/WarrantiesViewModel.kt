@@ -1,11 +1,11 @@
-package com.guarantify.warranties.viewmodel
+package com.guarantify.warranties.list.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guarantify.domain.repository.WarrantiesRepository
 import com.guarantify.ui.di.AppDateFormatProvider
-import com.guarantify.warranties.mapper.toWarrantyUiModel
-import com.guarantify.warranties.model.WarrantiesUiState
+import com.guarantify.warranties.list.mapper.toWarrantyUiModel
+import com.guarantify.warranties.list.state.WarrantiesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted

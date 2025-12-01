@@ -1,4 +1,6 @@
-package com.guarantify.warranties.model
+package com.guarantify.warranties.list.state
+
+import com.guarantify.warranties.list.model.WarrantyUiModel
 
 sealed interface WarrantiesUiState {
     object Loading : WarrantiesUiState

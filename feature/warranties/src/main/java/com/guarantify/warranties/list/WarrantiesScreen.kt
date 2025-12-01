@@ -1,4 +1,4 @@
-package com.guarantify.warranties
+package com.guarantify.warranties.list
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,10 +28,11 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.guarantify.ui.components.LoadingScreen
 import com.guarantify.ui.components.NoResultsScreen
-import com.guarantify.warranties.components.WarrantyItem
-import com.guarantify.warranties.model.WarrantiesUiState
-import com.guarantify.warranties.model.WarrantyUiModel
-import com.guarantify.warranties.viewmodel.WarrantiesViewModel
+import com.guarantify.warranties.R
+import com.guarantify.warranties.list.components.WarrantyItem
+import com.guarantify.warranties.list.state.WarrantiesUiState
+import com.guarantify.warranties.list.model.WarrantyUiModel
+import com.guarantify.warranties.list.viewmodel.WarrantiesViewModel
 
 @Composable
 fun WarrantiesScreen(viewModel: WarrantiesViewModel = hiltViewModel()) {

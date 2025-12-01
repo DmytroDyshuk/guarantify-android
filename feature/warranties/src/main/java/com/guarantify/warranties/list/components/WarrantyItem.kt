@@ -1,4 +1,4 @@
-package com.guarantify.warranties.components
+package com.guarantify.warranties.list.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guarantify.ui.theme.GuarantifyTheme
-import com.guarantify.warranties.model.WarrantyUiModel
+import com.guarantify.warranties.list.model.WarrantyUiModel
 
 @Composable
 fun WarrantyItem(
