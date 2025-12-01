@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guarantify.ui.theme.GuarantifyTheme
-import com.guarantify.warranties.list.model.WarrantyUiModel
+import com.guarantify.warranties.model.WarrantyUiModel
 
 @Composable
 fun WarrantyItem(

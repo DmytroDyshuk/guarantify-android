@@ -15,6 +15,7 @@ fun Warranty.toDto(): WarrantyDto {
         expirationDate = this.expirationDate.toString(),
         storeName = this.storeName,
         brand = this.brand,
+        amount = this.amount,
         photoUrl = this.photoUrl,
         notes = this.notes,
         updatedAt = this.updatedAt
@@ -32,6 +33,7 @@ fun Warranty.toEntityWithGeneratedIdIfNeeded(): WarrantyEntity {
         expirationDate = this.expirationDate,
         storeName = this.storeName,
         brand = this.brand,
+        amount = this.amount,
         photoUrl = this.photoUrl,
         notes = this.notes,
         updatedAt = System.currentTimeMillis(),
@@ -48,6 +50,7 @@ fun WarrantyDto.toEntity(): WarrantyEntity {
         expirationDate = LocalDate.parse(this.expirationDate),
         storeName = this.storeName,
         brand = this.brand,
+        amount = this.amount,
         photoUrl = this.photoUrl,
         notes = this.notes,
         updatedAt = this.updatedAt
@@ -63,6 +66,7 @@ fun WarrantyEntity.toDto(): WarrantyDto {
         expirationDate = this.expirationDate.toString(),
         storeName = this.storeName,
         brand = this.brand,
+        amount = this.amount,
         photoUrl = this.photoUrl,
         notes = this.notes,
         updatedAt = this.updatedAt
@@ -78,6 +82,7 @@ fun WarrantyEntity.toDomain(): Warranty {
         expirationDate = this.expirationDate,
         storeName = this.storeName,
         brand = this.brand,
+        amount = this.amount,
         photoUrl = this.photoUrl,
         notes = this.notes,
         updatedAt = this.updatedAt
