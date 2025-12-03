@@ -1,4 +1,4 @@
-package com.guarantify.warranties.list.mapper
+package com.guarantify.warranties.mapper
 
 import androidx.compose.ui.graphics.Color
 import com.guarantify.domain.model.Warranty
