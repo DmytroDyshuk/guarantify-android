@@ -7,6 +7,9 @@ sealed class WarrantiesDestinations {
     @Serializable
     data object WarrantiesScreen : WarrantiesDestinations()
 
+    @Serializable
+    data object CreateWarranty : WarrantiesDestinations()
+
 //    @Serializable
 //    data object WarrantyDetails : WarrantiesDestinations()
 

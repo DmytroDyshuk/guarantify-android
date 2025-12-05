@@ -16,9 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -32,22 +29,23 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.guarantify.ui.components.LoadingScreen
 import com.guarantify.ui.components.NoResultsScreen
 import com.guarantify.warranties.R
-import com.guarantify.warranties.list.components.WarrantyCreationMethodDialog
 import com.guarantify.warranties.list.components.WarrantyItem
 import com.guarantify.warranties.list.state.WarrantiesUiState
 import com.guarantify.warranties.list.viewmodel.WarrantiesViewModel
 import com.guarantify.warranties.model.WarrantyUiModel
 
 @Composable
-fun WarrantiesScreen(viewModel: WarrantiesViewModel = hiltViewModel()) {
+fun WarrantiesScreen(
+    viewModel: WarrantiesViewModel = hiltViewModel(),
+    onShowAddWarrantyDialog: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var showMethodDialog by remember { mutableStateOf(false) }
 
     when (uiState) {
         WarrantiesUiState.Loading -> LoadingScreen()
         WarrantiesUiState.Empty -> {
             WarrantiesEmptyScreenContent(
-                onAddWarrantyClicked = { showMethodDialog = !showMethodDialog }
+                onAddWarrantyClicked = onShowAddWarrantyDialog
             )
         }
 
@@ -59,22 +57,6 @@ fun WarrantiesScreen(viewModel: WarrantiesViewModel = hiltViewModel()) {
             val warrantiesList = (uiState as WarrantiesUiState.Success).warranties
             WarrantiesScreenContent(warranties = warrantiesList)
         }
-    }
-
-    if (showMethodDialog) {
-        WarrantyCreationMethodDialog(
-            onDismissRequest = {
-                showMethodDialog = false
-            },
-            onCreateManually = {
-                showMethodDialog = false
-                //TODO
-            },
-            onScan = {
-                showMethodDialog = false
-                //TODO
-            }
-        )
     }
 }
 
