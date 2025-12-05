@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -42,7 +42,6 @@ fun WarrantyCreationMethodDialog(
     ) {
         Card(
             modifier = Modifier
-                .widthIn(max = 560.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -52,14 +51,15 @@ fun WarrantyCreationMethodDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    modifier = Modifier.padding(top = 8.dp),
-                    text = "Select a method for creating a warranty",
-                    style = MaterialTheme.typography.labelMedium
+                    modifier = Modifier.padding(top = 16.dp),
+                    text = "Choose a method",
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
                 )
 
                 Row(
                     modifier = Modifier
-                        .padding(top = 8.dp)
+                        .padding(top = 16.dp)
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -76,7 +76,7 @@ fun WarrantyCreationMethodDialog(
                     )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -87,7 +87,8 @@ fun WarrantyCreationMethodDialog(
                         onClick = onDismissRequest
                     ) {
                         Text(
-                            text = "Cancel"
+                            text = "Cancel",
+                            style = MaterialTheme.typography.titleMedium
                         )
                     }
                 }
@@ -117,12 +118,13 @@ fun CreationMethodButton(
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
+                modifier = Modifier.size(36.dp),
                 imageVector = icon,
                 contentDescription = text
             )
             Text(
                 text = text,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
         }
