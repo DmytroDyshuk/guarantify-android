@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -42,16 +43,17 @@ fun WarrantyCreationMethodDialog(
     ) {
         Card(
             modifier = Modifier
+                .widthIn(min = 280.dp, max = 560.dp)
                 .padding(16.dp),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(28.dp)
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    modifier = Modifier.padding(top = 16.dp),
                     text = "Choose a method",
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center
@@ -62,7 +64,7 @@ fun WarrantyCreationMethodDialog(
                         .padding(top = 16.dp)
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     CreationMethodButton(
                         icon = ImageVector.vectorResource(R.drawable.ic_edit),
@@ -76,14 +78,13 @@ fun WarrantyCreationMethodDialog(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(
-                        modifier = Modifier.padding(end = 8.dp, bottom = 4.dp),
                         onClick = onDismissRequest
                     ) {
                         Text(
@@ -122,6 +123,7 @@ fun CreationMethodButton(
                 imageVector = icon,
                 contentDescription = text
             )
+            Spacer(modifier = Modifier.padding(top = 8.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleMedium,
