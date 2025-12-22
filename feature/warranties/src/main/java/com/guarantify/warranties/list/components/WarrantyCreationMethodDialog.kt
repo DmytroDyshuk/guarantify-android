@@ -50,7 +50,7 @@ fun WarrantyCreationMethodDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -64,7 +64,7 @@ fun WarrantyCreationMethodDialog(
                         .padding(top = 16.dp)
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
                 ) {
                     CreationMethodButton(
                         icon = ImageVector.vectorResource(R.drawable.ic_edit),
@@ -81,7 +81,9 @@ fun WarrantyCreationMethodDialog(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(

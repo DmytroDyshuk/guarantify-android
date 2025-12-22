@@ -1,34 +1,39 @@
 package com.guarantify.warranties.create.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.guarantify.domain.repository.WarrantiesRepository
 import com.guarantify.warranties.create.state.CreateWarrantyUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 @HiltViewModel
 class CreateWarrantyViewModel @Inject constructor(
     private val warrantiesRepository: WarrantiesRepository
 ) : ViewModel() {
-    var uiState by mutableStateOf(CreateWarrantyUiState())
-        private set
+    private val _uiState = MutableStateFlow(CreateWarrantyUiState())
+    val uiState: StateFlow<CreateWarrantyUiState> = _uiState.asStateFlow()
 
     fun onProductNameChange(newValue: String) {
-        uiState = uiState.copy(productName = newValue)
+        _uiState.update { it.copy(productName = newValue) }
     }
 
     fun onBrandNameChange(newValue: String) {
-        uiState = uiState.copy(brand = newValue)
+        _uiState.update { it.copy(brand = newValue) }
     }
 
     fun onStoreNameChange(newValue: String) {
-        uiState = uiState.copy(storeName = newValue)
+        _uiState.update { it.copy(storeName = newValue) }
     }
 
     fun onNotesChange(newValue: String) {
-        uiState = uiState.copy(notes = newValue)
+        _uiState.update { it.copy(notes = newValue) }
+    }
+
+    fun onPurchaseDateChange(newValue: Long) {
+        _uiState.update { it.copy(purchaseDate = newValue) }
     }
 }

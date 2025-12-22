@@ -1,6 +1,9 @@
 package com.guarantify.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -10,27 +13,32 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.guarantify.ui.theme.GuarantifyTheme
 
 @Composable
-fun AppTextField(
+fun AppOutlinedTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    label: String
+    label: String,
+    singleLine: Boolean = true,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default
 ) {
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
-        singleLine = true
+        singleLine = singleLine,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions
     )
 }
 
 @Preview
 @Composable
-fun AppTextFieldPreview() {
+fun AppOutlinedTextFieldPreview() {
     GuarantifyTheme() {
         Surface {
-            AppTextField(
+            AppOutlinedTextField(
                 value = "",
                 onValueChange = {},
                 label = "Preview"
