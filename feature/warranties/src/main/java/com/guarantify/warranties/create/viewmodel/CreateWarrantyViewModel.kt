@@ -33,6 +33,14 @@ class CreateWarrantyViewModel @Inject constructor(
         _uiState.update { it.copy(notes = newValue) }
     }
 
+    fun onPriceChange(newValue: String) {
+        _uiState.update { it.copy(price = newValue) }
+    }
+
+    fun onCurrencyChange(newValue: String) {
+        _uiState.update { it.copy(selectedCurrency = newValue) }
+    }
+
     fun onPurchaseDateChange(newValue: Long) {
         _uiState.update { it.copy(purchaseDate = newValue) }
     }
