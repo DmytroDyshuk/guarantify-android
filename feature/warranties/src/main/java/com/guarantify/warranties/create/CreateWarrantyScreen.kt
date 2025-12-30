@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -58,20 +59,21 @@ fun CreateWarrantyScreen(viewModel: CreateWarrantyViewModel = hiltViewModel()) {
         onBrandNameChange = { viewModel.onBrandNameChange(it) },
         onStoreNameChange = { viewModel.onStoreNameChange(it) },
         onPiceChange = { viewModel.onPriceChange(it) },
-        onCurrencyChange = { viewModel.onCurrencyChange(it) }
+        onCurrencyChange = { viewModel.onCurrencyChange(it) },
+        onNotesChange = { viewModel.onNotesChange(it) }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateWarrantyScreenContent(
-    modifier: Modifier = Modifier,
     uiState: CreateWarrantyUiState,
     onProductNameChange: (String) -> Unit,
     onBrandNameChange: (String) -> Unit,
     onStoreNameChange: (String) -> Unit,
     onPiceChange: (String) -> Unit,
-    onCurrencyChange: (String) -> Unit
+    onCurrencyChange: (String) -> Unit,
+    onNotesChange: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val interactionSource = remember { MutableInteractionSource() }
@@ -132,41 +134,34 @@ fun CreateWarrantyScreenContent(
                     }
                 )
             )
-            Row(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                AppOutlinedTextField(
-                    modifier = Modifier.weight(1f),
-                    value = uiState.brand,
-                    label = "Brand",
-                    placeholder = "(Optional)",
-                    onValueChange = { onBrandNameChange(it) },
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = {
-                            focusManager.moveFocus(FocusDirection.Right)
-                        }
-                    )
+            AppOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = uiState.storeName,
+                label = "Store Name",
+                onValueChange = { onStoreNameChange(it) },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    }
                 )
-                Spacer(modifier = Modifier.width(16.dp))
-                AppOutlinedTextField(
-                    modifier = Modifier.weight(1f),
-                    value = uiState.storeName,
-                    label = "Store Name",
-                    onValueChange = { onStoreNameChange(it) },
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            focusManager.clearFocus()
-                        }
-                    )
+            )
+            AppOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = uiState.brand,
+                label = "Brand (Optional)",
+                onValueChange = { onBrandNameChange(it) },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    }
                 )
-            }
-
+            )
             PriceInputField(
                 modifier = Modifier.fillMaxWidth(),
                 label = "Price",
@@ -177,39 +172,68 @@ fun CreateWarrantyScreenContent(
                 focusManager = focusManager
             )
 
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                value = uiState.purchaseDate.toString(),
-                onValueChange = { },
-                readOnly = true,
-                label = { Text("Purchase date") },
-                placeholder = { },
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = null
-                    )
-                },
-                interactionSource = interactionSource
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.weight(1f),
+                    value = uiState.purchaseDate.toString(),
+                    onValueChange = { },
+                    readOnly = true,
+                    label = { Text("Purchase date") },
+                    placeholder = { },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = null
+                        )
+                    },
+                    interactionSource = interactionSource
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                OutlinedTextField(
+                    modifier = Modifier.weight(1f),
+                    value = uiState.purchaseDate.toString(),
+                    onValueChange = { },
+                    readOnly = true,
+                    label = { Text("Expiration date") },
+                    placeholder = { },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = null
+                        )
+                    },
+                    interactionSource = interactionSource
+                )
+            }
+
+            AppOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = uiState.notes,
+                onValueChange = onNotesChange,
+                label = "Notes",
+                singleLine = false,
+                maxCharacters = 255,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                    }
+                )
             )
 
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                value = uiState.purchaseDate.toString(),
-                onValueChange = { },
-                readOnly = true,
-                label = { Text("Expiration date") },
-                placeholder = { },
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = null
-                    )
-                },
-                interactionSource = interactionSource
-            )
+            Spacer(modifier = Modifier.weight(1f))
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {}
+            ) {
+                Text(
+                    text = "Save"
+                )
+            }
 
             LaunchedEffect(interactionSource) {
                 interactionSource.interactions.collect {
