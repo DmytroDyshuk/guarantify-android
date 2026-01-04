@@ -1,8 +1,6 @@
 package com.guarantify.warranties.create
 
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,17 +13,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.guarantify.ui.R
+import com.guarantify.ui.components.AppDateField
 import com.guarantify.ui.components.AppDatePickerModalInput
 import com.guarantify.ui.components.AppOutlinedTextField
 import com.guarantify.ui.components.PriceInputField
@@ -60,7 +55,9 @@ fun CreateWarrantyScreen(viewModel: CreateWarrantyViewModel = hiltViewModel()) {
         onStoreNameChange = { viewModel.onStoreNameChange(it) },
         onPiceChange = { viewModel.onPriceChange(it) },
         onCurrencyChange = { viewModel.onCurrencyChange(it) },
-        onNotesChange = { viewModel.onNotesChange(it) }
+        onNotesChange = { viewModel.onNotesChange(it) },
+        onPurchaseDateSelected = { viewModel.onPurchaseDateSelected(it) },
+        onExpirationDateSelected = { viewModel.onExpirationDateSelected(it) }
     )
 }
 
@@ -73,11 +70,13 @@ fun CreateWarrantyScreenContent(
     onStoreNameChange: (String) -> Unit,
     onPiceChange: (String) -> Unit,
     onCurrencyChange: (String) -> Unit,
-    onNotesChange: (String) -> Unit
+    onNotesChange: (String) -> Unit,
+    onPurchaseDateSelected: (Long?) -> Unit,
+    onExpirationDateSelected: (Long?) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    val interactionSource = remember { MutableInteractionSource() }
     var showDatePicker by remember { mutableStateOf(false) }
+    var activeDateField by remember { mutableStateOf<ActiveDateField?>(null) }
 
     Scaffold(
         topBar = {
@@ -100,10 +99,15 @@ fun CreateWarrantyScreenContent(
         if (showDatePicker) {
             AppDatePickerModalInput(
                 onDateSelected = {
-                    //todo
+                    when (activeDateField) {
+                        ActiveDateField.Purchase -> onPurchaseDateSelected(it)
+                        ActiveDateField.Expiration -> onExpirationDateSelected(it)
+                        null -> Unit
+                    }
                 },
                 onDismiss = {
                     showDatePicker = false
+                    activeDateField = null
                     focusManager.clearFocus(force = true)
                 }
             )
@@ -175,36 +179,24 @@ fun CreateWarrantyScreenContent(
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedTextField(
+                AppDateField(
                     modifier = Modifier.weight(1f),
-                    value = uiState.purchaseDate.toString(),
-                    onValueChange = { },
-                    readOnly = true,
-                    label = { Text("Purchase date") },
-                    placeholder = { },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = null
-                        )
-                    },
-                    interactionSource = interactionSource
+                    value = uiState.purchaseDateText,
+                    label = "Purchase date",
+                    onClick = {
+                        activeDateField = ActiveDateField.Purchase
+                        showDatePicker = true
+                    }
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                OutlinedTextField(
+                AppDateField(
                     modifier = Modifier.weight(1f),
-                    value = uiState.purchaseDate.toString(),
-                    onValueChange = { },
-                    readOnly = true,
-                    label = { Text("Expiration date") },
-                    placeholder = { },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = null
-                        )
-                    },
-                    interactionSource = interactionSource
+                    value = uiState.expirationDateText,
+                    label = "Expiration date",
+                    onClick = {
+                        activeDateField = ActiveDateField.Expiration
+                        showDatePicker = true
+                    }
                 )
             }
 
@@ -234,17 +226,11 @@ fun CreateWarrantyScreenContent(
                     text = "Save"
                 )
             }
-
-            LaunchedEffect(interactionSource) {
-                interactionSource.interactions.collect {
-                    if (it is PressInteraction.Release) {
-                        showDatePicker = true
-                    }
-                }
-            }
         }
     }
 }
+
+private enum class ActiveDateField { Purchase, Expiration }
 
 @Composable
 @Preview
