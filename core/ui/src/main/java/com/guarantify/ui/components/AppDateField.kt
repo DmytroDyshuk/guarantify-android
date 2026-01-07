@@ -30,6 +30,7 @@ fun AppDateField(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .clickable { onClick() })
+                .clickable { onClick() }
+        )
     }
 }

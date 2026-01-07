@@ -1,6 +1,5 @@
 package com.guarantify.warranties.create.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.guarantify.domain.repository.WarrantiesRepository
 import com.guarantify.ui.di.AppDateFormatProvider
@@ -51,6 +50,7 @@ class CreateWarrantyViewModel @Inject constructor(
         val date = millisToLocalDate(newValue)
         _uiState.update {
             it.copy(
+                purchaseDateMillis = newValue,
                 purchaseDate = date,
                 purchaseDateText = date.format(dateFormatProvider.shortDate)
             )
@@ -61,6 +61,7 @@ class CreateWarrantyViewModel @Inject constructor(
         val date = millisToLocalDate(newValue)
         _uiState.update {
             it.copy(
+                expirationDateMillis = newValue,
                 expirationDate = date,
                 expirationDateText = date.format(dateFormatProvider.shortDate)
             )

@@ -109,7 +109,17 @@ fun CreateWarrantyScreenContent(
                     showDatePicker = false
                     activeDateField = null
                     focusManager.clearFocus(force = true)
-                }
+                },
+                initialSelectedDateMillis = when (activeDateField) {
+                    ActiveDateField.Purchase -> uiState.purchaseDateMillis
+                    ActiveDateField.Expiration -> uiState.expirationDateMillis
+                        ?: uiState.purchaseDateMillis
+
+                    null -> null
+                },
+                minDateMillis = if (activeDateField == ActiveDateField.Expiration) {
+                    uiState.purchaseDateMillis
+                } else null
             )
         }
 
