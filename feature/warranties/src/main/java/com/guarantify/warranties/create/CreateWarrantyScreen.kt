@@ -1,5 +1,6 @@
 package com.guarantify.warranties.create
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,11 +46,15 @@ import com.guarantify.warranties.create.state.CreateWarrantyUiState
 import com.guarantify.warranties.create.viewmodel.CreateWarrantyViewModel
 
 @Composable
-fun CreateWarrantyScreen(viewModel: CreateWarrantyViewModel = hiltViewModel()) {
+fun CreateWarrantyScreen(
+    viewModel: CreateWarrantyViewModel = hiltViewModel(),
+    onBackCLicked: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CreateWarrantyScreenContent(
         uiState = uiState,
+        onBackClicked = onBackCLicked,
         onProductNameChange = { viewModel.onProductNameChange(it) },
         onBrandNameChange = { viewModel.onBrandNameChange(it) },
         onStoreNameChange = { viewModel.onStoreNameChange(it) },
@@ -65,6 +70,7 @@ fun CreateWarrantyScreen(viewModel: CreateWarrantyViewModel = hiltViewModel()) {
 @Composable
 fun CreateWarrantyScreenContent(
     uiState: CreateWarrantyUiState,
+    onBackClicked: () -> Unit,
     onProductNameChange: (String) -> Unit,
     onBrandNameChange: (String) -> Unit,
     onStoreNameChange: (String) -> Unit,
@@ -86,6 +92,10 @@ fun CreateWarrantyScreenContent(
                 },
                 navigationIcon = {
                     Icon(
+                        modifier = Modifier
+                            .clickable {
+                                onBackClicked()
+                            },
                         imageVector = ImageVector.vectorResource(R.drawable.arrow_back),
                         contentDescription = "Back"
                     )
@@ -246,6 +256,6 @@ private enum class ActiveDateField { Purchase, Expiration }
 @Preview
 fun CreateWarrantyScreenPreview() {
     GuarantifyTheme {
-        CreateWarrantyScreen()
+        CreateWarrantyScreen() {}
     }
 }

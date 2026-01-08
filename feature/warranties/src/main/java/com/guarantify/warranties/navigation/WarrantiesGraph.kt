@@ -16,6 +16,10 @@ fun NavGraphBuilder.warrantiesGraph(
         )
     }
     composable<WarrantiesDestinations.CreateWarranty> {
-        CreateWarrantyScreen()
+        CreateWarrantyScreen(
+            onBackCLicked = {
+                navHostController.popBackStack()
+            }
+        )
     }
 }
