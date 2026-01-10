@@ -154,7 +154,7 @@ fun CreateWarrantyScreenContent(
                 sheetState = sheetState
             ) {
                 Column {
-                    ListItem(
+                    ListItem(   
                         headlineContent = { Text("Take photo") },
                         leadingContent = {
                             Icon(
