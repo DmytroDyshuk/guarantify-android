@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 fun DashedCard(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(16.dp),
-    strokeWidth: Dp = 2.dp,
+    strokeWidth: Dp = 4.dp,
     dashWidth: Dp = 8.dp,
     dashGap: Dp = 6.dp,
     color: Color = MaterialTheme.colorScheme.onSurface,

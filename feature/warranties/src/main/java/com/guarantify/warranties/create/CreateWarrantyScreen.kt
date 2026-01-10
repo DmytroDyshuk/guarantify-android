@@ -1,6 +1,5 @@
 package com.guarantify.warranties.create
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -11,40 +10,34 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,27 +49,21 @@ import com.guarantify.ui.components.AppOutlinedTextField
 import com.guarantify.ui.components.DashedCard
 import com.guarantify.ui.components.PriceInputField
 import com.guarantify.ui.theme.GuarantifyTheme
+import com.guarantify.warranties.create.state.CreateWarrantyEvent
 import com.guarantify.warranties.create.state.CreateWarrantyUiState
 import com.guarantify.warranties.create.viewmodel.CreateWarrantyViewModel
 
 @Composable
 fun CreateWarrantyScreen(
     viewModel: CreateWarrantyViewModel = hiltViewModel(),
-    onBackCLicked: () -> Unit
+    onBackClicked: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CreateWarrantyScreenContent(
         uiState = uiState,
-        onBackClicked = onBackCLicked,
-        onProductNameChange = { viewModel.onProductNameChange(it) },
-        onBrandNameChange = { viewModel.onBrandNameChange(it) },
-        onStoreNameChange = { viewModel.onStoreNameChange(it) },
-        onPiceChange = { viewModel.onPriceChange(it) },
-        onCurrencyChange = { viewModel.onCurrencyChange(it) },
-        onNotesChange = { viewModel.onNotesChange(it) },
-        onPurchaseDateSelected = { viewModel.onPurchaseDateSelected(it) },
-        onExpirationDateSelected = { viewModel.onExpirationDateSelected(it) }
+        onBackClicked = onBackClicked,
+        onEvent = viewModel::onEvent
     )
 }
 
@@ -85,18 +72,13 @@ fun CreateWarrantyScreen(
 fun CreateWarrantyScreenContent(
     uiState: CreateWarrantyUiState,
     onBackClicked: () -> Unit,
-    onProductNameChange: (String) -> Unit,
-    onBrandNameChange: (String) -> Unit,
-    onStoreNameChange: (String) -> Unit,
-    onPiceChange: (String) -> Unit,
-    onCurrencyChange: (String) -> Unit,
-    onNotesChange: (String) -> Unit,
-    onPurchaseDateSelected: (Long?) -> Unit,
-    onExpirationDateSelected: (Long?) -> Unit
+    onEvent: (CreateWarrantyEvent) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     var showDatePicker by remember { mutableStateOf(false) }
     var activeDateField by remember { mutableStateOf<ActiveDateField?>(null) }
+    val sheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -110,22 +92,39 @@ fun CreateWarrantyScreenContent(
                             .clickable {
                                 onBackClicked()
                             },
-                        imageVector = ImageVector.vectorResource(R.drawable.arrow_back),
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
                         contentDescription = "Back"
                     )
-                },
-                actions = {
-                    //TODO
                 }
             )
+        },
+        bottomBar = {
+            Button(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+                onClick = {
+                    onEvent(CreateWarrantyEvent.SaveClicked)
+                }
+            ) {
+                Text(
+                    text = "Save"
+                )
+            }
         }
     ) { innerPadding ->
         if (showDatePicker) {
             AppDatePickerModalInput(
                 onDateSelected = {
                     when (activeDateField) {
-                        ActiveDateField.Purchase -> onPurchaseDateSelected(it)
-                        ActiveDateField.Expiration -> onExpirationDateSelected(it)
+                        ActiveDateField.Purchase -> onEvent(
+                            CreateWarrantyEvent.PurchaseDateSelected(it)
+                        )
+
+                        ActiveDateField.Expiration -> onEvent(
+                            CreateWarrantyEvent.ExpirationDateSelected(it)
+                        )
+
                         null -> Unit
                     }
                 },
@@ -147,6 +146,38 @@ fun CreateWarrantyScreenContent(
             )
         }
 
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+                sheetState = sheetState
+            ) {
+                Column {
+                    ListItem(
+                        headlineContent = { Text("Take photo") },
+                        leadingContent = {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_photo_camera),
+                                contentDescription = null
+                            )
+                        },
+                        modifier = Modifier.clickable { } //TODO: implement
+                    )
+                    ListItem(
+                        headlineContent = { Text("Choose from gallery") },
+                        leadingContent = {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_gallery_image),
+                                contentDescription = null
+                            )
+                        },
+                        modifier = Modifier.clickable { } //TODO: implement
+                    )
+                }
+            }
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -162,7 +193,7 @@ fun CreateWarrantyScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 value = uiState.productName,
                 label = "Product Name",
-                onValueChange = { onProductNameChange(it) },
+                onValueChange = { onEvent(CreateWarrantyEvent.ProductNameChanged(it)) },
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -176,7 +207,7 @@ fun CreateWarrantyScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 value = uiState.storeName,
                 label = "Store Name",
-                onValueChange = { onStoreNameChange(it) },
+                onValueChange = { onEvent(CreateWarrantyEvent.StoreNameChanged(it)) },
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -190,7 +221,7 @@ fun CreateWarrantyScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 value = uiState.brand,
                 label = "Brand (Optional)",
-                onValueChange = { onBrandNameChange(it) },
+                onValueChange = { onEvent(CreateWarrantyEvent.BrandChanged(it)) },
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 ),
@@ -205,8 +236,12 @@ fun CreateWarrantyScreenContent(
                 label = "Price",
                 placeholder = "0.00",
                 value = uiState.price,
-                onValueChange = onPiceChange,
-                onCurrencyChange = onCurrencyChange,
+                onValueChange = {
+                    onEvent(CreateWarrantyEvent.PriceChanged(it))
+                },
+                onCurrencyChange = {
+                    onEvent(CreateWarrantyEvent.CurrencyChanged(it))
+                },
                 focusManager = focusManager
             )
 
@@ -237,7 +272,9 @@ fun CreateWarrantyScreenContent(
             AppOutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = uiState.notes,
-                onValueChange = onNotesChange,
+                onValueChange = {
+                    onEvent(CreateWarrantyEvent.NotesChanged(it))
+                },
                 label = "Notes",
                 singleLine = false,
                 maxCharacters = 255,
@@ -250,23 +287,30 @@ fun CreateWarrantyScreenContent(
                     }
                 )
             )
-
             DashedCard(
                 modifier = Modifier
                     .height(124.dp)
                     .fillMaxWidth()
+                    .clickable {
+                        showBottomSheet = true
+                    },
+                color = MaterialTheme.colorScheme.primary
             ) {
-
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {}
-            ) {
-                Text(
-                    text = "Save"
-                )
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_add_photo),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = "Add Photo"
+                    )
+                    Text(
+                        text = "Add warranty photo",
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }
