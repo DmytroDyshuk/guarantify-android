@@ -19,12 +19,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +45,7 @@ import com.guarantify.ui.components.AppDatePickerModalInput
 import com.guarantify.ui.components.AppOutlinedTextField
 import com.guarantify.ui.components.DashedCard
 import com.guarantify.ui.components.PriceInputField
+import com.guarantify.ui.components.WarrantyPhotoPicker
 import com.guarantify.ui.theme.GuarantifyTheme
 import com.guarantify.warranties.create.state.CreateWarrantyEvent
 import com.guarantify.warranties.create.state.CreateWarrantyUiState
@@ -77,7 +75,6 @@ fun CreateWarrantyScreenContent(
     val focusManager = LocalFocusManager.current
     var showDatePicker by remember { mutableStateOf(false) }
     var activeDateField by remember { mutableStateOf<ActiveDateField?>(null) }
-    val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -146,37 +143,15 @@ fun CreateWarrantyScreenContent(
             )
         }
 
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    showBottomSheet = false
-                },
-                sheetState = sheetState
-            ) {
-                Column {
-                    ListItem(   
-                        headlineContent = { Text("Take photo") },
-                        leadingContent = {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_photo_camera),
-                                contentDescription = null
-                            )
-                        },
-                        modifier = Modifier.clickable { } //TODO: implement
-                    )
-                    ListItem(
-                        headlineContent = { Text("Choose from gallery") },
-                        leadingContent = {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_gallery_image),
-                                contentDescription = null
-                            )
-                        },
-                        modifier = Modifier.clickable { } //TODO: implement
-                    )
-                }
+        WarrantyPhotoPicker(
+            openSheet = showBottomSheet,
+            onPhotoPicked = {
+
+            },
+            onDismissSheet = {
+                showBottomSheet = false
             }
-        }
+        )
 
         Column(
             modifier = Modifier
