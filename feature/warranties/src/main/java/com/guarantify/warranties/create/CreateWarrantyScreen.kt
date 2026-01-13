@@ -16,9 +16,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import com.guarantify.ui.R
 import com.guarantify.ui.components.AppDateField
 import com.guarantify.ui.components.AppDatePickerModalInput
@@ -84,14 +89,12 @@ fun CreateWarrantyScreenContent(
                     Text("Add new Warranty")
                 },
                 navigationIcon = {
-                    Icon(
-                        modifier = Modifier
-                            .clickable {
-                                onBackClicked()
-                            },
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
-                        contentDescription = "Back"
-                    )
+                    IconButton(onClick = onBackClicked) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
+                            contentDescription = "Back"
+                        )
+                    }
                 }
             )
         },
@@ -145,7 +148,8 @@ fun CreateWarrantyScreenContent(
 
         WarrantyPhotoPicker(
             openSheet = showBottomSheet,
-            onPhotoPicked = {
+            onPhotoPicked = { uri ->
+                uri?.let { onEvent(CreateWarrantyEvent.PhotoPicked(it)) }
 
             },
             onDismissSheet = {
@@ -262,28 +266,86 @@ fun CreateWarrantyScreenContent(
                     }
                 )
             )
-            DashedCard(
-                modifier = Modifier
-                    .height(124.dp)
-                    .fillMaxWidth()
-                    .clickable {
-                        showBottomSheet = true
-                    },
-                color = MaterialTheme.colorScheme.primary
+            WarrantyPhotoField(
+                photoUri = uiState.photoUri,
+                onAddOrReplace = {
+                    showBottomSheet = true
+                },
+                onRemove = {
+                    onEvent(CreateWarrantyEvent.PhotoRemoved)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun WarrantyPhotoField(
+    photoUri: String? = null,
+    onAddOrReplace: () -> Unit,
+    onRemove: () -> Unit
+) {
+    if (photoUri == null) {
+        DashedCard(
+            modifier = Modifier
+                .height(124.dp)
+                .fillMaxWidth()
+                .clickable { onAddOrReplace() },
+            color = MaterialTheme.colorScheme.primary
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_add_photo),
+                    tint = MaterialTheme.colorScheme.primary,
+                    contentDescription = "Add Photo"
+                )
+                Text(
+                    text = "Add warranty photo",
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            ElevatedCard(
+                modifier = Modifier
+                    .height(154.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            ) {
+                AsyncImage(
+                    model = photoUri,
+                    contentDescription = null,
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .padding(top = 16.dp)
+            ) {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    ),
+                    onClick = onRemove
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_add_photo),
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = "Add Photo"
-                    )
                     Text(
-                        text = "Add warranty photo",
-                        color = MaterialTheme.colorScheme.primary
+                        text = "Remove"
+                    )
+                }
+                Spacer(modifier = Modifier.width(24.dp))
+                Button(
+                    onClick = onAddOrReplace
+                ) {
+                    Text(
+                        text = "Replace"
                     )
                 }
             }

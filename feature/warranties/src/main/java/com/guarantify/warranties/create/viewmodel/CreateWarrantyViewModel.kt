@@ -61,6 +61,22 @@ class CreateWarrantyViewModel @Inject constructor(
                     )
                 }
             }
+            is CreateWarrantyEvent.PhotoPicked -> {
+                _uiState.update {
+                    it.copy(
+                        photoUri = event.value.toString(),
+                        photoUploadError = null
+                    )
+                }
+            }
+            is CreateWarrantyEvent.PhotoRemoved -> {
+                _uiState.update {
+                    it.copy(
+                        photoUri = null,
+                        photoUploadError = null
+                    )
+                }
+            }
             is CreateWarrantyEvent.SaveClicked -> {
                 //TODO: implement save()
             }

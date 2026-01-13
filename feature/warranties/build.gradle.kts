@@ -48,6 +48,9 @@ dependencies {
     //Lottie
     implementation(libs.lottie.compose)
 
+    //Coil
+    implementation(libs.coil)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

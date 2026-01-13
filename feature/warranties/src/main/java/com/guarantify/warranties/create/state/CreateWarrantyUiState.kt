@@ -1,7 +1,5 @@
 package com.guarantify.warranties.create.state
 
-import java.time.LocalDate
-
 data class CreateWarrantyUiState(
     val productName: String = "",
     val brand: String = "",
@@ -12,5 +10,7 @@ data class CreateWarrantyUiState(
     val purchaseDateText: String = "",
     val expirationDateMillis: Long? = null,
     val expirationDateText: String = "",
-    val notes: String = ""
+    val notes: String = "",
+    val photoUri: String? = null,
+    val photoUploadError: String? = null
 )
