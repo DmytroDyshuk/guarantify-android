@@ -12,5 +12,7 @@ data class CreateWarrantyUiState(
     val expirationDateText: String = "",
     val notes: String = "",
     val photoUri: String? = null,
-    val photoUploadError: String? = null
+    val photoUploadError: String? = null,
+    val errors: CreateWarrantyErrors = CreateWarrantyErrors(),
+    val attemptedSubmit: Boolean = false
 )

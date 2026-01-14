@@ -52,6 +52,7 @@ import com.guarantify.ui.components.DashedCard
 import com.guarantify.ui.components.PriceInputField
 import com.guarantify.ui.components.WarrantyPhotoPicker
 import com.guarantify.ui.theme.GuarantifyTheme
+import com.guarantify.warranties.create.state.CreateWarrantyErrors
 import com.guarantify.warranties.create.state.CreateWarrantyEvent
 import com.guarantify.warranties.create.state.CreateWarrantyUiState
 import com.guarantify.warranties.create.viewmodel.CreateWarrantyViewModel
@@ -65,6 +66,7 @@ fun CreateWarrantyScreen(
 
     CreateWarrantyScreenContent(
         uiState = uiState,
+        errorsState = uiState.errors,
         onBackClicked = onBackClicked,
         onEvent = viewModel::onEvent
     )
@@ -74,6 +76,7 @@ fun CreateWarrantyScreen(
 @Composable
 fun CreateWarrantyScreenContent(
     uiState: CreateWarrantyUiState,
+    errorsState: CreateWarrantyErrors,
     onBackClicked: () -> Unit,
     onEvent: (CreateWarrantyEvent) -> Unit
 ) {
@@ -81,6 +84,7 @@ fun CreateWarrantyScreenContent(
     var showDatePicker by remember { mutableStateOf(false) }
     var activeDateField by remember { mutableStateOf<ActiveDateField?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
+    val showErrors = uiState.attemptedSubmit
 
     Scaffold(
         topBar = {
@@ -180,7 +184,9 @@ fun CreateWarrantyScreenContent(
                     onNext = {
                         focusManager.moveFocus(FocusDirection.Down)
                     }
-                )
+                ),
+                isError = showErrors && errorsState.productNameError != null,
+                errorMessage = errorsState.productNameError
             )
             AppOutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -194,7 +200,9 @@ fun CreateWarrantyScreenContent(
                     onNext = {
                         focusManager.moveFocus(FocusDirection.Down)
                     }
-                )
+                ),
+                isError = showErrors && errorsState.storeNameError != null,
+                errorMessage = errorsState.storeNameError
             )
             AppOutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -212,7 +220,7 @@ fun CreateWarrantyScreenContent(
             )
             PriceInputField(
                 modifier = Modifier.fillMaxWidth(),
-                label = "Price",
+                label = "Price (Optional)",
                 placeholder = "0.00",
                 value = uiState.price,
                 onValueChange = {
@@ -234,7 +242,9 @@ fun CreateWarrantyScreenContent(
                     onClick = {
                         activeDateField = ActiveDateField.Purchase
                         showDatePicker = true
-                    }
+                    },
+                    isError = showErrors && errorsState.purchaseDateError != null,
+                    errorMessage = errorsState.purchaseDateError
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 AppDateField(
@@ -244,7 +254,9 @@ fun CreateWarrantyScreenContent(
                     onClick = {
                         activeDateField = ActiveDateField.Expiration
                         showDatePicker = true
-                    }
+                    },
+                    isError = showErrors && errorsState.expirationDateError != null,
+                    errorMessage = errorsState.expirationDateError
                 )
             }
 
@@ -254,7 +266,7 @@ fun CreateWarrantyScreenContent(
                 onValueChange = {
                     onEvent(CreateWarrantyEvent.NotesChanged(it))
                 },
-                label = "Notes",
+                label = "Notes (Optional)",
                 singleLine = false,
                 maxCharacters = 255,
                 keyboardOptions = KeyboardOptions(
