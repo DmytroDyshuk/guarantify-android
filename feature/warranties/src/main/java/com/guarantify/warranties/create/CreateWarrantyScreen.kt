@@ -229,7 +229,9 @@ fun CreateWarrantyScreenContent(
                 onCurrencyChange = {
                     onEvent(CreateWarrantyEvent.CurrencyChanged(it))
                 },
-                focusManager = focusManager
+                focusManager = focusManager,
+                isError = showErrors && errorsState.priceError != null,
+                errorMessage = errorsState.priceError
             )
 
             Row(

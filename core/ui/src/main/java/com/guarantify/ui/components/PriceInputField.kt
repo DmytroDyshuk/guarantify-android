@@ -9,6 +9,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,7 +32,9 @@ fun PriceInputField(
     onValueChange: (String) -> Unit,
     onCurrencyChange: (String) -> Unit,
     value: String,
-    focusManager: FocusManager
+    focusManager: FocusManager,
+    isError: Boolean = false,
+    errorMessage: String? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
     var selectedCurrency by remember { mutableStateOf("USD") }
@@ -57,6 +60,17 @@ fun PriceInputField(
             }
         ),
         singleLine = true,
+        isError = isError,
+        supportingText = if (isError) {
+            errorMessage?.let {
+                {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        } else null,
         trailingIcon = {
             Box {
                 TextButton(onClick = { expanded = true }) {

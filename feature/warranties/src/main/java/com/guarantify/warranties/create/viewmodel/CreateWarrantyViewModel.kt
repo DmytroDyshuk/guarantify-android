@@ -124,14 +124,23 @@ class CreateWarrantyViewModel @Inject constructor(
         val storeErr = if (state.storeName.isBlank()) "Store is required" else null
         val purchaseErr =
             if (state.purchaseDateMillis == null) "Purchase date is required" else null
-        val expirationErr =
-            if (state.expirationDateMillis == null) "Expiration date is required" else null
+        val expirationErr = when {
+            state.expirationDateMillis == null -> "Expiration date is required"
+            state.purchaseDateMillis != null &&
+                    state.expirationDateMillis <= state.purchaseDateMillis -> "Expiration date must be after purchase date"
+
+            else -> null
+        }
+        val priceError = if (state.price.isNotBlank() && state.price.toDoubleOrNull() == null) {
+            "Invalid price format"
+        } else null
 
         return CreateWarrantyErrors(
             productNameError = nameErr,
             storeNameError = storeErr,
             purchaseDateError = purchaseErr,
-            expirationDateError = expirationErr
+            expirationDateError = expirationErr,
+            priceError = priceError
         )
     }
 
