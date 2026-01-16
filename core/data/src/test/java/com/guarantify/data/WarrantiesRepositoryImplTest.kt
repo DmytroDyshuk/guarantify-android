@@ -88,7 +88,7 @@ class WarrantiesRepositoryImplTest {
 
         // ASSERT
         assertEquals(2, resultList.size)
-        assertEquals("Samsung Galaxy S21", resultList[0].title)
+        assertEquals("Samsung Galaxy S21", resultList[0].productName)
         assertEquals("2", resultList[1].userId)
     }
 
@@ -99,10 +99,11 @@ class WarrantiesRepositoryImplTest {
             val warranty = Warranty(
                 id = "1",
                 userId = "1",
-                title = "Samsung Galaxy S21",
+                productName = "Samsung Galaxy S21",
                 purchaseDate = LocalDate.now(),
                 expirationDate = LocalDate.now(),
-                storeName = "Samsung"
+                storeName = "Samsung",
+                currency = "USD"
             )
 
             coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
@@ -128,10 +129,11 @@ class WarrantiesRepositoryImplTest {
         val warranty = Warranty(
             id = "1",
             userId = "1",
-            title = "Samsung Galaxy S21",
+            productName = "Samsung Galaxy S21",
             purchaseDate = LocalDate.now(),
             expirationDate = LocalDate.now(),
-            storeName = "Samsung"
+            storeName = "Samsung",
+            currency = "USD"
         )
         val expectedError = "Network error"
 
@@ -159,10 +161,11 @@ class WarrantiesRepositoryImplTest {
         val warranty = Warranty(
             id = "1",
             userId = "1",
-            title = "Samsung Galaxy S21",
+            productName = "Samsung Galaxy S21",
             purchaseDate = LocalDate.now(),
             expirationDate = LocalDate.now(),
-            storeName = "Samsung"
+            storeName = "Samsung",
+            currency = "USD"
         )
 
         coEvery { warrantyDao.deleteWarranty(any()) } just Runs
@@ -185,10 +188,11 @@ class WarrantiesRepositoryImplTest {
         val warranty = Warranty(
             id = "1",
             userId = "1",
-            title = "Samsung Galaxy S21",
+            productName = "Samsung Galaxy S21",
             purchaseDate = LocalDate.now(),
             expirationDate = LocalDate.now(),
-            storeName = "Samsung"
+            storeName = "Samsung",
+            currency = "USD"
         )
 
         coEvery { warrantyDao.deleteWarranty(any()) } just Runs

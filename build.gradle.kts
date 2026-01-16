@@ -38,9 +38,16 @@ subprojects {
 
             defaultConfig {
                 minSdk = 26
-                targetSdk = 36
 
                 testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            }
+
+            testOptions {
+                targetSdk = 36
+            }
+
+            lint {
+                targetSdk = 36
             }
 
             compileOptions {

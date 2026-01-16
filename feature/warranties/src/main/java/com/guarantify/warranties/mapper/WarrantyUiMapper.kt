@@ -26,7 +26,7 @@ fun Warranty.toWarrantyUiModel(dateFormatter: DateTimeFormatter): WarrantyUiMode
 
     return WarrantyUiModel(
         id = this.id,
-        title = this.title,
+        title = this.productName,
         brand = this.brand,
         storeName = this.storeName,
         remainingDays = remainingDaysText,

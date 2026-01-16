@@ -14,6 +14,7 @@ data class WarrantyEntity(
     val storeName: String? = null,
     val brand: String? = null,
     val amount: Long? = null,
+    val currency: String = "USD",
     val photoUrl: String? = null,
     val notes: String? = null,
     val updatedAt: Long = 0,
