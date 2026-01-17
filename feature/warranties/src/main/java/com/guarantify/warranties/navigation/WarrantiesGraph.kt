@@ -19,6 +19,9 @@ fun NavGraphBuilder.warrantiesGraph(
         CreateWarrantyScreen(
             onBackClicked = {
                 navHostController.popBackStack()
+            },
+            onWarrantyCreated = {
+                navHostController.popBackStack()
             }
         )
     }

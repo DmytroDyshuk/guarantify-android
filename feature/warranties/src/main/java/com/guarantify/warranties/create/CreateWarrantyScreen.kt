@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -19,14 +20,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +44,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,7 +55,6 @@ import com.guarantify.ui.components.AppOutlinedTextField
 import com.guarantify.ui.components.DashedCard
 import com.guarantify.ui.components.PriceInputField
 import com.guarantify.ui.components.WarrantyPhotoPicker
-import com.guarantify.ui.theme.GuarantifyTheme
 import com.guarantify.warranties.create.state.CreateWarrantyErrors
 import com.guarantify.warranties.create.state.CreateWarrantyEvent
 import com.guarantify.warranties.create.state.CreateWarrantyUiState
@@ -60,15 +63,17 @@ import com.guarantify.warranties.create.viewmodel.CreateWarrantyViewModel
 @Composable
 fun CreateWarrantyScreen(
     viewModel: CreateWarrantyViewModel = hiltViewModel(),
-    onBackClicked: () -> Unit
+    onBackClicked: () -> Unit,
+    onWarrantyCreated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CreateWarrantyScreenContent(
         uiState = uiState,
-        errorsState = uiState.errors,
+        validationErrorsState = uiState.validationErrors,
         onBackClicked = onBackClicked,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        onWarrantyCreated = onWarrantyCreated
     )
 }
 
@@ -76,15 +81,23 @@ fun CreateWarrantyScreen(
 @Composable
 fun CreateWarrantyScreenContent(
     uiState: CreateWarrantyUiState,
-    errorsState: CreateWarrantyErrors,
+    validationErrorsState: CreateWarrantyErrors,
     onBackClicked: () -> Unit,
+    onWarrantyCreated: () -> Unit,
     onEvent: (CreateWarrantyEvent) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     var showDatePicker by remember { mutableStateOf(false) }
     var activeDateField by remember { mutableStateOf<ActiveDateField?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }
+    val snackBarHostState = remember { SnackbarHostState() }
     val showErrors = uiState.attemptedSubmit
+
+    LaunchedEffect(uiState.saveSuccess) {
+        if (uiState.saveSuccess) {
+            onWarrantyCreated()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -109,14 +122,31 @@ fun CreateWarrantyScreenContent(
                     .fillMaxWidth(),
                 onClick = {
                     onEvent(CreateWarrantyEvent.SaveClicked)
-                }
+                },
+                enabled = !uiState.isSaving
             ) {
-                Text(
-                    text = "Save"
-                )
+                if (uiState.isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text(
+                        text = "Save Warranty"
+                    )
+                }
             }
         }
     ) { innerPadding ->
+        LaunchedEffect(uiState.saveError) {
+            uiState.saveError?.let { error ->
+                snackBarHostState.showSnackbar(
+                    message = error,
+                    duration = SnackbarDuration.Long
+                )
+            }
+        }
+
         if (showDatePicker) {
             AppDatePickerModalInput(
                 onDateSelected = {
@@ -185,8 +215,8 @@ fun CreateWarrantyScreenContent(
                         focusManager.moveFocus(FocusDirection.Down)
                     }
                 ),
-                isError = showErrors && errorsState.productNameError != null,
-                errorMessage = errorsState.productNameError
+                isError = showErrors && validationErrorsState.productNameError != null,
+                errorMessage = validationErrorsState.productNameError
             )
             AppOutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -201,8 +231,8 @@ fun CreateWarrantyScreenContent(
                         focusManager.moveFocus(FocusDirection.Down)
                     }
                 ),
-                isError = showErrors && errorsState.storeNameError != null,
-                errorMessage = errorsState.storeNameError
+                isError = showErrors && validationErrorsState.storeNameError != null,
+                errorMessage = validationErrorsState.storeNameError
             )
             AppOutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -230,8 +260,8 @@ fun CreateWarrantyScreenContent(
                     onEvent(CreateWarrantyEvent.CurrencyChanged(it))
                 },
                 focusManager = focusManager,
-                isError = showErrors && errorsState.priceError != null,
-                errorMessage = errorsState.priceError
+                isError = showErrors && validationErrorsState.priceError != null,
+                errorMessage = validationErrorsState.priceError
             )
 
             Row(
@@ -245,8 +275,8 @@ fun CreateWarrantyScreenContent(
                         activeDateField = ActiveDateField.Purchase
                         showDatePicker = true
                     },
-                    isError = showErrors && errorsState.purchaseDateError != null,
-                    errorMessage = errorsState.purchaseDateError
+                    isError = showErrors && validationErrorsState.purchaseDateError != null,
+                    errorMessage = validationErrorsState.purchaseDateError
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 AppDateField(
@@ -257,8 +287,8 @@ fun CreateWarrantyScreenContent(
                         activeDateField = ActiveDateField.Expiration
                         showDatePicker = true
                     },
-                    isError = showErrors && errorsState.expirationDateError != null,
-                    errorMessage = errorsState.expirationDateError
+                    isError = showErrors && validationErrorsState.expirationDateError != null,
+                    errorMessage = validationErrorsState.expirationDateError
                 )
             }
 
@@ -368,11 +398,3 @@ private fun WarrantyPhotoField(
 }
 
 private enum class ActiveDateField { Purchase, Expiration }
-
-@Composable
-@Preview
-fun CreateWarrantyScreenPreview() {
-    GuarantifyTheme {
-        CreateWarrantyScreen() {}
-    }
-}

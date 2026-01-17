@@ -45,6 +45,7 @@ dependencies {
     implementation(projects.feature.auth)
     implementation(projects.feature.settings)
     implementation(projects.feature.warranties)
+    implementation(projects.core.util)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

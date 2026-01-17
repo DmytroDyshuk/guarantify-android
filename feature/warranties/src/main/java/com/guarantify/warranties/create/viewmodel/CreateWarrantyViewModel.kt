@@ -32,7 +32,7 @@ class CreateWarrantyViewModel @Inject constructor(
             is CreateWarrantyEvent.ProductNameChanged -> {
                 _uiState.update {
                     val updated = it.copy(productName = event.value)
-                    updated.copy(errors = validate(updated))
+                    updated.copy(validationErrors = validate(updated))
                 }
             }
 
@@ -43,7 +43,7 @@ class CreateWarrantyViewModel @Inject constructor(
             is CreateWarrantyEvent.StoreNameChanged -> {
                 _uiState.update {
                     val updated = it.copy(storeName = event.value)
-                    updated.copy(errors = validate(updated))
+                    updated.copy(validationErrors = validate(updated))
                 }
             }
 
@@ -67,7 +67,7 @@ class CreateWarrantyViewModel @Inject constructor(
                             dateFormatter.formatToShortText(it)
                         } ?: ""
                     )
-                    updated.copy(errors = validate(updated))
+                    updated.copy(validationErrors = validate(updated))
                 }
             }
 
@@ -79,7 +79,7 @@ class CreateWarrantyViewModel @Inject constructor(
                             dateFormatter.formatToShortText(it)
                         } ?: ""
                     )
-                    updated.copy(errors = validate(updated))
+                    updated.copy(validationErrors = validate(updated))
                 }
             }
 
@@ -107,7 +107,7 @@ class CreateWarrantyViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         attemptedSubmit = true,
-                        errors = errors,
+                        validationErrors = errors,
                         saveError = null
                     )
                 }

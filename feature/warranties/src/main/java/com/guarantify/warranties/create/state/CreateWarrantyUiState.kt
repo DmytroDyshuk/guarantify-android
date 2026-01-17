@@ -13,7 +13,7 @@ data class CreateWarrantyUiState(
     val notes: String = "",
     val photoUri: String? = null,
     val photoUploadError: String? = null,
-    val errors: CreateWarrantyErrors = CreateWarrantyErrors(),
+    val validationErrors: CreateWarrantyErrors = CreateWarrantyErrors(),
     val attemptedSubmit: Boolean = false,
     val isSaving: Boolean = false,
     val saveError: String? = null,
