@@ -1,8 +1,12 @@
 package com.guarantify.warranties.create.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.guarantify.domain.model.Warranty
+import com.guarantify.domain.repository.GoogleAuthRepository
 import com.guarantify.domain.repository.WarrantiesRepository
-import com.guarantify.ui.di.AppDateFormatProvider
+import com.guarantify.util.date.DateFormatter
+import com.guarantify.util.extensions.toLocalDate
 import com.guarantify.warranties.create.state.CreateWarrantyErrors
 import com.guarantify.warranties.create.state.CreateWarrantyEvent
 import com.guarantify.warranties.create.state.CreateWarrantyUiState
@@ -12,13 +16,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.time.Instant
-import java.time.ZoneOffset
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class CreateWarrantyViewModel @Inject constructor(
     private val warrantiesRepository: WarrantiesRepository,
-    private val dateFormatProvider: AppDateFormatProvider
+    private val authRepository: GoogleAuthRepository,
+    private val dateFormatter: DateFormatter
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CreateWarrantyUiState())
     val uiState: StateFlow<CreateWarrantyUiState> = _uiState.asStateFlow()
@@ -56,20 +60,24 @@ class CreateWarrantyViewModel @Inject constructor(
             }
 
             is CreateWarrantyEvent.PurchaseDateSelected -> {
-                _uiState.update {
-                    val updated = it.copy(
+                _uiState.update { state ->
+                    val updated = state.copy(
                         purchaseDateMillis = event.date,
-                        purchaseDateText = event.date?.toDateText() ?: ""
+                        purchaseDateText = event.date?.let {
+                            dateFormatter.formatToShortText(it)
+                        } ?: ""
                     )
                     updated.copy(errors = validate(updated))
                 }
             }
 
             is CreateWarrantyEvent.ExpirationDateSelected -> {
-                _uiState.update {
-                    val updated = it.copy(
+                _uiState.update { state ->
+                    val updated = state.copy(
                         expirationDateMillis = event.date,
-                        expirationDateText = event.date?.toDateText() ?: ""
+                        expirationDateText = event.date?.let {
+                            dateFormatter.formatToShortText(it)
+                        } ?: ""
                     )
                     updated.copy(errors = validate(updated))
                 }
@@ -99,21 +107,74 @@ class CreateWarrantyViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         attemptedSubmit = true,
-                        errors = errors
+                        errors = errors,
+                        saveError = null
                     )
                 }
 
-                val hasErrors = listOf(
-                    errors.productNameError,
-                    errors.storeNameError,
-                    errors.purchaseDateError,
-                    errors.expirationDateError
-                ).any { it != null }
+                if (errors.hasErrors()) return
 
-                if (!hasErrors) {
-                    //todo: implement save
+                val userId = authRepository.getSignedUser()?.userId
+                if (userId == null) {
+                    _uiState.update {
+                        it.copy(
+                            saveError = "You must be logged in to create a warranty",
+                            attemptedSubmit = false
+                        )
+                    }
+                    return
+                }
 
-                    _uiState.update { it.copy(attemptedSubmit = false) }
+                val state = _uiState.value
+
+                val purchaseDate = state.purchaseDateMillis?.toLocalDate()
+                val expirationDate = state.expirationDateMillis?.toLocalDate()
+
+                if (purchaseDate == null || expirationDate == null) {
+                    _uiState.update {
+                        it.copy(
+                            saveError = "Please select both purchase and expiration dates",
+                            attemptedSubmit = false
+                        )
+                    }
+                    return
+                }
+
+                _uiState.update { it.copy(isSaving = true) }
+
+                viewModelScope.launch {
+                    try {
+                        val warranty = Warranty(
+                            userId = userId,
+                            productName = state.productName,
+                            storeName = state.storeName,
+                            brand = state.brand.takeIf { it.isNotBlank() },
+                            amount = state.price.toDoubleOrNull()?.let { (it * 100).toLong() },
+                            currency = state.selectedCurrency,
+                            photoUrl = state.photoUri,
+                            purchaseDate = purchaseDate,
+                            expirationDate = expirationDate,
+                            notes = state.notes.takeIf { it.isNotBlank() }
+                        )
+
+                        warrantiesRepository.createOrUpdateWarranty(warranty)
+
+                        _uiState.update {
+                            it.copy(
+                                isSaving = false,
+                                attemptedSubmit = false,
+                                saveSuccess = true
+                            )
+                        }
+                    } catch (e: Exception) {
+                        _uiState.update {
+                            it.copy(
+                                isSaving = false,
+                                saveError = e.message ?: "Failed to save warranty",
+                                attemptedSubmit = false
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -144,12 +205,14 @@ class CreateWarrantyViewModel @Inject constructor(
         )
     }
 
-    private fun Long.toDateText(): String {
-        val localDate = Instant.ofEpochMilli(this)
-            .atZone(ZoneOffset.UTC)
-            .toLocalDate()
-
-        return localDate.format(dateFormatProvider.shortDate)
+    private fun CreateWarrantyErrors.hasErrors(): Boolean {
+        return listOf(
+            productNameError,
+            storeNameError,
+            purchaseDateError,
+            expirationDateError,
+            priceError
+        ).any { it != null }
     }
 
 }

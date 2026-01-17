@@ -1,4 +1,4 @@
-package com.guarantify.ui.di
+package com.guarantify.util.date.di
 
 import dagger.Module
 import dagger.Provides
