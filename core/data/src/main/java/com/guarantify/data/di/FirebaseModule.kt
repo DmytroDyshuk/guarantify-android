@@ -1,28 +1,29 @@
 package com.guarantify.data.di
 
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
+import com.guarantify.data.network.firebase.FirebaseWarrantyDataSource
+import com.guarantify.data.network.firebase.FirebaseWarrantyDataSourceImpl
 import com.guarantify.data.repository.GoogleAuthRepositoryImpl
 import com.guarantify.domain.repository.GoogleAuthRepository
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class FirebaseModule {
+interface FirebaseModule {
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideAuthFirebase(): FirebaseAuth = Firebase.auth
+    fun bindGoogleAuthRepository(
+        impl: GoogleAuthRepositoryImpl
+    ): GoogleAuthRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideGoogleAuthRepository(
-        firebaseAuth: FirebaseAuth
-    ): GoogleAuthRepository = GoogleAuthRepositoryImpl(firebaseAuth)
+    fun bindFirebaseWarrantyDataSource(
+        impl: FirebaseWarrantyDataSourceImpl
+    ): FirebaseWarrantyDataSource
 
 }

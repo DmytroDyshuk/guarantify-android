@@ -24,7 +24,7 @@ fun ConfirmationDialog(
         icon = {
             Icon(
                 imageVector = icon,
-                contentDescription = "SignOut Icon"
+                contentDescription = "Sign Out Icon"
             )
         },
         title = {

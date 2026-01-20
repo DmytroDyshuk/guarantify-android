@@ -1,4 +1,4 @@
-package com.guarantify.data
+package com.guarantify.util
 
 import org.junit.Test
 
