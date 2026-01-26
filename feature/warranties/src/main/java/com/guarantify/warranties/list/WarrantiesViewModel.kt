@@ -1,4 +1,4 @@
-package com.guarantify.warranties.list.viewmodel
+package com.guarantify.warranties.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -34,5 +34,4 @@ class WarrantiesViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = WarrantiesUiState.Loading
         )
-
 }

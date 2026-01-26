@@ -58,7 +58,6 @@ import com.guarantify.ui.components.WarrantyPhotoPicker
 import com.guarantify.warranties.create.state.CreateWarrantyErrors
 import com.guarantify.warranties.create.state.CreateWarrantyEvent
 import com.guarantify.warranties.create.state.CreateWarrantyUiState
-import com.guarantify.warranties.create.viewmodel.CreateWarrantyViewModel
 
 @Composable
 fun CreateWarrantyScreen(
