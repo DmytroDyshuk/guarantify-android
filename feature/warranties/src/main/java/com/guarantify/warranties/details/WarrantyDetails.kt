@@ -11,6 +11,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -30,7 +31,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.guarantify.ui.R
-import com.guarantify.ui.components.PaddingHorizontalDivider
 import com.guarantify.ui.theme.darkGrayishCyan
 import com.guarantify.ui.theme.emeraldGreen
 import com.guarantify.ui.theme.lavenderGray
@@ -46,8 +46,6 @@ fun WarrantyDetailsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WarrantyDetailsScreenContent() {
-    val defaultInnerHorizontalPadding = 16.dp
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -69,7 +67,7 @@ fun WarrantyDetailsScreenContent() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 12.dp, vertical = 16.dp)
+                .padding(horizontal = 16.dp, vertical = 16.dp)
         ) {
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
@@ -78,54 +76,51 @@ fun WarrantyDetailsScreenContent() {
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             ) {
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = defaultInnerHorizontalPadding)
-                        .padding(top = 12.dp),
-                    text = "MacBook Air M1",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                )
-                Text(
-                    modifier = Modifier.padding(horizontal = defaultInnerHorizontalPadding),
-                    text = "Brand",
-                    style = MaterialTheme.typography.labelMedium
-                )
-                SuggestionChip( //TODO: change bg color with days left
-                    modifier = Modifier
-                        .padding(horizontal = defaultInnerHorizontalPadding)
-                        .padding(top = 8.dp),
-                    label = {
-                        Text(
-                            text = "143 days left",
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                        )
-                    },
-                    onClick = {},
-                    border = null,
-                    colors = SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = emeraldGreen
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(top = 12.dp),
+                        text = "MacBook Air M1",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
-                )
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = defaultInnerHorizontalPadding)
-                        .padding(bottom = 6.dp),
-                    text = "Warranty until 12 Dec 2026",
-                    color = darkGrayishCyan,
-                    style = MaterialTheme.typography.labelMedium
-                )
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = defaultInnerHorizontalPadding)
-                        .padding(bottom = 12.dp)
-                        .height(6.dp),
-                    progress = { 0.35f },
-                    color = emeraldGreen, //TODO: Change track color with days left
-                    trackColor = lavenderGray,
-                    gapSize = 1.dp
-                )
+                    Text(
+                        text = "Brand",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    SuggestionChip( //TODO: change bg color with days left
+                        modifier = Modifier.padding(top = 8.dp),
+                        label = {
+                            Text(
+                                text = "143 days left",
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                            )
+                        },
+                        onClick = {},
+                        border = null,
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = emeraldGreen
+                        )
+                    )
+                    Text(
+                        modifier = Modifier.padding(bottom = 6.dp),
+                        text = "Warranty until 12 Dec 2026",
+                        color = darkGrayishCyan,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                            .height(6.dp),
+                        progress = { 0.35f },
+                        color = emeraldGreen, //TODO: Change track color with days left
+                        trackColor = lavenderGray,
+                        gapSize = 1.dp
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -136,19 +131,19 @@ fun WarrantyDetailsScreenContent() {
                     firstString = "Store",
                     secondString = "Rozetka"
                 )
-                PaddingHorizontalDivider()
+                HorizontalDivider()
                 DoubleStringInfoRow(
                     icon = ImageVector.vectorResource(R.drawable.ic_price),
                     firstString = "Price",
                     secondString = "34 999"
                 )
-                PaddingHorizontalDivider()
+                HorizontalDivider()
                 DoubleStringInfoRow(
                     icon = ImageVector.vectorResource(R.drawable.ic_brand),
                     firstString = "Brand",
                     secondString = "Apple"
                 )
-                PaddingHorizontalDivider()
+                HorizontalDivider()
                 DoubleStringInfoRow(
                     icon = ImageVector.vectorResource(R.drawable.ic_serial_number),
                     firstString = "Serial Number",
@@ -164,7 +159,7 @@ fun WarrantyDetailsScreenContent() {
                     firstString = "Purchase Date",
                     secondString = "12 Dec 2025"
                 )
-                PaddingHorizontalDivider()
+                HorizontalDivider()
                 DoubleStringInfoRow(
                     icon = ImageVector.vectorResource(R.drawable.ic_end_time_hourglass),
                     firstString = "Expiration Date",
@@ -185,7 +180,6 @@ fun WarrantyDetailsScreenContent() {
             InfoCardWithTitle(title = "Notes") {
                 Text(
                     modifier = Modifier.padding(
-                        horizontal = defaultInnerHorizontalPadding,
                         vertical = 8.dp
                     ),
                     text = "Notes notesNotes notesNotes notesNotes notesNotes notesNotes notes"
@@ -205,19 +199,20 @@ private fun InfoCardWithTitle(
 ) {
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
-        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
     ) {
-        Text(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            text = title,
-            style = MaterialTheme.typography.titleMedium
-        )
-        PaddingHorizontalDivider()
-        content()
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            Text(
+                modifier = Modifier.padding(vertical = 8.dp),
+                text = title,
+                style = MaterialTheme.typography.titleMedium
+            )
+            HorizontalDivider()
+            content()
+        }
     }
 }
 
@@ -231,7 +226,7 @@ private fun DoubleStringInfoRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
