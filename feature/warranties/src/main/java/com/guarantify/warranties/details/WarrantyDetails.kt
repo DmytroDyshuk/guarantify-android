@@ -1,5 +1,6 @@
 package com.guarantify.warranties.details
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -23,6 +26,10 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,24 +53,11 @@ fun WarrantyDetailsScreen(
     WarrantyDetailsScreenContent()
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WarrantyDetailsScreenContent() {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text("Warranty details")
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /* todo: implement back nav */ }) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Back"
-                        )
-                    }
-                }
-            )
+            WarrantyDetailsTopAppBar()
         }
     ) { paddingValues ->
         Column(
@@ -197,10 +191,47 @@ fun WarrantyDetailsScreenContent() {
                     text = "Notes notesNotes notesNotes notesNotes notesNotes notesNotes notes"
                 ) //TODO: change style
             }
-
-            //TODO: Add edit button
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WarrantyDetailsTopAppBar() {
+    var isExpandedDropdownMenu by remember { mutableStateOf(false) }
+
+    CenterAlignedTopAppBar(
+        title = {
+            Text("Warranty details")
+        },
+        navigationIcon = {
+            IconButton(onClick = { /* todo: implement back nav */ }) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
+                    contentDescription = "Back"
+                )
+            }
+        },
+        actions = {
+            Box {
+                IconButton(
+                    onClick = { isExpandedDropdownMenu = !isExpandedDropdownMenu }
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_more_vert),
+                        contentDescription = "More menu"
+                    )
+                }
+
+                MoreDropdownMenu(
+                    expanded = isExpandedDropdownMenu,
+                    onDismiss = { isExpandedDropdownMenu = false },
+                    onEditClick = { isExpandedDropdownMenu = false },
+                    onDeleteClick = { isExpandedDropdownMenu = false }
+                )
+            }
+        }
+    )
 }
 
 @Composable
@@ -253,6 +284,30 @@ private fun DoubleStringInfoRow(
         Text(
             text = secondString,
             style = MaterialTheme.typography.labelLarge
+        )
+    }
+}
+
+@Composable
+fun MoreDropdownMenu(
+    modifier: Modifier = Modifier,
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    DropdownMenu(
+        modifier = modifier,
+        expanded = expanded,
+        onDismissRequest = onDismiss
+    ) {
+        DropdownMenuItem(
+            text = { Text(text = "Edit") },
+            onClick = onEditClick
+        )
+        DropdownMenuItem(
+            text = { Text(text = "Delete") },
+            onClick = onDeleteClick
         )
     }
 }

@@ -10,7 +10,7 @@ sealed class WarrantiesDestinations {
     @Serializable
     data object CreateWarranty : WarrantiesDestinations()
 
-//    @Serializable
-//    data object WarrantyDetails : WarrantiesDestinations()
+    @Serializable
+    data object WarrantyDetails : WarrantiesDestinations()
 
 }

@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.guarantify.warranties.create.CreateWarrantyScreen
+import com.guarantify.warranties.details.WarrantyDetailsScreen
 import com.guarantify.warranties.list.WarrantiesScreen
 
 fun NavGraphBuilder.warrantiesGraph(
@@ -24,5 +25,8 @@ fun NavGraphBuilder.warrantiesGraph(
                 navHostController.popBackStack()
             }
         )
+    }
+    composable<WarrantiesDestinations.WarrantyDetails> {
+        WarrantyDetailsScreen()
     }
 }
