@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -146,54 +148,11 @@ fun CreateWarrantyScreenContent(
             }
         }
 
-        if (showDatePicker) {
-            AppDatePickerModalInput(
-                onDateSelected = {
-                    when (activeDateField) {
-                        ActiveDateField.Purchase -> onEvent(
-                            CreateWarrantyEvent.PurchaseDateSelected(it)
-                        )
-
-                        ActiveDateField.Expiration -> onEvent(
-                            CreateWarrantyEvent.ExpirationDateSelected(it)
-                        )
-
-                        null -> Unit
-                    }
-                },
-                onDismiss = {
-                    showDatePicker = false
-                    activeDateField = null
-                    focusManager.clearFocus(force = true)
-                },
-                initialSelectedDateMillis = when (activeDateField) {
-                    ActiveDateField.Purchase -> uiState.purchaseDateMillis
-                    ActiveDateField.Expiration -> uiState.expirationDateMillis
-                        ?: uiState.purchaseDateMillis
-
-                    null -> null
-                },
-                minDateMillis = if (activeDateField == ActiveDateField.Expiration) {
-                    uiState.purchaseDateMillis
-                } else null
-            )
-        }
-
-        WarrantyPhotoPicker(
-            openSheet = showBottomSheet,
-            onPhotoPicked = { uri ->
-                uri?.let { onEvent(CreateWarrantyEvent.PhotoPicked(it)) }
-
-            },
-            onDismissSheet = {
-                showBottomSheet = false
-            }
-        )
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
                 .pointerInput(Unit) {
@@ -319,6 +278,50 @@ fun CreateWarrantyScreenContent(
                 }
             )
         }
+
+        if (showDatePicker) {
+            AppDatePickerModalInput(
+                onDateSelected = {
+                    when (activeDateField) {
+                        ActiveDateField.Purchase -> onEvent(
+                            CreateWarrantyEvent.PurchaseDateSelected(it)
+                        )
+
+                        ActiveDateField.Expiration -> onEvent(
+                            CreateWarrantyEvent.ExpirationDateSelected(it)
+                        )
+
+                        null -> Unit
+                    }
+                },
+                onDismiss = {
+                    showDatePicker = false
+                    activeDateField = null
+                    focusManager.clearFocus(force = true)
+                },
+                initialSelectedDateMillis = when (activeDateField) {
+                    ActiveDateField.Purchase -> uiState.purchaseDateMillis
+                    ActiveDateField.Expiration -> uiState.expirationDateMillis
+                        ?: uiState.purchaseDateMillis
+
+                    null -> null
+                },
+                minDateMillis = if (activeDateField == ActiveDateField.Expiration) {
+                    uiState.purchaseDateMillis
+                } else null
+            )
+        }
+
+        WarrantyPhotoPicker(
+            openSheet = showBottomSheet,
+            onPhotoPicked = { uri ->
+                uri?.let { onEvent(CreateWarrantyEvent.PhotoPicked(it)) }
+
+            },
+            onDismissSheet = {
+                showBottomSheet = false
+            }
+        )
     }
 }
 

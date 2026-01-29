@@ -31,8 +31,7 @@ import com.guarantify.ui.components.NoResultsScreen
 import com.guarantify.warranties.R
 import com.guarantify.warranties.list.components.WarrantyItem
 import com.guarantify.warranties.list.state.WarrantiesUiState
-import com.guarantify.warranties.list.WarrantiesViewModel
-import com.guarantify.warranties.model.WarrantyUiModel
+import com.guarantify.warranties.list.model.WarrantyUiModel
 
 @Composable
 fun WarrantiesScreen(

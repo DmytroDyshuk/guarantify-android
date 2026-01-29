@@ -1,5 +1,6 @@
 package com.guarantify.home_navigation
 
+import androidx.annotation.StringRes
 import kotlinx.serialization.Serializable
 
 sealed class HomeDestinations {
@@ -16,22 +17,22 @@ sealed class HomeDestinations {
 }
 
 enum class BottomNavItem(
-    val label: String,
+    @param:StringRes val label: Int,
     val icon: Int,
     val route: HomeDestinations
 ) {
     Warranties(
-        label = "Warranties",
+        label = R.string.warranties_label,
         icon = R.drawable.outline_receipt_long_24,
         route = HomeDestinations.Warranties
     ),
     Insights(
-        label = "Insights",
+        label = R.string.insights_label,
         icon = R.drawable.outline_search_insights_24,
         route = HomeDestinations.Insights
     ),
     Settings(
-        label = "Settings",
+        label = R.string.settings_label,
         icon = R.drawable.outline_settings_24,
         route = HomeDestinations.Settings
     )

@@ -3,7 +3,7 @@ package com.guarantify.warranties.mapper
 import androidx.compose.ui.graphics.Color
 import com.guarantify.domain.model.Warranty
 import com.guarantify.util.date.DateFormatter
-import com.guarantify.warranties.model.WarrantyUiModel
+import com.guarantify.warranties.list.model.WarrantyUiModel
 import jakarta.inject.Inject
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit

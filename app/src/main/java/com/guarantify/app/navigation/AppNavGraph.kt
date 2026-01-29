@@ -10,6 +10,8 @@ import com.guarantify.auth.navigation.AuthDestinations
 import com.guarantify.auth.navigation.authGraph
 import com.guarantify.domain.model.AuthState
 import com.guarantify.home_navigation.HomeScreenContainer
+import com.guarantify.warranties.create.CreateWarrantyScreen
+import com.guarantify.warranties.details.WarrantyDetailsScreen
 
 @Composable
 fun AppNavGraph(
@@ -29,8 +31,30 @@ fun AppNavGraph(
         navigation<RootDestinations.Auth>(startDestination = AuthDestinations.Auth) {
             authGraph(navController)
         }
+
         composable<RootDestinations.Home> {
-            HomeScreenContainer()
+            HomeScreenContainer(
+                onNavigateToCreateWarranty = {
+                    navController.navigate(RootDestinations.CreateWarranty) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        composable<RootDestinations.CreateWarranty> {
+            CreateWarrantyScreen(
+                onBackClicked = {
+                    navController.popBackStack()
+                },
+                onWarrantyCreated = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable<RootDestinations.WarrantyDetails> {
+            WarrantyDetailsScreen()
         }
     }
 }

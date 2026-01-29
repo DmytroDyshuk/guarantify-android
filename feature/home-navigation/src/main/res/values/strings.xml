@@ -3,4 +3,7 @@
     <string name="warranties_topbar_title">Warranties</string>
     <string name="insights_topbar_title">Insights</string>
     <string name="settings_topbar_title">Settings</string>
+    <string name="warranties_label">Warranties</string>
+    <string name="insights_label">Insights</string>
+    <string name="settings_label">Settings</string>
 </resources>
