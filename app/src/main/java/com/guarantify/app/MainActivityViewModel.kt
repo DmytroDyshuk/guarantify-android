@@ -14,12 +14,14 @@ import kotlinx.coroutines.flow.stateIn
 class MainActivityViewModel @Inject constructor(
     private val googleAuthRepository: GoogleAuthRepository
 ) : ViewModel() {
-    val uiState: StateFlow<MainActivityUiState> = googleAuthRepository.observeAuthState().map {
-        MainActivityUiState.Success(it)
-    }.stateIn(
-        scope = viewModelScope,
-        initialValue = MainActivityUiState.Loading,
-        started = SharingStarted.WhileSubscribed(5_000)
-    )
+    val uiState: StateFlow<MainActivityUiState> = googleAuthRepository.observeAuthState()
+        .map {
+            MainActivityUiState.Success(it)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            initialValue = MainActivityUiState.Loading,
+            started = SharingStarted.WhileSubscribed(5_000)
+        )
 
 }
