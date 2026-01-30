@@ -1,5 +1,6 @@
 package com.guarantify.home_navigation.bottomnavigation
 
+import android.net.http.SslCertificate.saveState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.guarantify.home_navigation.BottomNavItem
 import com.guarantify.home_navigation.HomeDestinations
@@ -60,7 +62,7 @@ fun NavigationBottomBar(
                     onClick = {
                         if (!isSelected) {
                             navController.navigate(bottomNavItem.route) {
-                                popUpTo(HomeDestinations.Warranties) {
+                                popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
                                 launchSingleTop = true
