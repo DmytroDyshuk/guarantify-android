@@ -7,10 +7,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
-import com.guarantify.auth.navigation.AuthDestinations
 import com.guarantify.auth.navigation.authGraph
 import com.guarantify.domain.model.AuthState
 import com.guarantify.home_navigation.HomeScreenContainer
+import com.guarantify.navigation.destinations.AuthDestinations
+import com.guarantify.navigation.destinations.RootDestinations
 import com.guarantify.warranties.create.CreateWarrantyScreen
 import com.guarantify.warranties.details.WarrantyDetailsScreen
 
@@ -25,6 +26,7 @@ fun AppNavGraph(
                 popUpTo(0)
                 launchSingleTop = true
             }
+
             is AuthState.Unauthenticated -> navController.navigate(RootDestinations.Auth) {
                 popUpTo(0)
                 launchSingleTop = true
@@ -44,6 +46,11 @@ fun AppNavGraph(
             HomeScreenContainer(
                 onNavigateToCreateWarranty = {
                     navController.navigate(RootDestinations.CreateWarranty) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToWarrantyDetails = { warrantyId ->
+                    navController.navigate(RootDestinations.WarrantyDetails(id = warrantyId)) {
                         launchSingleTop = true
                     }
                 }

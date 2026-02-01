@@ -36,7 +36,8 @@ import com.guarantify.warranties.list.model.WarrantyUiModel
 @Composable
 fun WarrantiesScreen(
     viewModel: WarrantiesViewModel = hiltViewModel(),
-    onShowAddWarrantyDialog: () -> Unit
+    onShowAddWarrantyDialog: () -> Unit,
+    onWarrantyClick: (id: String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -54,7 +55,9 @@ fun WarrantiesScreen(
 
         is WarrantiesUiState.Success -> {
             val warrantiesList = (uiState as WarrantiesUiState.Success).warranties
-            WarrantiesScreenContent(warranties = warrantiesList)
+            WarrantiesScreenContent(warranties = warrantiesList) {
+                onWarrantyClick(it)
+            }
         }
     }
 }
@@ -62,7 +65,8 @@ fun WarrantiesScreen(
 @Composable
 fun WarrantiesScreenContent(
     modifier: Modifier = Modifier,
-    warranties: List<WarrantyUiModel>
+    warranties: List<WarrantyUiModel>,
+    onWarrantyClick: (id: String) -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -72,8 +76,10 @@ fun WarrantiesScreenContent(
         contentPadding = PaddingValues(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(items = warranties, key = { it.id }) {
-            WarrantyItem(warranty = it)
+        items(items = warranties, key = { it.id }) { warrantyUiModel ->
+            WarrantyItem(warranty = warrantyUiModel) { id ->
+                onWarrantyClick(id)
+            }
         }
     }
 }

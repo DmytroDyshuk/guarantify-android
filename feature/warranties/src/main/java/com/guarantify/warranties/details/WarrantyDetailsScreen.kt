@@ -47,7 +47,6 @@ import com.guarantify.ui.theme.lavenderGray
 
 @Composable
 fun WarrantyDetailsScreen(
-
     viewModel: WarrantyDetailsViewModel = hiltViewModel()
 ) {
     WarrantyDetailsScreenContent()
@@ -223,7 +222,7 @@ private fun WarrantyDetailsTopAppBar() {
                     )
                 }
 
-                MoreDropdownMenu(
+                OptionsDropdownMenu(
                     expanded = isExpandedDropdownMenu,
                     onDismiss = { isExpandedDropdownMenu = false },
                     onEditClick = { isExpandedDropdownMenu = false },
@@ -289,7 +288,7 @@ private fun DoubleStringInfoRow(
 }
 
 @Composable
-fun MoreDropdownMenu(
+fun OptionsDropdownMenu(
     modifier: Modifier = Modifier,
     expanded: Boolean,
     onDismiss: () -> Unit,

@@ -22,7 +22,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -30,14 +29,17 @@ import androidx.navigation.compose.rememberNavController
 import com.guarantify.home_navigation.bottomnavigation.NavigationBottomBar
 import com.guarantify.home_navigation.components.HomeTopAppBar
 import com.guarantify.insights.InsightsScreen
+import com.guarantify.navigation.destinations.HomeDestinations
 import com.guarantify.settings.SettingsScreen
 import com.guarantify.warranties.list.WarrantiesScreen
 import com.guarantify.warranties.list.components.WarrantyCreationMethodDialog
+import androidx.navigation.NavDestination.Companion.hasRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContainer(
-    onNavigateToCreateWarranty: () -> Unit
+    onNavigateToCreateWarranty: () -> Unit,
+    onNavigateToWarrantyDetails: (id: String) -> Unit
 ) {
     val homeNavController = rememberNavController()
     val navBackStackEntry by homeNavController.currentBackStackEntryAsState()
@@ -98,6 +100,9 @@ fun HomeScreenContainer(
                 WarrantiesScreen(
                     onShowAddWarrantyDialog = {
                         showCreationMethodDialog = true
+                    },
+                    onWarrantyClick = { warrantyId ->
+                        onNavigateToWarrantyDetails(warrantyId)
                     }
                 )
             }

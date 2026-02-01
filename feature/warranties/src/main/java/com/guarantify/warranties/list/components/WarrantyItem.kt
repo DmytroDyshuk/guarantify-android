@@ -28,14 +28,15 @@ import com.guarantify.warranties.list.model.WarrantyUiModel
 @Composable
 fun WarrantyItem(
     modifier: Modifier = Modifier,
-    warranty: WarrantyUiModel
+    warranty: WarrantyUiModel,
+    onWarrantyClick: (id: String) -> Unit
 ) {
     val subtitleText = listOfNotNull(warranty.brand, warranty.storeName)
         .joinToString(" • ")
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        onClick = { onWarrantyClick(warranty.id) }
     ) {
         Column(
             modifier = modifier
@@ -43,8 +44,7 @@ fun WarrantyItem(
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -101,7 +101,8 @@ fun PreviewWarrantyItem() {
                     brand = "Samsung",
                     remainingDays = "Expires today",
                     status = Color.Red
-                )
+                ),
+                onWarrantyClick = {}
             )
         }
     }

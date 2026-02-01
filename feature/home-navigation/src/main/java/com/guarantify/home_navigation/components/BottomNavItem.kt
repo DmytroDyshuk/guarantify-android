@@ -1,20 +1,8 @@
-package com.guarantify.home_navigation
+package com.guarantify.home_navigation.components
 
 import androidx.annotation.StringRes
-import kotlinx.serialization.Serializable
-
-sealed class HomeDestinations {
-
-    @Serializable
-    data object Warranties : HomeDestinations()
-
-    @Serializable
-    data object Insights : HomeDestinations()
-
-    @Serializable
-    data object Settings : HomeDestinations()
-
-}
+import com.guarantify.home_navigation.R
+import com.guarantify.navigation.destinations.HomeDestinations
 
 enum class BottomNavItem(
     @param:StringRes val label: Int,

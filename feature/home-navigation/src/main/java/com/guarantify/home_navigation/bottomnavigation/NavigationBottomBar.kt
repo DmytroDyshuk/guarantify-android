@@ -1,6 +1,5 @@
 package com.guarantify.home_navigation.bottomnavigation
 
-import android.net.http.SslCertificate.saveState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -19,8 +18,8 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.guarantify.home_navigation.BottomNavItem
-import com.guarantify.home_navigation.HomeDestinations
+import com.guarantify.home_navigation.components.BottomNavItem
+import com.guarantify.navigation.destinations.HomeDestinations
 
 
 private val TOP_LEVEL_DESTINATIONS = setOf(

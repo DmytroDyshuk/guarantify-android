@@ -1,4 +1,4 @@
-package com.guarantify.app.navigation
+package com.guarantify.navigation.destinations
 
 import kotlinx.serialization.Serializable
 
@@ -14,6 +14,6 @@ sealed class RootDestinations {
     data object CreateWarranty : RootDestinations()
 
     @Serializable
-    data object WarrantyDetails : RootDestinations()
+    data class WarrantyDetails(val id: String) : RootDestinations()
 
 }

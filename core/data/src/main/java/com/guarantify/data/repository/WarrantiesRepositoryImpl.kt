@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.cancellation.CancellationException
 
 const val WARRANTIES_REPO = "WarrantiesRepo"
 
@@ -31,6 +32,7 @@ class WarrantiesRepositoryImpl @Inject constructor(
                 Log.e(WARRANTIES_REPO, "${e.message}")
                 emit(emptyList())
             }
+
     override suspend fun createOrUpdateWarranty(warranty: Warranty): Result<Unit> =
         withContext(ioDispatcher) {
             val warrantyEntity = warranty.toEntityWithGeneratedIdIfNeeded()
@@ -43,6 +45,16 @@ class WarrantiesRepositoryImpl @Inject constructor(
             } catch (e: Exception) {
                 Log.e(WARRANTIES_REPO, "Sync failed for warranty: ${warranty.id}", e)
                 Result.Error(errorMessage = e.message)
+            }
+        }
+
+    override suspend fun getWarranty(warrantyId: String): Result<Warranty> =
+        withContext(ioDispatcher) {
+            try {
+                Result.Success(warrantyDao.getWarrantyById(warrantyId).toDomain())
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Result.Error(e.message ?: "Warranty not found")
             }
         }
 

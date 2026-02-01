@@ -11,9 +11,11 @@ configure<LibraryExtension> {
 }
 
 dependencies {
+    //Modules
     implementation(projects.feature.warranties)
     implementation(projects.feature.insights)
     implementation(projects.feature.settings)
+    implementation(projects.core.navigation)
 
     implementation(libs.androidx.core.ktx)
 
