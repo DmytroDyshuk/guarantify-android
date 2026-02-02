@@ -59,17 +59,21 @@ fun AppNavGraph(
 
         composable<RootDestinations.CreateWarranty> {
             CreateWarrantyScreen(
-                onBackClicked = {
+                onBackClick = {
                     navController.popBackStack()
                 },
-                onWarrantyCreated = {
+                onCreateWarranty = {
                     navController.popBackStack()
                 }
             )
         }
 
         composable<RootDestinations.WarrantyDetails> {
-            WarrantyDetailsScreen()
+            WarrantyDetailsScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

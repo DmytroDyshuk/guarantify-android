@@ -39,24 +39,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.guarantify.ui.R
 import com.guarantify.ui.theme.darkGrayishCyan
 import com.guarantify.ui.theme.emeraldGreen
 import com.guarantify.ui.theme.lavenderGray
+import com.guarantify.warranties.details.state.DetailsUiState
 
 @Composable
 fun WarrantyDetailsScreen(
-    viewModel: WarrantyDetailsViewModel = hiltViewModel()
+    viewModel: WarrantyDetailsViewModel = hiltViewModel(),
+    onBackClick: () -> Unit
 ) {
-    WarrantyDetailsScreenContent()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    WarrantyDetailsScreenContent(
+        uiState = uiState,
+        onBackClick = onBackClick
+    )
 }
 
 @Composable
-fun WarrantyDetailsScreenContent() {
+fun WarrantyDetailsScreenContent(
+    uiState: DetailsUiState,
+    onBackClick: () -> Unit
+) {
     Scaffold(
         topBar = {
-            WarrantyDetailsTopAppBar()
+            WarrantyDetailsTopAppBar(
+                onBackClick = onBackClick
+            )
         }
     ) { paddingValues ->
         Column(
@@ -196,7 +208,9 @@ fun WarrantyDetailsScreenContent() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WarrantyDetailsTopAppBar() {
+private fun WarrantyDetailsTopAppBar(
+    onBackClick: () -> Unit
+) {
     var isExpandedDropdownMenu by remember { mutableStateOf(false) }
 
     CenterAlignedTopAppBar(
@@ -204,7 +218,7 @@ private fun WarrantyDetailsTopAppBar() {
             Text("Warranty details")
         },
         navigationIcon = {
-            IconButton(onClick = { /* todo: implement back nav */ }) {
+            IconButton(onClick = { onBackClick() }) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
                     contentDescription = "Back"
@@ -314,5 +328,8 @@ fun OptionsDropdownMenu(
 @Preview(showBackground = true)
 @Composable
 fun WarrantyDetailsScreenPreview() {
-    WarrantyDetailsScreenContent()
+    WarrantyDetailsScreenContent(
+        uiState = DetailsUiState(warranty = null),
+        onBackClick = {}
+    )
 }

@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppDatePickerModalInput(
-    onDateSelected: (Long?) -> Unit,
+    onDateSelect: (Long?) -> Unit,
     onDismiss: () -> Unit,
     initialSelectedDateMillis: Long? = null,
     minDateMillis: Long? = null
@@ -30,7 +30,7 @@ fun AppDatePickerModalInput(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = {
-                onDateSelected(datePickerState.selectedDateMillis)
+                onDateSelect(datePickerState.selectedDateMillis)
                 onDismiss()
             }) {
                 Text("OK")

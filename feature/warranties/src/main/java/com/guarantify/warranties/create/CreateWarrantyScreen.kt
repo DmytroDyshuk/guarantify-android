@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -65,17 +64,17 @@ import com.guarantify.warranties.create.state.CreateWarrantyUiState
 @Composable
 fun CreateWarrantyScreen(
     viewModel: CreateWarrantyViewModel = hiltViewModel(),
-    onBackClicked: () -> Unit,
-    onWarrantyCreated: () -> Unit
+    onBackClick: () -> Unit,
+    onCreateWarranty: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CreateWarrantyScreenContent(
         uiState = uiState,
         validationErrorsState = uiState.validationErrors,
-        onBackClicked = onBackClicked,
+        onBackClick = onBackClick,
         onEvent = viewModel::onEvent,
-        onWarrantyCreated = onWarrantyCreated
+        onCreateWarranty = onCreateWarranty
     )
 }
 
@@ -84,8 +83,8 @@ fun CreateWarrantyScreen(
 fun CreateWarrantyScreenContent(
     uiState: CreateWarrantyUiState,
     validationErrorsState: CreateWarrantyErrors,
-    onBackClicked: () -> Unit,
-    onWarrantyCreated: () -> Unit,
+    onBackClick: () -> Unit,
+    onCreateWarranty: () -> Unit,
     onEvent: (CreateWarrantyEvent) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
@@ -97,7 +96,7 @@ fun CreateWarrantyScreenContent(
 
     LaunchedEffect(uiState.saveSuccess) {
         if (uiState.saveSuccess) {
-            onWarrantyCreated()
+            onCreateWarranty()
         }
     }
 
@@ -108,7 +107,7 @@ fun CreateWarrantyScreenContent(
                     Text("Add new Warranty")
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClicked) {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
                             contentDescription = "Back"
@@ -283,7 +282,7 @@ fun CreateWarrantyScreenContent(
 
         if (showDatePicker) {
             AppDatePickerModalInput(
-                onDateSelected = {
+                onDateSelect = {
                     when (activeDateField) {
                         ActiveDateField.Purchase -> onEvent(
                             CreateWarrantyEvent.PurchaseDateSelected(it)
@@ -316,7 +315,7 @@ fun CreateWarrantyScreenContent(
 
         WarrantyPhotoPicker(
             openSheet = showBottomSheet,
-            onPhotoPicked = { uri ->
+            onPhotoPick = { uri ->
                 uri?.let { onEvent(CreateWarrantyEvent.PhotoPicked(it)) }
 
             },
