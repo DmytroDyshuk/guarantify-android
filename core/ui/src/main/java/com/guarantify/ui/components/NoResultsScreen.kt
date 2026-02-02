@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
@@ -36,14 +37,14 @@ fun NoResultsScreen(modifier: Modifier = Modifier) {
             speed = 0.8f
         )
         Text(
-            text = "Oops! Something went wrong :(",
+            text = stringResource(R.string.core_ui_error_generic),
             style = MaterialTheme.typography.titleMedium
         )
         Text(
             modifier = Modifier
                 .padding(top = 8.dp)
                 .padding(horizontal = 16.dp),
-            text = "We couldn't complete your request right now. Please try reloading the page or come back and try again later. \n\nWe apologize for the inconvenience.",
+            text = stringResource(R.string.core_ui_error_generic_description),
             style = MaterialTheme.typography.bodyMedium
         )
     }

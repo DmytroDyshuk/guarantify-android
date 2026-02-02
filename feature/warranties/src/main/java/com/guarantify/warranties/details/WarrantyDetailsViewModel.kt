@@ -23,16 +23,16 @@ class WarrantyDetailsViewModel @Inject constructor(
 
     private val warrantyId = savedStateHandle.toRoute<RootDestinations.WarrantyDetails>().id
 
-    private val _uiState = MutableStateFlow(DetailsUiState())
+    private val _uiState: MutableStateFlow<DetailsUiState> =
+        MutableStateFlow(DetailsUiState.Loading)
     val uiState: StateFlow<DetailsUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            _uiState.value = DetailsUiState(isLoading = true)
+            _uiState.value = DetailsUiState.Loading
             when (val result = warrantiesRepository.getWarranty(warrantyId)) {
-                is Result.Success -> _uiState.value = DetailsUiState(warranty = result.data)
-                is Result.Error -> _uiState.value =
-                    DetailsUiState(errorMessage = result.errorMessage)
+                is Result.Success -> _uiState.value = DetailsUiState.Content(result.data)
+                is Result.Error -> _uiState.value = DetailsUiState.Error
             }
         }
     }

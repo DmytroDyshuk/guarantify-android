@@ -36,12 +36,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.guarantify.domain.model.Warranty
 import com.guarantify.ui.R
+import com.guarantify.ui.components.LoadingScreen
+import com.guarantify.ui.components.NoResultsScreen
 import com.guarantify.ui.theme.darkGrayishCyan
 import com.guarantify.ui.theme.emeraldGreen
 import com.guarantify.ui.theme.lavenderGray
@@ -53,17 +55,7 @@ fun WarrantyDetailsScreen(
     onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    WarrantyDetailsScreenContent(
-        uiState = uiState,
-        onBackClick = onBackClick
-    )
-}
 
-@Composable
-fun WarrantyDetailsScreenContent(
-    uiState: DetailsUiState,
-    onBackClick: () -> Unit
-) {
     Scaffold(
         topBar = {
             WarrantyDetailsTopAppBar(
@@ -71,137 +63,159 @@ fun WarrantyDetailsScreenContent(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 16.dp)
+        when (val state = uiState) {
+            is DetailsUiState.Loading -> {
+                LoadingScreen(modifier = Modifier.padding(paddingValues))
+            }
+
+            is DetailsUiState.Error -> {
+                NoResultsScreen(modifier = Modifier.padding(paddingValues))
+            }
+
+            is DetailsUiState.Content -> {
+                WarrantyDetailsScreenContent(
+                    warranty = state.warranty,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun WarrantyDetailsScreenContent(
+    warranty: Warranty,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+    ) {
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            )
         ) {
-            ElevatedCard(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                )
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(top = 12.dp),
-                        text = "MacBook Air M1",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                    Text(
-                        text = "Brand",
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    SuggestionChip( //TODO: change bg color with days left
-                        modifier = Modifier.padding(top = 8.dp),
-                        label = {
-                            Text(
-                                text = "143 days left",
-                                color = Color.White,
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                            )
-                        },
-                        onClick = {},
-                        border = null,
-                        colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = emeraldGreen
-                        )
-                    )
-                    Text(
-                        modifier = Modifier.padding(bottom = 6.dp),
-                        text = "Warranty until 12 Dec 2026",
-                        color = darkGrayishCyan,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    LinearProgressIndicator(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                            .height(6.dp),
-                        progress = { 0.35f },
-                        color = emeraldGreen, //TODO: Change track color with days left
-                        trackColor = lavenderGray,
-                        gapSize = 1.dp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            InfoCardWithTitle(title = "Details") {
-                DoubleStringInfoRow(
-                    icon = ImageVector.vectorResource(R.drawable.ic_store),
-                    firstString = "Store",
-                    secondString = "Rozetka"
-                )
-                HorizontalDivider()
-                DoubleStringInfoRow(
-                    icon = ImageVector.vectorResource(R.drawable.ic_price),
-                    firstString = "Price",
-                    secondString = "34 999"
-                )
-                HorizontalDivider()
-                DoubleStringInfoRow(
-                    icon = ImageVector.vectorResource(R.drawable.ic_brand),
-                    firstString = "Brand",
-                    secondString = "Apple"
-                )
-                HorizontalDivider()
-                DoubleStringInfoRow(
-                    icon = ImageVector.vectorResource(R.drawable.ic_serial_number),
-                    firstString = "Serial Number",
-                    secondString = "C023F32A23B123"
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            InfoCardWithTitle(title = "Dates") {
-                DoubleStringInfoRow(
-                    icon = ImageVector.vectorResource(R.drawable.ic_purchase_date),
-                    firstString = "Purchase Date",
-                    secondString = "12 Dec 2025"
-                )
-                HorizontalDivider()
-                DoubleStringInfoRow(
-                    icon = ImageVector.vectorResource(R.drawable.ic_end_time_hourglass),
-                    firstString = "Expiration Date",
-                    secondString = "12 Dec 2025"
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            InfoCardWithTitle(
-                title = "Attachments"
-            ) {
-                Card(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .size(84.dp)
-                ) {
-                    AsyncImage(
-                        model = null,
-                        contentDescription = null
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            InfoCardWithTitle(title = "Notes") {
                 Text(
-                    modifier = Modifier.padding(
-                        vertical = 8.dp
-                    ),
-                    text = "Notes notesNotes notesNotes notesNotes notesNotes notesNotes notes"
-                ) //TODO: change style
+                    modifier = Modifier
+                        .padding(top = 12.dp),
+                    text = warranty.productName,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    text = warranty.brand ?: "—",
+                    style = MaterialTheme.typography.labelMedium
+                )
+                SuggestionChip( //TODO: change bg color with days left
+                    modifier = Modifier.padding(top = 8.dp),
+                    label = {
+                        Text(
+                            text = "143 days left",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                        )
+                    },
+                    onClick = {},
+                    border = null,
+                    colors = SuggestionChipDefaults.suggestionChipColors(
+                        containerColor = emeraldGreen
+                    )
+                )
+                Text(
+                    modifier = Modifier.padding(bottom = 6.dp),
+                    text = "Warranty until 12 Dec 2026",
+                    color = darkGrayishCyan,
+                    style = MaterialTheme.typography.labelMedium
+                )
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                        .height(6.dp),
+                    progress = { 0.35f },
+                    color = emeraldGreen, //TODO: Change track color with days left
+                    trackColor = lavenderGray,
+                    gapSize = 1.dp
+                )
             }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        InfoCardWithTitle(title = "Details") {
+            DoubleStringInfoRow(
+                icon = ImageVector.vectorResource(R.drawable.ic_store),
+                firstString = "Store",
+                secondString = "Rozetka"
+            )
+            HorizontalDivider()
+            DoubleStringInfoRow(
+                icon = ImageVector.vectorResource(R.drawable.ic_price),
+                firstString = "Price",
+                secondString = "34 999"
+            )
+            HorizontalDivider()
+            DoubleStringInfoRow(
+                icon = ImageVector.vectorResource(R.drawable.ic_brand),
+                firstString = "Brand",
+                secondString = "Apple"
+            )
+            HorizontalDivider()
+            DoubleStringInfoRow(
+                icon = ImageVector.vectorResource(R.drawable.ic_serial_number),
+                firstString = "Serial Number",
+                secondString = "C023F32A23B123"
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        InfoCardWithTitle(title = "Dates") {
+            DoubleStringInfoRow(
+                icon = ImageVector.vectorResource(R.drawable.ic_purchase_date),
+                firstString = "Purchase Date",
+                secondString = "12 Dec 2025"
+            )
+            HorizontalDivider()
+            DoubleStringInfoRow(
+                icon = ImageVector.vectorResource(R.drawable.ic_end_time_hourglass),
+                firstString = "Expiration Date",
+                secondString = "12 Dec 2025"
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        InfoCardWithTitle(
+            title = "Attachments"
+        ) {
+            Card(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .size(84.dp)
+            ) {
+                AsyncImage(
+                    model = null,
+                    contentDescription = null
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        InfoCardWithTitle(title = "Notes") {
+            Text(
+                modifier = Modifier.padding(
+                    vertical = 8.dp
+                ),
+                text = "Notes notesNotes notesNotes notesNotes notesNotes notesNotes notes"
+            ) //TODO: change style
         }
     }
 }
@@ -323,13 +337,4 @@ fun OptionsDropdownMenu(
             onClick = onDeleteClick
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun WarrantyDetailsScreenPreview() {
-    WarrantyDetailsScreenContent(
-        uiState = DetailsUiState(warranty = null),
-        onBackClick = {}
-    )
 }
