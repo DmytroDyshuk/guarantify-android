@@ -31,7 +31,7 @@ import com.guarantify.ui.components.NoResultsScreen
 import com.guarantify.warranties.R
 import com.guarantify.warranties.list.components.WarrantyItem
 import com.guarantify.warranties.list.state.WarrantiesUiState
-import com.guarantify.warranties.list.model.WarrantyUiModel
+import com.guarantify.warranties.list.model.WarrantyListItemUi
 
 @Composable
 fun WarrantiesScreen(
@@ -65,7 +65,7 @@ fun WarrantiesScreen(
 @Composable
 fun WarrantiesScreenContent(
     modifier: Modifier = Modifier,
-    warranties: List<WarrantyUiModel>,
+    warranties: List<WarrantyListItemUi>,
     onWarrantyClick: (id: String) -> Unit
 ) {
     val listState = rememberLazyListState()

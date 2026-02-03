@@ -3,7 +3,7 @@ package com.guarantify.warranties.mapper
 import androidx.compose.ui.graphics.Color
 import com.guarantify.domain.model.Warranty
 import com.guarantify.util.date.DateFormatter
-import com.guarantify.warranties.list.model.WarrantyUiModel
+import com.guarantify.warranties.list.model.WarrantyListItemUi
 import jakarta.inject.Inject
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit
 class WarrantyUiMapper @Inject constructor(
     private val dateFormatter: DateFormatter
 ) {
-    fun map(w: Warranty): WarrantyUiModel {
+    fun map(w: Warranty): WarrantyListItemUi {
         val daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), w.expirationDate)
 
         val statusColor = when {
@@ -28,14 +28,14 @@ class WarrantyUiMapper @Inject constructor(
             else -> "$daysRemaining days left"
         }
 
-        return WarrantyUiModel(
+        return WarrantyListItemUi(
             id = w.id,
             title = w.productName,
             brand = w.brand,
             storeName = w.storeName,
             remainingDays = remainingDaysText,
             status = statusColor,
-            formattedExpirationDate = "Valid until: ${dateFormatter.formatToShortText(w.expirationDate)}",
+            formattedExpirationDate = "Valid until: ${dateFormatter.formatToFullText(w.expirationDate)}",
             formattedPurchaseDate = "Purchased: ${dateFormatter.formatToShortText(w.purchaseDate)}"
         )
     }
