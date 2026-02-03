@@ -1,6 +1,6 @@
 package com.guarantify.app
 
-import com.guarantify.domain.model.AuthState
+import com.guarantify.domain.model.auth.AuthState
 
 sealed interface MainActivityUiState {
 

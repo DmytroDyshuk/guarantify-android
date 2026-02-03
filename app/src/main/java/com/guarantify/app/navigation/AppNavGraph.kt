@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.guarantify.auth.navigation.authGraph
-import com.guarantify.domain.model.AuthState
+import com.guarantify.domain.model.auth.AuthState
 import com.guarantify.home_navigation.HomeScreenContainer
 import com.guarantify.navigation.destinations.AuthDestinations
 import com.guarantify.navigation.destinations.RootDestinations

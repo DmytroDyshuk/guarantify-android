@@ -1,4 +1,4 @@
-package com.guarantify.domain.model
+package com.guarantify.domain.model.auth
 
 sealed interface AuthState {
     data object Unauthenticated : AuthState
