@@ -23,7 +23,7 @@ class WarrantiesViewModel @Inject constructor(
     val uiState: StateFlow<WarrantiesUiState> = warrantiesRepository.latestWarranties
         .map { warranties ->
             if (warranties.isEmpty()) WarrantiesUiState.Empty
-            else WarrantiesUiState.Success(warranties.map(warrantyUiMapper::map))
+            else WarrantiesUiState.Success(warranties.map(warrantyUiMapper::toListItem))
         }
         .distinctUntilChanged()
         .catch {

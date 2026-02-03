@@ -48,6 +48,7 @@ import com.guarantify.ui.theme.darkGrayishCyan
 import com.guarantify.ui.theme.emeraldGreen
 import com.guarantify.ui.theme.lavenderGray
 import com.guarantify.warranties.details.state.DetailsUiState
+import com.guarantify.warranties.details.state.WarrantyDetailsUi
 
 @Composable
 fun WarrantyDetailsScreen(
@@ -84,7 +85,7 @@ fun WarrantyDetailsScreen(
 
 @Composable
 fun WarrantyDetailsScreenContent(
-    warranty: Warranty,
+    warranty: WarrantyDetailsUi,
     modifier: Modifier = Modifier
 ) {
     Column(
