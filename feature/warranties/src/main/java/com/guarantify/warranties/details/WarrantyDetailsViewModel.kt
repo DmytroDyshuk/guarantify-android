@@ -8,6 +8,7 @@ import com.guarantify.domain.model.Result
 import com.guarantify.domain.repository.WarrantiesRepository
 import com.guarantify.navigation.destinations.RootDestinations
 import com.guarantify.warranties.details.state.DetailsUiState
+import com.guarantify.warranties.mapper.WarrantyUiMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class WarrantyDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    warrantiesRepository: WarrantiesRepository
+    warrantiesRepository: WarrantiesRepository,
+    warrantyUiMapper: WarrantyUiMapper
 ) : ViewModel() {
 
     private val warrantyId = savedStateHandle.toRoute<RootDestinations.WarrantyDetails>().id
@@ -31,7 +33,9 @@ class WarrantyDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = DetailsUiState.Loading
             when (val result = warrantiesRepository.getWarranty(warrantyId)) {
-                is Result.Success -> _uiState.value = DetailsUiState.Content(result.data)
+                is Result.Success -> _uiState.value =
+                    DetailsUiState.Content(warrantyUiMapper.toDetails(result.data))
+
                 is Result.Error -> _uiState.value = DetailsUiState.Error
             }
         }

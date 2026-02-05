@@ -7,6 +7,7 @@ import com.guarantify.domain.repository.GoogleAuthRepository
 import com.guarantify.domain.repository.WarrantiesRepository
 import com.guarantify.util.date.DateFormatter
 import com.guarantify.util.extensions.toLocalDate
+import com.guarantify.util.money.MoneyParser
 import com.guarantify.warranties.create.state.CreateWarrantyErrors
 import com.guarantify.warranties.create.state.CreateWarrantyEvent
 import com.guarantify.warranties.create.state.CreateWarrantyUiState
@@ -149,7 +150,10 @@ class CreateWarrantyViewModel @Inject constructor(
                             productName = state.productName,
                             storeName = state.storeName,
                             brand = state.brand.takeIf { it.isNotBlank() },
-                            amount = state.price.toDoubleOrNull()?.let { (it * 100).toLong() },
+                            amount = MoneyParser.parseToMinorUnits(
+                                state.price,
+                                state.selectedCurrency
+                            ),
                             currency = state.selectedCurrency,
                             photoUrl = state.photoUri,
                             purchaseDate = purchaseDate,
@@ -192,8 +196,12 @@ class CreateWarrantyViewModel @Inject constructor(
 
             else -> null
         }
-        val priceError = if (state.price.isNotBlank() && state.price.toDoubleOrNull() == null) {
-            "Invalid price format"
+        val priceError = if (state.price.isNotBlank()) {
+            val parsed = MoneyParser.parseToMinorUnits(
+                input = state.price,
+                currencyCode = state.selectedCurrency
+            )
+            if (parsed == null) "Invalid price format" else null
         } else null
 
         return CreateWarrantyErrors(

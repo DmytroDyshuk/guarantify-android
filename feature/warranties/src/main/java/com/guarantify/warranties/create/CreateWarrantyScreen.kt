@@ -212,15 +212,16 @@ fun CreateWarrantyScreenContent(
                 label = "Price (Optional)",
                 placeholder = "0.00",
                 value = uiState.price,
+                selectedCurrency = uiState.selectedCurrency,
+                focusManager = focusManager,
+                isError = showErrors && validationErrorsState.priceError != null,
+                errorMessage = validationErrorsState.priceError,
                 onValueChange = {
                     onEvent(CreateWarrantyEvent.PriceChanged(it))
                 },
                 onCurrencyChange = {
                     onEvent(CreateWarrantyEvent.CurrencyChanged(it))
-                },
-                focusManager = focusManager,
-                isError = showErrors && validationErrorsState.priceError != null,
-                errorMessage = validationErrorsState.priceError
+                }
             )
 
             Row(

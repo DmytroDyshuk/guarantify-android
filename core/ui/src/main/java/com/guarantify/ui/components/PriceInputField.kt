@@ -29,16 +29,16 @@ fun PriceInputField(
     modifier: Modifier = Modifier,
     label: String,
     placeholder: String = "0.00",
-    onValueChange: (String) -> Unit,
-    onCurrencyChange: (String) -> Unit,
+    selectedCurrency: String,
     value: String,
     focusManager: FocusManager,
     isError: Boolean = false,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    onValueChange: (String) -> Unit,
+    onCurrencyChange: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedCurrency by remember { mutableStateOf("USD") }
-    val currencies = listOf("USD", "EUR", "UAH")
+    var currencies by remember { mutableStateOf(listOf("USD", "EUR", "UAH")) }
 
     OutlinedTextField(
         modifier = modifier,
@@ -85,7 +85,6 @@ fun PriceInputField(
                         DropdownMenuItem(
                             text = { Text(currency) },
                             onClick = {
-                                selectedCurrency = currency
                                 onCurrencyChange(currency)
                                 expanded = false
                             }

@@ -3,6 +3,7 @@ package com.guarantify.warranties.mapper
 import androidx.compose.ui.graphics.Color
 import com.guarantify.domain.model.Warranty
 import com.guarantify.util.date.DateFormatter
+import com.guarantify.util.money.MoneyFormatter
 import com.guarantify.warranties.details.state.WarrantyDetailsUi
 import com.guarantify.warranties.list.model.WarrantyListItemUi
 import com.guarantify.warranties.model.WarrantyStatus
@@ -58,8 +59,7 @@ class WarrantyUiMapper @Inject constructor(
             store = w.storeName,
             purchaseDate = dateFormatter.formatToShortText(w.purchaseDate),
             expirationDate = dateFormatter.formatToShortText(w.expirationDate),
-            amount = null, //TODO: add amount to Warranty domain
-            currency = w.currency,
+            priceText = w.amount?.let { MoneyFormatter.minorUnitsToString(it, w.currency) },
             photoUrl = w.photoUrl,
             notest = w.notes,
             status = status,
