@@ -11,6 +11,7 @@ configure<LibraryExtension> {
 }
 
 dependencies {
+    //Core
     implementation(libs.androidx.core.ktx)
 
     //Hilt

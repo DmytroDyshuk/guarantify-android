@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -34,21 +36,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.guarantify.domain.model.Warranty
 import com.guarantify.ui.R
 import com.guarantify.ui.components.LoadingScreen
 import com.guarantify.ui.components.NoResultsScreen
 import com.guarantify.ui.theme.darkGrayishCyan
-import com.guarantify.ui.theme.emeraldGreen
 import com.guarantify.ui.theme.lavenderGray
 import com.guarantify.warranties.details.state.DetailsUiState
 import com.guarantify.warranties.details.state.WarrantyDetailsUi
+import com.guarantify.warranties.extensions.toColor
 
 @Composable
 fun WarrantyDetailsScreen(
@@ -88,9 +90,11 @@ fun WarrantyDetailsScreenContent(
     warranty: WarrantyDetailsUi,
     modifier: Modifier = Modifier
 ) {
+    val statusColor by remember { mutableStateOf(warranty.status.toColor()) }
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
         ElevatedCard(
@@ -113,11 +117,11 @@ fun WarrantyDetailsScreenContent(
                     text = warranty.brand ?: "—",
                     style = MaterialTheme.typography.labelMedium
                 )
-                SuggestionChip( //TODO: change bg color with days left
+                SuggestionChip(
                     modifier = Modifier.padding(top = 8.dp),
                     label = {
                         Text(
-                            text = "143 days left",
+                            text = "${warranty.remainingDays} days left",
                             color = Color.White,
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )
@@ -125,12 +129,12 @@ fun WarrantyDetailsScreenContent(
                     onClick = {},
                     border = null,
                     colors = SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = emeraldGreen
+                        containerColor = statusColor
                     )
                 )
                 Text(
                     modifier = Modifier.padding(bottom = 6.dp),
-                    text = "Warranty until 12 Dec 2026",
+                    text = "Warranty until ${warranty.expirationDate}",
                     color = darkGrayishCyan,
                     style = MaterialTheme.typography.labelMedium
                 )
@@ -139,8 +143,10 @@ fun WarrantyDetailsScreenContent(
                         .fillMaxWidth()
                         .padding(bottom = 12.dp)
                         .height(6.dp),
-                    progress = { 0.35f },
-                    color = emeraldGreen, //TODO: Change track color with days left
+                    progress = {
+                        warranty.warrantyExpirationProgress
+                    },
+                    color = statusColor,
                     trackColor = lavenderGray,
                     gapSize = 1.dp
                 )
@@ -153,25 +159,25 @@ fun WarrantyDetailsScreenContent(
             DoubleStringInfoRow(
                 icon = ImageVector.vectorResource(R.drawable.ic_store),
                 firstString = "Store",
-                secondString = "Rozetka"
+                secondString = warranty.store ?: "—"
             )
             HorizontalDivider()
             DoubleStringInfoRow(
                 icon = ImageVector.vectorResource(R.drawable.ic_price),
                 firstString = "Price",
-                secondString = "34 999"
+                secondString = warranty.priceText ?: "—"
             )
             HorizontalDivider()
             DoubleStringInfoRow(
                 icon = ImageVector.vectorResource(R.drawable.ic_brand),
                 firstString = "Brand",
-                secondString = "Apple"
+                secondString = warranty.brand ?: "—"
             )
             HorizontalDivider()
             DoubleStringInfoRow(
                 icon = ImageVector.vectorResource(R.drawable.ic_serial_number),
                 firstString = "Serial Number",
-                secondString = "C023F32A23B123"
+                secondString = "C023F32A23B123" //TODO: implement serial number
             )
         }
 
@@ -181,13 +187,13 @@ fun WarrantyDetailsScreenContent(
             DoubleStringInfoRow(
                 icon = ImageVector.vectorResource(R.drawable.ic_purchase_date),
                 firstString = "Purchase Date",
-                secondString = "12 Dec 2025"
+                secondString = warranty.purchaseDate
             )
             HorizontalDivider()
             DoubleStringInfoRow(
                 icon = ImageVector.vectorResource(R.drawable.ic_end_time_hourglass),
                 firstString = "Expiration Date",
-                secondString = "12 Dec 2025"
+                secondString = warranty.expirationDate
             )
         }
 
@@ -196,16 +202,22 @@ fun WarrantyDetailsScreenContent(
         InfoCardWithTitle(
             title = "Attachments"
         ) {
-            Card(
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .size(84.dp)
-            ) {
-                AsyncImage(
-                    model = null,
-                    contentDescription = null
-                )
+            if (warranty.photoUrl != null) {
+                Card(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .size(120.dp)
+                ) {
+                    AsyncImage(
+                        model = warranty.photoUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            } else {
+                //TODO: implement UI/UX
             }
+
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -215,7 +227,7 @@ fun WarrantyDetailsScreenContent(
                 modifier = Modifier.padding(
                     vertical = 8.dp
                 ),
-                text = "Notes notesNotes notesNotes notesNotes notesNotes notesNotes notes"
+                text = warranty.notes ?: "—"
             ) //TODO: change style
         }
     }

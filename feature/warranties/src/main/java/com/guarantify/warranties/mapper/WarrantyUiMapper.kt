@@ -44,7 +44,15 @@ class WarrantyUiMapper @Inject constructor(
     }
 
     fun toDetails(w: Warranty): WarrantyDetailsUi {
-        val daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), w.expirationDate)
+        val today = LocalDate.now()
+        val daysRemaining = ChronoUnit.DAYS.between(today, w.expirationDate)
+        val totalDuration = ChronoUnit.DAYS.between(w.purchaseDate, w.expirationDate)
+
+        val warrantyProgress = when {
+            daysRemaining <= 0 -> 0f
+            totalDuration <= 0 -> 0f
+            else -> (daysRemaining.toFloat() / totalDuration.toFloat())
+        }
 
         val status = when {
             daysRemaining < 0 -> WarrantyStatus.EXPIRED
@@ -59,9 +67,10 @@ class WarrantyUiMapper @Inject constructor(
             store = w.storeName,
             purchaseDate = dateFormatter.formatToShortText(w.purchaseDate),
             expirationDate = dateFormatter.formatToShortText(w.expirationDate),
+            warrantyExpirationProgress = warrantyProgress,
             priceText = w.amount?.let { MoneyFormatter.minorUnitsToString(it, w.currency) },
             photoUrl = w.photoUrl,
-            notest = w.notes,
+            notes = w.notes,
             status = status,
             remainingDays = daysRemaining.toInt()
         )

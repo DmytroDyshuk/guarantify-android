@@ -8,9 +8,10 @@ data class WarrantyDetailsUi(
     val store: String? = null,
     val purchaseDate: String,
     val expirationDate: String,
+    val warrantyExpirationProgress: Float,
     val priceText: String? = null,
     val photoUrl: String? = null,
-    val notest: String? = null,
+    val notes: String? = null,
     val status: WarrantyStatus,
     val remainingDays: Int
 )
