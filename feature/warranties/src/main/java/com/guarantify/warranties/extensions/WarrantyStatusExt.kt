@@ -15,3 +15,12 @@ fun WarrantyStatus.toColor(): Color {
         WarrantyStatus.EXPIRED -> darkGrayishCyan
     }
 }
+
+fun Float.toWarrantyStatus(): WarrantyStatus {
+    return when {
+       this <= 0 -> WarrantyStatus.EXPIRED
+       this < 0.10f -> WarrantyStatus.CRITICAL
+       this < 0.35f -> WarrantyStatus.WARNING
+       else -> WarrantyStatus.LONG_TERM
+    }
+}

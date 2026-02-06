@@ -15,15 +15,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.guarantify.ui.theme.GuarantifyTheme
+import com.guarantify.warranties.extensions.toColor
 import com.guarantify.warranties.list.model.WarrantyListItemUi
+import com.guarantify.warranties.model.WarrantyStatus
 
 @Composable
 fun WarrantyItem(
@@ -33,6 +37,17 @@ fun WarrantyItem(
 ) {
     val subtitleText = listOfNotNull(warranty.brand, warranty.storeName)
         .joinToString(" • ")
+
+    val remainingDaysText by remember {
+        derivedStateOf {
+            when {
+                warranty.remainingDays < 0 -> "Expired"
+                warranty.remainingDays == 0 -> "Expires today"
+                warranty.remainingDays < 10 -> "Soon"
+                else -> "${warranty.remainingDays} days left"
+            }
+        }
+    }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -56,13 +71,13 @@ fun WarrantyItem(
                 Spacer(Modifier.weight(weight = 1f))
                 Text(
                     modifier = Modifier.padding(end = 8.dp),
-                    text = warranty.remainingDays,
+                    text = remainingDaysText,
                     style = MaterialTheme.typography.labelSmall
                 )
                 Box(
                     modifier = Modifier
                         .size(12.dp)
-                        .background(color = warranty.status, shape = CircleShape)
+                        .background(color = warranty.status.toColor(), shape = CircleShape)
                 )
             }
             if (subtitleText.isNotEmpty()) {
@@ -99,8 +114,8 @@ fun PreviewWarrantyItem() {
                     formattedExpirationDate = "Valid until: October 15, 2025",
                     storeName = "",
                     brand = "Samsung",
-                    remainingDays = "Expires today",
-                    status = Color.Red
+                    remainingDays = 54,
+                    status = WarrantyStatus.WARNING
                 ),
                 onWarrantyClick = {}
             )

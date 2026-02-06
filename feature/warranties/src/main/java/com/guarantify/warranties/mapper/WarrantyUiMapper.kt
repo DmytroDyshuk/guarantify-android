@@ -1,10 +1,10 @@
 package com.guarantify.warranties.mapper
 
-import androidx.compose.ui.graphics.Color
 import com.guarantify.domain.model.Warranty
 import com.guarantify.util.date.DateFormatter
 import com.guarantify.util.money.MoneyFormatter
 import com.guarantify.warranties.details.state.WarrantyDetailsUi
+import com.guarantify.warranties.extensions.toWarrantyStatus
 import com.guarantify.warranties.list.model.WarrantyListItemUi
 import com.guarantify.warranties.model.WarrantyStatus
 import jakarta.inject.Inject
@@ -14,36 +14,14 @@ import java.time.temporal.ChronoUnit
 class WarrantyUiMapper @Inject constructor(
     private val dateFormatter: DateFormatter
 ) {
-    fun toListItem(w: Warranty): WarrantyListItemUi {
-        val daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), w.expirationDate)
 
-        val statusColor = when {
-            daysRemaining < 0 -> Color.Gray
-            daysRemaining < 25 -> Color.Red
-            daysRemaining < 100 -> Color(0xFFFF9800)
-            else -> Color.Green
-        }
+    private data class WarrantyComputed(
+        val daysRemaining: Long,
+        val status: WarrantyStatus,
+        val warrantyProgress: Float
+    )
 
-        val remainingDaysText = when {
-            daysRemaining < 0 -> "Expired"
-            daysRemaining == 0L -> "Expires today"
-            daysRemaining > 365 -> "Valid"
-            else -> "$daysRemaining days left"
-        }
-
-        return WarrantyListItemUi(
-            id = w.id,
-            title = w.productName,
-            brand = w.brand,
-            storeName = w.storeName,
-            remainingDays = remainingDaysText,
-            status = statusColor,
-            formattedExpirationDate = "Valid until: ${dateFormatter.formatToFullText(w.expirationDate)}",
-            formattedPurchaseDate = "Purchased: ${dateFormatter.formatToShortText(w.purchaseDate)}"
-        )
-    }
-
-    fun toDetails(w: Warranty): WarrantyDetailsUi {
+    private fun computeWarranty(w: Warranty): WarrantyComputed {
         val today = LocalDate.now()
         val daysRemaining = ChronoUnit.DAYS.between(today, w.expirationDate)
         val totalDuration = ChronoUnit.DAYS.between(w.purchaseDate, w.expirationDate)
@@ -54,12 +32,30 @@ class WarrantyUiMapper @Inject constructor(
             else -> (daysRemaining.toFloat() / totalDuration.toFloat())
         }
 
-        val status = when {
-            daysRemaining < 0 -> WarrantyStatus.EXPIRED
-            daysRemaining < 30 -> WarrantyStatus.CRITICAL
-            daysRemaining < 100 -> WarrantyStatus.WARNING
-            else -> WarrantyStatus.LONG_TERM
-        }
+        return WarrantyComputed(
+            daysRemaining = daysRemaining,
+            status = warrantyProgress.toWarrantyStatus(),
+            warrantyProgress = warrantyProgress
+        )
+    }
+
+    fun toListItem(w: Warranty): WarrantyListItemUi {
+        val computed = computeWarranty(w)
+
+        return WarrantyListItemUi(
+            id = w.id,
+            title = w.productName,
+            brand = w.brand,
+            storeName = w.storeName,
+            remainingDays = computed.daysRemaining.toInt(),
+            status = computed.status,
+            formattedExpirationDate = dateFormatter.formatToFullText(w.expirationDate),
+            formattedPurchaseDate = dateFormatter.formatToShortText(w.purchaseDate)
+        )
+    }
+
+    fun toDetails(w: Warranty): WarrantyDetailsUi {
+        val computed = computeWarranty(w)
 
         return WarrantyDetailsUi(
             productName = w.productName,
@@ -67,13 +63,13 @@ class WarrantyUiMapper @Inject constructor(
             store = w.storeName,
             purchaseDate = dateFormatter.formatToShortText(w.purchaseDate),
             expirationDate = dateFormatter.formatToShortText(w.expirationDate),
-            warrantyExpirationProgress = warrantyProgress,
+            warrantyExpirationProgress = computed.warrantyProgress,
             priceText = w.amount?.let { MoneyFormatter.minorUnitsToString(it, w.currency) },
             photoUrl = w.photoUrl,
             notes = w.notes,
-            status = status,
-            remainingDays = daysRemaining.toInt()
+            status = computed.status,
+            remainingDays = computed.daysRemaining.toInt()
         )
-
     }
+
 }
