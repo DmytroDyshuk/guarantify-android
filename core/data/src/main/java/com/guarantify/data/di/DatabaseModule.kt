@@ -23,7 +23,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "app_database"
         )
-            .fallbackToDestructiveMigration(true)
+            .fallbackToDestructiveMigration(true) //TODO: remove on release, implement migration logic
             .build()
     }
 
