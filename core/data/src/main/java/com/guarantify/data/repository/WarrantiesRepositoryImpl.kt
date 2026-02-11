@@ -1,8 +1,8 @@
 package com.guarantify.data.repository
 
 import android.util.Log
+import com.guarantify.common.di.IoDispatcher
 import com.guarantify.data.database.dao.WarrantyDao
-import com.guarantify.data.di.IoDispatcher
 import com.guarantify.data.mapper.toDomain
 import com.guarantify.data.mapper.toDto
 import com.guarantify.data.mapper.toEntityWithGeneratedIdIfNeeded

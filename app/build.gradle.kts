@@ -48,6 +48,7 @@ dependencies {
     implementation(projects.feature.warranties)
     implementation(projects.core.util)
     implementation(projects.core.navigation)
+    implementation(projects.core.common)
 
     //Core
     implementation(libs.androidx.core.ktx)

@@ -1,4 +1,4 @@
-package com.guarantify.data.di
+package com.guarantify.common.di
 
 import dagger.Module
 import dagger.Provides
