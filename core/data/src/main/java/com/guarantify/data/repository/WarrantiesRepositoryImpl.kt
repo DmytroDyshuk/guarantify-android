@@ -7,7 +7,7 @@ import com.guarantify.data.mapper.toDomain
 import com.guarantify.data.mapper.toDto
 import com.guarantify.data.mapper.toEntityWithGeneratedIdIfNeeded
 import com.guarantify.data.network.firebase.FirebaseWarrantyDataSource
-import com.guarantify.domain.model.Result
+import com.guarantify.common.result.Result
 import com.guarantify.domain.model.Warranty
 import com.guarantify.domain.repository.WarrantiesRepository
 import jakarta.inject.Inject

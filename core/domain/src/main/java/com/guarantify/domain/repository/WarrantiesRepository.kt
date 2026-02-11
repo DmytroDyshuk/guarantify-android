@@ -1,6 +1,6 @@
 package com.guarantify.domain.repository
 
-import com.guarantify.domain.model.Result
+import com.guarantify.common.result.Result
 import com.guarantify.domain.model.Warranty
 import kotlinx.coroutines.flow.Flow
 

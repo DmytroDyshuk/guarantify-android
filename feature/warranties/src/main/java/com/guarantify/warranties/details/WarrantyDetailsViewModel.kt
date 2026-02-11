@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.guarantify.domain.model.Result
+import com.guarantify.common.result.Result
 import com.guarantify.domain.repository.WarrantiesRepository
 import com.guarantify.navigation.destinations.RootDestinations
 import com.guarantify.warranties.details.state.DetailsUiState
@@ -37,6 +37,7 @@ class WarrantyDetailsViewModel @Inject constructor(
                     DetailsUiState.Content(warrantyUiMapper.toDetails(result.data))
 
                 is Result.Error -> _uiState.value = DetailsUiState.Error
+                is Result.Loading -> _uiState.value = DetailsUiState.Loading
             }
         }
     }

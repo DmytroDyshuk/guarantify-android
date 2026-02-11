@@ -5,7 +5,7 @@ import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.database.entity.WarrantyEntity
 import com.guarantify.data.network.firebase.FirebaseWarrantyDataSource
 import com.guarantify.data.repository.WarrantiesRepositoryImpl
-import com.guarantify.domain.model.Result
+import com.guarantify.common.result.Result
 import com.guarantify.domain.model.Warranty
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
