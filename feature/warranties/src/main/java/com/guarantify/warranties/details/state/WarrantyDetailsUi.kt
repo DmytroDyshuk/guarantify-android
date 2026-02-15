@@ -11,6 +11,7 @@ data class WarrantyDetailsUi(
     val warrantyExpirationProgress: Float,
     val priceText: String? = null,
     val photoUrl: String? = null,
+    val serialNumber: String? = null,
     val notes: String? = null,
     val status: WarrantyStatus,
     val remainingDays: Int

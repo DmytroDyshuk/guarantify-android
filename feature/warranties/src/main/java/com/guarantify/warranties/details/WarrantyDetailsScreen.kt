@@ -54,8 +54,7 @@ import com.guarantify.warranties.extensions.toColor
 
 @Composable
 fun WarrantyDetailsScreen(
-    viewModel: WarrantyDetailsViewModel = hiltViewModel(),
-    onBackClick: () -> Unit
+    viewModel: WarrantyDetailsViewModel = hiltViewModel(), onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -64,8 +63,7 @@ fun WarrantyDetailsScreen(
             WarrantyDetailsTopAppBar(
                 onBackClick = onBackClick
             )
-        }
-    ) { paddingValues ->
+        }) { paddingValues ->
         when (val state = uiState) {
             is DetailsUiState.Loading -> {
                 LoadingScreen(modifier = Modifier.padding(paddingValues))
@@ -77,8 +75,7 @@ fun WarrantyDetailsScreen(
 
             is DetailsUiState.Content -> {
                 WarrantyDetailsScreenContent(
-                    warranty = state.warranty,
-                    modifier = Modifier.padding(paddingValues)
+                    warranty = state.warranty, modifier = Modifier.padding(paddingValues)
                 )
             }
         }
@@ -87,8 +84,7 @@ fun WarrantyDetailsScreen(
 
 @Composable
 fun WarrantyDetailsScreenContent(
-    warranty: WarrantyDetailsUi,
-    modifier: Modifier = Modifier
+    warranty: WarrantyDetailsUi, modifier: Modifier = Modifier
 ) {
     val statusColor by remember { mutableStateOf(warranty.status.toColor()) }
     Column(
@@ -108,8 +104,7 @@ fun WarrantyDetailsScreenContent(
                 modifier = Modifier.padding(horizontal = 16.dp)
             ) {
                 Text(
-                    modifier = Modifier
-                        .padding(top = 12.dp),
+                    modifier = Modifier.padding(top = 12.dp),
                     text = warranty.productName,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
@@ -177,7 +172,7 @@ fun WarrantyDetailsScreenContent(
             DoubleStringInfoRow(
                 icon = ImageVector.vectorResource(R.drawable.ic_serial_number),
                 firstString = "Serial Number",
-                secondString = "C023F32A23B123" //TODO: implement serial number
+                secondString = warranty.serialNumber ?: "—"
             )
         }
 
@@ -197,12 +192,11 @@ fun WarrantyDetailsScreenContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        InfoCardWithTitle(
-            title = "Attachments"
-        ) {
-            if (warranty.photoUrl != null) {
+        if (warranty.photoUrl != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            InfoCardWithTitle(
+                title = "Attachments"
+            ) {
                 Card(
                     modifier = Modifier
                         .padding(vertical = 8.dp)
@@ -214,10 +208,7 @@ fun WarrantyDetailsScreenContent(
                         contentScale = ContentScale.Crop
                     )
                 }
-            } else {
-                //TODO: implement UI/UX
             }
-
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -228,57 +219,14 @@ fun WarrantyDetailsScreenContent(
                     vertical = 8.dp
                 ),
                 text = warranty.notes ?: "—"
-            ) //TODO: change style
+            )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun WarrantyDetailsTopAppBar(
-    onBackClick: () -> Unit
-) {
-    var isExpandedDropdownMenu by remember { mutableStateOf(false) }
-
-    CenterAlignedTopAppBar(
-        title = {
-            Text("Warranty details")
-        },
-        navigationIcon = {
-            IconButton(onClick = { onBackClick() }) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
-                    contentDescription = "Back"
-                )
-            }
-        },
-        actions = {
-            Box {
-                IconButton(
-                    onClick = { isExpandedDropdownMenu = !isExpandedDropdownMenu }
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_more_vert),
-                        contentDescription = "More menu"
-                    )
-                }
-
-                OptionsDropdownMenu(
-                    expanded = isExpandedDropdownMenu,
-                    onDismiss = { isExpandedDropdownMenu = false },
-                    onEditClick = { isExpandedDropdownMenu = false },
-                    onDeleteClick = { isExpandedDropdownMenu = false }
-                )
-            }
-        }
-    )
-}
-
 @Composable
 private fun InfoCardWithTitle(
-    modifier: Modifier = Modifier,
-    title: String,
-    content: @Composable () -> Unit
+    modifier: Modifier = Modifier, title: String, content: @Composable () -> Unit
 ) {
     ElevatedCard(
         modifier = modifier.fillMaxWidth(),
@@ -301,10 +249,7 @@ private fun InfoCardWithTitle(
 
 @Composable
 private fun DoubleStringInfoRow(
-    modifier: Modifier = Modifier,
-    icon: ImageVector,
-    firstString: String,
-    secondString: String
+    modifier: Modifier = Modifier, icon: ImageVector, firstString: String, secondString: String
 ) {
     Row(
         modifier = modifier
@@ -313,8 +258,7 @@ private fun DoubleStringInfoRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = icon,
-            contentDescription = null
+            imageVector = icon, contentDescription = null
         )
         Text(
             modifier = Modifier.padding(horizontal = 8.dp),
@@ -328,12 +272,52 @@ private fun DoubleStringInfoRow(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WarrantyDetailsTopAppBar(
+    onBackClick: () -> Unit
+) {
+    var isExpandedDropdownMenu by remember { mutableStateOf(false) }
+
+    CenterAlignedTopAppBar(
+        title = { Text("Warranty details") },
+        navigationIcon = {
+            IconButton(onClick = { onBackClick() }) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
+                    contentDescription = "Back"
+                )
+            }
+        },
+        actions = {
+            Box {
+                IconButton(
+                    onClick = { isExpandedDropdownMenu = !isExpandedDropdownMenu }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_more_vert),
+                        contentDescription = "More menu"
+                    )
+                }
+
+                OptionsDropdownMenu(
+                    expanded = isExpandedDropdownMenu,
+                    onDismiss = { isExpandedDropdownMenu = false },
+                    onEditClick = { isExpandedDropdownMenu = false },
+                    onAddPhotoClick = { isExpandedDropdownMenu = false },
+                    onDeleteClick = { isExpandedDropdownMenu = false }
+                )
+            }
+        }
+    )
+}
+
 @Composable
 fun OptionsDropdownMenu(
     modifier: Modifier = Modifier,
     expanded: Boolean,
     onDismiss: () -> Unit,
     onEditClick: () -> Unit,
+    onAddPhotoClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     DropdownMenu(
@@ -342,12 +326,13 @@ fun OptionsDropdownMenu(
         onDismissRequest = onDismiss
     ) {
         DropdownMenuItem(
-            text = { Text(text = "Edit") },
-            onClick = onEditClick
+            text = { Text(text = "Edit") }, onClick = onEditClick
         )
         DropdownMenuItem(
-            text = { Text(text = "Delete") },
-            onClick = onDeleteClick
+            text = { Text(text = "Add photo") }, onClick = onAddPhotoClick
+        )
+        DropdownMenuItem(
+            text = { Text(text = "Delete") }, onClick = onDeleteClick
         )
     }
 }
