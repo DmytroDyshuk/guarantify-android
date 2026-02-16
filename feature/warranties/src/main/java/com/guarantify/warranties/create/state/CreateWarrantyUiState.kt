@@ -10,6 +10,7 @@ data class CreateWarrantyUiState(
     val purchaseDateText: String = "",
     val expirationDateMillis: Long? = null,
     val expirationDateText: String = "",
+    val serialNumber: String = "",
     val notes: String = "",
     val photoUri: String? = null,
     val photoUploadError: String? = null,

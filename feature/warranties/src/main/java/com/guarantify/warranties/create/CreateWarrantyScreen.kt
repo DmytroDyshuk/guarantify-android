@@ -207,6 +207,20 @@ fun CreateWarrantyScreenContent(
                     }
                 )
             )
+            AppOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = uiState.serialNumber,
+                label = "Serial Number (Optional)",
+                onValueChange = { onEvent(CreateWarrantyEvent.SerialNumberChanged(it)) },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    }
+                )
+            )
             PriceInputField(
                 modifier = Modifier.fillMaxWidth(),
                 label = "Price (Optional)",

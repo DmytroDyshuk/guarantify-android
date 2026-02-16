@@ -48,6 +48,10 @@ class CreateWarrantyViewModel @Inject constructor(
                 }
             }
 
+            is CreateWarrantyEvent.SerialNumberChanged -> {
+                _uiState.update { it.copy(serialNumber = event.value) }
+            }
+
             is CreateWarrantyEvent.NotesChanged -> {
                 _uiState.update { it.copy(notes = event.value) }
             }
@@ -158,7 +162,8 @@ class CreateWarrantyViewModel @Inject constructor(
                             photoUrl = state.photoUri,
                             purchaseDate = purchaseDate,
                             expirationDate = expirationDate,
-                            notes = state.notes.takeIf { it.isNotBlank() }
+                            notes = state.notes.takeIf { it.isNotBlank() },
+                            serialNumber = state.serialNumber
                         )
 
                         warrantiesRepository.createOrUpdateWarranty(warranty)
