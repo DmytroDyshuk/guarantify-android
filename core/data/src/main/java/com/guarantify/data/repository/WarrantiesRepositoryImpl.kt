@@ -57,7 +57,7 @@ class WarrantiesRepositoryImpl @Inject constructor(
                 when (e) {
                     is CancellationException -> throw e
                     is IOException, is FirebaseException -> {
-                        Log.w(WARRANTIES_REPO, "Sync failed, but data saved locally", e)
+                        Log.e(WARRANTIES_REPO, "Sync failed, but data saved locally", e)
                     }
 
                     else -> {
