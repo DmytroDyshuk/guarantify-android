@@ -118,6 +118,7 @@ class WarrantiesRepositoryImplTest {
 
             coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
             coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } just Runs
+            coEvery { warrantyDao.updateSyncStatus(any(), any()) } just Runs
 
             // ACT
             val result = repository.createOrUpdateWarranty(warranty)
@@ -132,16 +133,16 @@ class WarrantiesRepositoryImplTest {
 
                 warrantyDao.updateSyncStatus(id = warranty.id, isSynced = match { true })
             }
+
+            confirmVerified(warrantyDao, firebaseDataSource)
         }
 
     @Test
     fun `createOrUpdateWarranty should return Error when database fails`() = runTest {
         val warranty = createFakeWarranty()
-
         val expectedException = SQLiteException("Database error")
+
         coEvery { warrantyDao.createOrUpdateWarranty(any()) } throws expectedException
-        coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } just Runs
-        coEvery { warrantyDao.updateSyncStatus(any(), any()) } just Runs
 
         val result = repository.createOrUpdateWarranty(warranty)
 
@@ -152,39 +153,53 @@ class WarrantiesRepositoryImplTest {
             warrantyDao.createOrUpdateWarranty(any())
         }
 
-        coVerify(exactly = 0) {
-            firebaseDataSource.createOrUpdateWarranty(any())
-        }
-
-        coVerify(exactly = 0) {
-            warrantyDao.updateSyncStatus(id = warranty.id, isSynced = match { true })
-        }
-
         confirmVerified(warrantyDao, firebaseDataSource)
     }
 
     @Test
-    fun `createOrUpdateWarranty should return Success even if firebase fails`() = runTest {
-        val warranty = createFakeWarranty()
+    fun `createOrUpdateWarranty should return Success even if firebase fails with IOException`() =
+        runTest {
+            val warranty = createFakeWarranty()
 
-        coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
-        coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } throws IOException("No internet")
-        coEvery { warrantyDao.updateSyncStatus(any(), any()) } just Runs
+            coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
+            coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } throws IOException("No internet")
 
-        val result = repository.createOrUpdateWarranty(warranty)
+            val result = repository.createOrUpdateWarranty(warranty)
 
-        assertTrue(result is Result.Success)
+            assertTrue(result is Result.Success)
 
-        coVerify(exactly = 0) { warrantyDao.updateSyncStatus(any(), true) }
-    }
+            coVerify(exactly = 1) { warrantyDao.createOrUpdateWarranty(any()) }
+            coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }
+            coVerify(exactly = 0) { warrantyDao.updateSyncStatus(any(), any()) }
+
+            confirmVerified(warrantyDao, firebaseDataSource)
+        }
+
+    @Test
+    fun `createOrUpdateWarranty should succeed when local saves but Firebase fails with Exception`() =
+        runTest {
+            val warranty = createFakeWarranty()
+
+            coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
+            coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } throws Exception("Firebase exception")
+
+            val result = repository.createOrUpdateWarranty(warranty)
+
+            assertTrue(result is Result.Success)
+
+            coVerify(exactly = 1) { warrantyDao.createOrUpdateWarranty(any()) }
+            coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }
+            coVerify(exactly = 0) { warrantyDao.updateSyncStatus(any(), any()) }
+
+            confirmVerified(warrantyDao, firebaseDataSource)
+        }
 
     @Test
     fun `createOrUpdateWarranty should save with isSynced FALSE when firebase fails`() = runTest {
         val warranty = createFakeWarranty()
 
         coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
-        coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } throws IOException("No internet")
-        coEvery { warrantyDao.updateSyncStatus(any(), any()) } just Runs
+        coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } throws Exception("No internet")
 
         repository.createOrUpdateWarranty(warranty)
 
@@ -193,8 +208,10 @@ class WarrantiesRepositoryImplTest {
                 !entity.isSynced && entity.title == "Samsung Galaxy S21"
             })
         }
+        coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }
+        coVerify(exactly = 0) { warrantyDao.updateSyncStatus(any(), any()) }
 
-        coVerify(exactly = 0) { warrantyDao.updateSyncStatus(any(), true) }
+        confirmVerified(warrantyDao, firebaseDataSource)
     }
 
     @Test
