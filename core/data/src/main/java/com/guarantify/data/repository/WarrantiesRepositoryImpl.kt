@@ -1,21 +1,26 @@
 package com.guarantify.data.repository
 
+import android.database.sqlite.SQLiteException
 import android.util.Log
+import com.google.firebase.FirebaseException
+import com.guarantify.common.di.ApplicationScope
 import com.guarantify.common.di.IoDispatcher
+import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.mapper.toDomain
 import com.guarantify.data.mapper.toDto
 import com.guarantify.data.mapper.toEntityWithGeneratedIdIfNeeded
 import com.guarantify.data.network.firebase.FirebaseWarrantyDataSource
-import com.guarantify.common.result.Result
 import com.guarantify.domain.model.Warranty
 import com.guarantify.domain.repository.WarrantiesRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
 const val WARRANTIES_REPO = "WarrantiesRepo"
@@ -36,16 +41,32 @@ class WarrantiesRepositoryImpl @Inject constructor(
     override suspend fun createOrUpdateWarranty(warranty: Warranty): Result<Unit> =
         withContext(ioDispatcher) {
             val warrantyEntity = warranty.toEntityWithGeneratedIdIfNeeded()
-            warrantyDao.createOrUpdateWarranty(warrantyEntity)
 
-            return@withContext try {
-                firebaseWarrantyDataSource.createOrUpdateWarranty(warrantyEntity.toDto())
-                warrantyDao.createOrUpdateWarranty(warrantyEntity.copy(isSynced = true))
+            val localResult = try {
+                warrantyDao.createOrUpdateWarranty(warrantyEntity)
                 Result.Success(Unit)
-            } catch (e: Exception) {
-                Log.e(WARRANTIES_REPO, "Sync failed for warranty: ${warranty.id}", e)
-                Result.Error(errorMessage = e.message)
+            } catch (e: SQLiteException) {
+                Log.e(WARRANTIES_REPO, "Critical Database Error", e)
+                return@withContext Result.Error(e)
             }
+
+            try {
+                firebaseWarrantyDataSource.createOrUpdateWarranty(warrantyEntity.toDto())
+                warrantyDao.updateSyncStatus(warrantyEntity.id, isSynced = true)
+            } catch (e: Exception) {
+                when (e) {
+                    is CancellationException -> throw e
+                    is IOException, is FirebaseException -> {
+                        Log.w(WARRANTIES_REPO, "Sync failed, but data saved locally", e)
+                    }
+
+                    else -> {
+                        Log.e(WARRANTIES_REPO, "Unexpected error during sync", e)
+                    }
+                }
+            }
+
+            localResult
         }
 
     override suspend fun getWarranty(warrantyId: String): Result<Warranty> =
@@ -54,7 +75,7 @@ class WarrantiesRepositoryImpl @Inject constructor(
                 Result.Success(warrantyDao.getWarrantyById(warrantyId).toDomain())
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Result.Error(e.message ?: "Warranty not found")
+                Result.Error(e)
             }
         }
 

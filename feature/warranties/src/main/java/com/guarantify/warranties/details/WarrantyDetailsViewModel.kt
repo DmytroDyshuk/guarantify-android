@@ -37,7 +37,6 @@ class WarrantyDetailsViewModel @Inject constructor(
                     DetailsUiState.Content(warrantyUiMapper.toDetails(result.data))
 
                 is Result.Error -> _uiState.value = DetailsUiState.Error
-                is Result.Loading -> _uiState.value = DetailsUiState.Loading
             }
         }
     }

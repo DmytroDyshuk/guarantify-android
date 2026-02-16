@@ -24,4 +24,7 @@ interface WarrantyDao {
 
     @Query("SELECT * FROM warranties WHERE isSynced = 0")
     suspend fun getUnsyncedWarranties(): List<WarrantyEntity>
+
+    @Query("UPDATE warranties SET isSynced = :isSynced WHERE id = :id")
+    suspend fun updateSyncStatus(id: String, isSynced: Boolean)
 }

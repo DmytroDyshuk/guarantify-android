@@ -1,7 +1,9 @@
 package com.guarantify.warranties.create
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.guarantify.common.result.Result
 import com.guarantify.domain.model.Warranty
 import com.guarantify.domain.repository.GoogleAuthRepository
 import com.guarantify.domain.repository.WarrantiesRepository
@@ -130,12 +132,8 @@ class CreateWarrantyViewModel @Inject constructor(
                     return
                 }
 
-                val state = _uiState.value
-
-                val purchaseDate = state.purchaseDateMillis?.toLocalDate()
-                val expirationDate = state.expirationDateMillis?.toLocalDate()
-
-                if (purchaseDate == null || expirationDate == null) {
+                val warranty = _uiState.value.toWarranty(userId)
+                if (warranty == null) {
                     _uiState.update {
                         it.copy(
                             saveError = "Please select both purchase and expiration dates",
@@ -145,46 +143,7 @@ class CreateWarrantyViewModel @Inject constructor(
                     return
                 }
 
-                _uiState.update { it.copy(isSaving = true) }
-
-                viewModelScope.launch {
-                    try {
-                        val warranty = Warranty(
-                            userId = userId,
-                            productName = state.productName,
-                            storeName = state.storeName,
-                            brand = state.brand.takeIf { it.isNotBlank() },
-                            amount = MoneyParser.parseToMinorUnits(
-                                state.price,
-                                state.selectedCurrency
-                            ),
-                            currency = state.selectedCurrency,
-                            photoUrl = state.photoUri,
-                            purchaseDate = purchaseDate,
-                            expirationDate = expirationDate,
-                            notes = state.notes.takeIf { it.isNotBlank() },
-                            serialNumber = state.serialNumber
-                        )
-
-                        warrantiesRepository.createOrUpdateWarranty(warranty)
-
-                        _uiState.update {
-                            it.copy(
-                                isSaving = false,
-                                attemptedSubmit = false,
-                                saveSuccess = true
-                            )
-                        }
-                    } catch (e: Exception) {
-                        _uiState.update {
-                            it.copy(
-                                isSaving = false,
-                                saveError = e.message ?: "Failed to save warranty",
-                                attemptedSubmit = false
-                            )
-                        }
-                    }
-                }
+                saveWarranty(warranty)
             }
         }
     }
@@ -226,6 +185,54 @@ class CreateWarrantyViewModel @Inject constructor(
             expirationDateError,
             priceError
         ).any { it != null }
+    }
+
+    private fun saveWarranty(warranty: Warranty) {
+        _uiState.update { it.copy(isSaving = true) }
+
+        viewModelScope.launch {
+            when (val result = warrantiesRepository.createOrUpdateWarranty(warranty)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            isSaving = false,
+                            attemptedSubmit = false,
+                            saveSuccess = true
+                        )
+                    }
+                }
+
+                is Result.Error -> {
+                    Log.e("CreateWarrantyViewModel", "Failed to save warranty", result.throwable)
+                    _uiState.update {
+                        it.copy(
+                            isSaving = false,
+                            saveError = "Failed to save warranty, please try again latter",
+                            attemptedSubmit = false
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun CreateWarrantyUiState.toWarranty(userId: String): Warranty? {
+        val purchaseDate = purchaseDateMillis?.toLocalDate() ?: return null
+        val expirationDate = expirationDateMillis?.toLocalDate() ?: return null
+
+        return Warranty(
+            userId = userId,
+            productName = productName,
+            storeName = storeName,
+            brand = brand.takeIf { it.isNotBlank() },
+            amount = MoneyParser.parseToMinorUnits(price, selectedCurrency),
+            currency = selectedCurrency,
+            photoUrl = photoUri,
+            purchaseDate = purchaseDate,
+            expirationDate = expirationDate,
+            notes = notes.takeIf { it.isNotBlank() },
+            serialNumber = serialNumber
+        )
     }
 
 }

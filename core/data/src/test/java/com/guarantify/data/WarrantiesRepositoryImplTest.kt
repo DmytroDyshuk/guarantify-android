@@ -1,5 +1,6 @@
 package com.guarantify.data
 
+import android.database.sqlite.SQLiteException
 import android.util.Log
 import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.database.entity.WarrantyEntity
@@ -12,6 +13,7 @@ import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifyOrder
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.just
@@ -25,9 +27,11 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.IOException
 import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -120,12 +124,12 @@ class WarrantiesRepositoryImplTest {
 
                 firebaseDataSource.createOrUpdateWarranty(any())
 
-                warrantyDao.createOrUpdateWarranty(match { it.isSynced })
+                warrantyDao.updateSyncStatus(id = warranty.id, isSynced = match { true })
             }
         }
 
     @Test
-    fun `createOrUpdateWarranty should return Error when firebase fails`() = runTest {
+    fun `createOrUpdateWarranty should return Error when database fails`() = runTest {
         val warranty = Warranty(
             id = "1",
             userId = "1",
@@ -135,24 +139,30 @@ class WarrantiesRepositoryImplTest {
             storeName = "Samsung",
             currency = "USD"
         )
-        val expectedError = "Network error"
 
-        coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
-        coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } throws RuntimeException(
-            expectedError
-        )
+        val expectedException = SQLiteException("Database error")
+        coEvery { warrantyDao.createOrUpdateWarranty(any()) } throws expectedException
+        coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } just Runs
+        coEvery { warrantyDao.updateSyncStatus(any(), any()) } just Runs
 
         val result = repository.createOrUpdateWarranty(warranty)
 
         assertTrue(result is Result.Error)
+        assertEquals(expectedException, (result as Result.Error).throwable)
 
         coVerify(exactly = 1) {
             warrantyDao.createOrUpdateWarranty(any())
         }
 
         coVerify(exactly = 0) {
-            warrantyDao.createOrUpdateWarranty(match { it.isSynced })
+            firebaseDataSource.createOrUpdateWarranty(any())
         }
+
+        coVerify(exactly = 0) {
+            warrantyDao.updateSyncStatus(id = warranty.id, isSynced = match { true })
+        }
+
+        confirmVerified(warrantyDao, firebaseDataSource)
     }
 
     @Test
