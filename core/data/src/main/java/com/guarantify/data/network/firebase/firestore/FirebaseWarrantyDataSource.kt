@@ -1,4 +1,4 @@
-package com.guarantify.data.network.firebase
+package com.guarantify.data.network.firebase.firestore
 
 import com.guarantify.data.network.dto.WarrantyDto
 

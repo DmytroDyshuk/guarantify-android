@@ -1,8 +1,9 @@
-package com.guarantify.data.network.firebase
+package com.guarantify.data.network.firebase.firestore
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.guarantify.data.network.dto.WarrantyDto
+import com.guarantify.data.network.firebase.firestore.FirestoreConstants
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
 
