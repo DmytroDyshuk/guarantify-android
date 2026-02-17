@@ -3,6 +3,7 @@ package com.guarantify.util.date.di
 import java.time.format.DateTimeFormatter
 
 interface AppDateFormatProvider {
-    val longDate: DateTimeFormatter
-    val shortDate: DateTimeFormatter
+    val fullText: DateTimeFormatter
+    val shortText: DateTimeFormatter
+    val numeric: DateTimeFormatter
 }

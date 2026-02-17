@@ -2,4 +2,6 @@
 <resources>
     <string name="confirmation_dialog_confirm">Yes</string>
     <string name="confirmation_dialog_cancel">Cancel</string>
+    <string name="core_ui_error_generic">Oops! Something went wrong :(</string>
+    <string name="core_ui_error_generic_description">We couldn\'t complete your request right now. Please try reloading the page or come back and try again later.\n\nWe apologize for the inconvenience.</string>
 </resources>

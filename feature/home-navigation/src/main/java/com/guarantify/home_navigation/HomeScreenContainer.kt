@@ -1,5 +1,6 @@
 package com.guarantify.home_navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,46 +14,49 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
 import com.guarantify.home_navigation.bottomnavigation.NavigationBottomBar
 import com.guarantify.home_navigation.components.HomeTopAppBar
 import com.guarantify.insights.InsightsScreen
+import com.guarantify.navigation.destinations.HomeDestinations
 import com.guarantify.settings.SettingsScreen
+import com.guarantify.warranties.list.WarrantiesScreen
 import com.guarantify.warranties.list.components.WarrantyCreationMethodDialog
-import com.guarantify.warranties.navigation.WarrantiesDestinations
-import com.guarantify.warranties.navigation.warrantiesGraph
+import androidx.navigation.NavDestination.Companion.hasRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenContainer() {
+fun HomeScreenContainer(
+    onNavigateToCreateWarranty: () -> Unit,
+    onNavigateToWarrantyDetails: (id: String) -> Unit
+) {
     val homeNavController = rememberNavController()
     val navBackStackEntry by homeNavController.currentBackStackEntryAsState()
-    val currentDestination: NavDestination? = navBackStackEntry?.destination
-    var showMethodDialog by rememberSaveable { mutableStateOf(false) }
+    val currentDestination by remember { derivedStateOf { navBackStackEntry?.destination } }
+    var showCreationMethodDialog by rememberSaveable { mutableStateOf(false) }
 
-    if (showMethodDialog) {
+    if (showCreationMethodDialog) {
         WarrantyCreationMethodDialog(
             onDismissRequest = {
-                showMethodDialog = false
+                showCreationMethodDialog = false
             },
             onCreateManually = {
-                showMethodDialog = false
-                homeNavController.navigate(WarrantiesDestinations.CreateWarranty)
+                showCreationMethodDialog = false
+                onNavigateToCreateWarranty()
             },
             onScan = {
-                showMethodDialog = false
+                showCreationMethodDialog = false
                 //TODO
             }
         )
@@ -60,37 +64,20 @@ fun HomeScreenContainer() {
 
     Scaffold(
         topBar = {
-            currentDestination?.let {
-                when {
-                    it.hasRoute<WarrantiesDestinations.WarrantiesScreen>() -> {
-                        HomeTopAppBar(
-                            title = stringResource(R.string.warranties_topbar_title)
-                        )
-                    }
-
-                    it.hasRoute<HomeDestinations.Insights>() -> {
-                        HomeTopAppBar(
-                            title = stringResource(R.string.insights_topbar_title)
-                        )
-                    }
-
-                    it.hasRoute<HomeDestinations.Settings>() -> {
-                        HomeTopAppBar(
-                            title = stringResource(R.string.settings_topbar_title)
-                        )
-                    }
-                }
+            val titleRes = topBarTitleRes(currentDestination)
+            if (titleRes != null) {
+                HomeTopAppBar(title = titleRes)
             }
         },
         floatingActionButton = {
             currentDestination?.let {
                 AnimatedVisibility(
-                    visible = it.hasRoute<WarrantiesDestinations.WarrantiesScreen>(),
+                    visible = it.hasRoute<HomeDestinations.Warranties>(),
                     enter = scaleIn() + fadeIn(),
                     exit = scaleOut() + fadeOut()
                 ) {
                     FloatingActionButton(onClick = {
-                        showMethodDialog = true
+                        showCreationMethodDialog = true
                     }) {
                         Icon(Icons.Default.Add, contentDescription = null)
                     }
@@ -109,11 +96,13 @@ fun HomeScreenContainer() {
             navController = homeNavController,
             startDestination = HomeDestinations.Warranties,
         ) {
-            navigation<HomeDestinations.Warranties>(startDestination = WarrantiesDestinations.WarrantiesScreen) {
-                warrantiesGraph(
-                    navHostController = homeNavController,
+            composable<HomeDestinations.Warranties> {
+                WarrantiesScreen(
                     onShowAddWarrantyDialog = {
-                        showMethodDialog = true
+                        showCreationMethodDialog = true
+                    },
+                    onWarrantyClick = { warrantyId ->
+                        onNavigateToWarrantyDetails(warrantyId)
                     }
                 )
             }
@@ -125,4 +114,12 @@ fun HomeScreenContainer() {
             }
         }
     }
+}
+
+@StringRes
+private fun topBarTitleRes(dest: NavDestination?): Int? = when {
+    dest?.hasRoute<HomeDestinations.Warranties>() == true -> R.string.warranties_topbar_title
+    dest?.hasRoute<HomeDestinations.Insights>() == true -> R.string.insights_topbar_title
+    dest?.hasRoute<HomeDestinations.Settings>() == true -> R.string.settings_topbar_title
+    else -> null
 }

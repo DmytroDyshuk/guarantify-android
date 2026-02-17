@@ -1,6 +1,6 @@
 package com.guarantify.domain.usecase
 
-import com.guarantify.domain.model.AuthResult
+import com.guarantify.domain.model.auth.AuthResult
 import com.guarantify.domain.repository.GoogleAuthRepository
 import javax.inject.Inject
 

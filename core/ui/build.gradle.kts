@@ -14,8 +14,10 @@ configure<LibraryExtension> {
 }
 
 dependencies {
+    //Modules
     implementation(projects.core.util)
 
+    //Core
     implementation(libs.androidx.core.ktx)
 
     //Jetpack Compose
@@ -23,8 +25,14 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
+
+    //Fonts
     implementation(libs.androidx.ui.text.google.fonts)
+
+    //M3
     implementation(libs.androidx.material3)
+
+    //Compose Preview
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.tooling.preview)
 

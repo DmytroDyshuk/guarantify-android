@@ -2,8 +2,8 @@ package com.guarantify.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.guarantify.domain.model.AuthResult
-import com.guarantify.domain.model.AuthState
+import com.guarantify.domain.model.auth.AuthResult
+import com.guarantify.domain.model.auth.AuthState
 import com.guarantify.domain.model.UserData
 import com.guarantify.domain.repository.GoogleAuthRepository
 import jakarta.inject.Inject

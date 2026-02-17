@@ -1,9 +1,12 @@
 package com.guarantify.warranties.mapper
 
-import androidx.compose.ui.graphics.Color
 import com.guarantify.domain.model.Warranty
 import com.guarantify.util.date.DateFormatter
-import com.guarantify.warranties.model.WarrantyUiModel
+import com.guarantify.util.money.MoneyFormatter
+import com.guarantify.warranties.details.state.WarrantyDetailsUi
+import com.guarantify.warranties.extensions.toWarrantyStatus
+import com.guarantify.warranties.list.model.WarrantyListItemUi
+import com.guarantify.warranties.model.WarrantyStatus
 import jakarta.inject.Inject
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -11,32 +14,63 @@ import java.time.temporal.ChronoUnit
 class WarrantyUiMapper @Inject constructor(
     private val dateFormatter: DateFormatter
 ) {
-    fun map(w: Warranty): WarrantyUiModel {
-        val daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), w.expirationDate)
 
-        val statusColor = when {
-            daysRemaining < 0 -> Color.Gray
-            daysRemaining < 25 -> Color.Red
-            daysRemaining < 100 -> Color(0xFFFF9800)
-            else -> Color.Green
+    private data class WarrantyComputed(
+        val daysRemaining: Long,
+        val status: WarrantyStatus,
+        val warrantyProgress: Float
+    )
+
+    private fun computeWarranty(w: Warranty): WarrantyComputed {
+        val today = LocalDate.now()
+        val daysRemaining = ChronoUnit.DAYS.between(today, w.expirationDate)
+        val totalDuration = ChronoUnit.DAYS.between(w.purchaseDate, w.expirationDate)
+
+        val warrantyProgress = when {
+            daysRemaining <= 0 -> 0f
+            totalDuration <= 0 -> 0f
+            else -> (daysRemaining.toFloat() / totalDuration.toFloat())
         }
 
-        val remainingDaysText = when {
-            daysRemaining < 0 -> "Expired"
-            daysRemaining == 0L -> "Expires today"
-            daysRemaining > 365 -> "Valid"
-            else -> "$daysRemaining days left"
-        }
+        return WarrantyComputed(
+            daysRemaining = daysRemaining,
+            status = warrantyProgress.toWarrantyStatus(),
+            warrantyProgress = warrantyProgress
+        )
+    }
 
-        return WarrantyUiModel(
+    fun toListItem(w: Warranty): WarrantyListItemUi {
+        val computed = computeWarranty(w)
+
+        return WarrantyListItemUi(
             id = w.id,
             title = w.productName,
             brand = w.brand,
             storeName = w.storeName,
-            remainingDays = remainingDaysText,
-            status = statusColor,
-            formattedExpirationDate = "Valid until: ${dateFormatter.formatToShortText(w.expirationDate)}",
-            formattedPurchaseDate = "Purchased: ${dateFormatter.formatToShortText(w.purchaseDate)}"
+            remainingDays = computed.daysRemaining.toInt(),
+            status = computed.status,
+            formattedExpirationDate = dateFormatter.formatToFullText(w.expirationDate),
+            formattedPurchaseDate = dateFormatter.formatToShortText(w.purchaseDate)
         )
     }
+
+    fun toDetails(w: Warranty): WarrantyDetailsUi {
+        val computed = computeWarranty(w)
+
+        return WarrantyDetailsUi(
+            productName = w.productName,
+            brand = w.brand,
+            store = w.storeName,
+            purchaseDate = dateFormatter.formatToShortText(w.purchaseDate),
+            expirationDate = dateFormatter.formatToShortText(w.expirationDate),
+            warrantyExpirationProgress = computed.warrantyProgress,
+            priceText = w.amount?.let { MoneyFormatter.minorUnitsToString(it, w.currency) },
+            photoUrl = w.photoUrl,
+            serialNumber = w.serialNumber,
+            notes = w.notes,
+            status = computed.status,
+            remainingDays = computed.daysRemaining.toInt()
+        )
+    }
+
 }

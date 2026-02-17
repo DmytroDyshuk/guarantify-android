@@ -16,6 +16,8 @@ fun Warranty.toDto(): WarrantyDto {
         storeName = this.storeName,
         brand = this.brand,
         amount = this.amount,
+        currency = this.currency,
+        serialNumber = this.serialNumber,
         photoUrl = this.photoUrl,
         notes = this.notes,
         updatedAt = this.updatedAt
@@ -36,6 +38,7 @@ fun Warranty.toEntityWithGeneratedIdIfNeeded(): WarrantyEntity {
         amount = this.amount,
         currency = this.currency,
         photoUrl = this.photoUrl,
+        serialNumber = this.serialNumber,
         notes = this.notes,
         updatedAt = System.currentTimeMillis(),
         isSynced = false
@@ -52,6 +55,7 @@ fun WarrantyDto.toEntity(): WarrantyEntity {
         storeName = this.storeName,
         brand = this.brand,
         amount = this.amount,
+        serialNumber = this.serialNumber,
         photoUrl = this.photoUrl,
         notes = this.notes,
         updatedAt = this.updatedAt
@@ -68,6 +72,8 @@ fun WarrantyEntity.toDto(): WarrantyDto {
         storeName = this.storeName,
         brand = this.brand,
         amount = this.amount,
+        currency = this.currency,
+        serialNumber = this.serialNumber,
         photoUrl = this.photoUrl,
         notes = this.notes,
         updatedAt = this.updatedAt
@@ -84,6 +90,7 @@ fun WarrantyEntity.toDomain(): Warranty {
         storeName = this.storeName,
         brand = this.brand,
         amount = this.amount,
+        serialNumber = this.serialNumber,
         photoUrl = this.photoUrl,
         notes = this.notes,
         updatedAt = this.updatedAt,

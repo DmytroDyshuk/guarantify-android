@@ -29,7 +29,7 @@ import com.guarantify.util.extensions.createTempImageUri
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WarrantyPhotoPicker(
-    onPhotoPicked: (Uri?) -> Unit,
+    onPhotoPick: (Uri?) -> Unit,
     openSheet: Boolean,
     onDismissSheet: () -> Unit
 ) {
@@ -41,14 +41,14 @@ fun WarrantyPhotoPicker(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            pendingCameraUri?.let { onPhotoPicked(it.toUri()) }
+            pendingCameraUri?.let { onPhotoPick(it.toUri()) }
         }
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
-        if (uri != null) onPhotoPicked(uri)
+        if (uri != null) onPhotoPick(uri)
     }
 
     if (openSheet) {

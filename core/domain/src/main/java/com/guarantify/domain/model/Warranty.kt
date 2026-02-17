@@ -13,6 +13,7 @@ data class Warranty(
     val amount: Long? = null,
     val currency: String,
     val photoUrl: String? = null,
+    val serialNumber: String? = null,
     val notes: String? = null,
     val updatedAt: Long = 0
 )

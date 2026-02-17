@@ -38,6 +38,7 @@ hilt {
 }
 
 dependencies {
+    //Modules
     implementation(projects.core.ui)
     implementation(projects.core.data)
     implementation(projects.core.domain)
@@ -46,15 +47,22 @@ dependencies {
     implementation(projects.feature.settings)
     implementation(projects.feature.warranties)
     implementation(projects.core.util)
+    implementation(projects.core.navigation)
+    implementation(projects.core.common)
 
+    //Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.core.splashscreen)
+
+    //Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
+
+    //M3
     implementation(libs.androidx.material3)
-    implementation(libs.core.splashscreen)
 
     //Navigation
     implementation(libs.navigation.compose)
@@ -78,8 +86,13 @@ dependencies {
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.platform.launcher)
 
+    //Espresso
     androidTestImplementation(libs.androidx.espresso.core)
+
+    //Test Compose
     androidTestImplementation(platform(libs.androidx.compose.bom))
+
+    //JUnit4
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
     debugImplementation(libs.androidx.ui.tooling)
