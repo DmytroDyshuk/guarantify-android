@@ -5,6 +5,7 @@ import android.util.Log
 import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.database.entity.WarrantyEntity
+import com.guarantify.data.mapper.toDomain
 import com.guarantify.data.network.firebase.FirebaseWarrantyDataSource
 import com.guarantify.data.repository.WarrantiesRepositoryImpl
 import com.guarantify.domain.model.Warranty
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.IOException
 import java.time.LocalDate
+import kotlin.test.assertIs
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class WarrantiesRepositoryImplTest {
@@ -185,7 +187,7 @@ class WarrantiesRepositoryImplTest {
 
             val result = repository.createOrUpdateWarranty(warranty)
 
-            assertTrue(result is Result.Success)
+            assertIs<Result.Success<Unit>>(result)
 
             coVerify(exactly = 1) { warrantyDao.createOrUpdateWarranty(any()) }
             coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }
@@ -212,6 +214,64 @@ class WarrantiesRepositoryImplTest {
         coVerify(exactly = 0) { warrantyDao.updateSyncStatus(any(), any()) }
 
         confirmVerified(warrantyDao, firebaseDataSource)
+    }
+
+    @Test
+    fun `getWarranty should return Success with mapped data when DAO returns entity`() = runTest {
+        val warrantyId = "23"
+        val warrantyEntity = WarrantyEntity(
+            id = warrantyId,
+            userId = "1",
+            title = "Samsung Galaxy S21",
+            purchaseDate = LocalDate.now(),
+            expirationDate = LocalDate.now(),
+            storeName = "Samsung"
+        )
+        val expectedDomain = warrantyEntity.toDomain()
+
+        coEvery { warrantyDao.getWarrantyById(warrantyId) } returns warrantyEntity
+
+        val result = repository.getWarranty(warrantyId)
+
+        assertIs<Result.Success<Warranty>>(result)
+        assertEquals(expectedDomain, result.data)
+
+        coVerify(exactly = 1) { warrantyDao.getWarrantyById(warrantyId) }
+
+        confirmVerified(warrantyDao)
+    }
+
+    @Test
+    fun `getWarranty should return Error when database return null`() = runTest {
+        val warrantyId = "123"
+        val expectedException = Exception("Warranty not found")
+
+        coEvery { warrantyDao.getWarrantyById(warrantyId) } returns null
+
+        val result = repository.getWarranty(warrantyId)
+
+        assertIs<Result.Error>(result)
+        assertEquals(expectedException.message, result.throwable.message)
+
+        coVerify(exactly = 1) { warrantyDao.getWarrantyById(warrantyId) }
+
+        confirmVerified(warrantyDao)
+    }
+
+    @Test
+    fun `getWarranty should return Error when database fails`() = runTest {
+        val sqliteException = SQLiteException()
+
+        coEvery { warrantyDao.getWarrantyById(any()) } throws sqliteException
+
+        val result = repository.getWarranty("123")
+
+        assertIs<Result.Error>(result)
+        assertEquals(sqliteException, result.throwable)
+
+        coVerify(exactly = 1) { warrantyDao.getWarrantyById(any()) }
+
+        confirmVerified(warrantyDao)
     }
 
     @Test

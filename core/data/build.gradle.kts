@@ -42,6 +42,9 @@ dependencies {
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.platform.launcher)
 
+    //Kotlin Test
+    testImplementation(libs.jetbrains.kotlin.test)
+
     //Mockk
     testImplementation(libs.mockk)
 

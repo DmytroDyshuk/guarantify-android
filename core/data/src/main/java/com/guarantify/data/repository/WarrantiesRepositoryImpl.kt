@@ -3,7 +3,6 @@ package com.guarantify.data.repository
 import android.database.sqlite.SQLiteException
 import android.util.Log
 import com.google.firebase.FirebaseException
-import com.guarantify.common.di.ApplicationScope
 import com.guarantify.common.di.IoDispatcher
 import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
@@ -15,7 +14,6 @@ import com.guarantify.domain.model.Warranty
 import com.guarantify.domain.repository.WarrantiesRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -72,9 +70,12 @@ class WarrantiesRepositoryImpl @Inject constructor(
     override suspend fun getWarranty(warrantyId: String): Result<Warranty> =
         withContext(ioDispatcher) {
             try {
-                Result.Success(warrantyDao.getWarrantyById(warrantyId).toDomain())
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
+                val warranty = warrantyDao.getWarrantyById(warrantyId)?.toDomain()
+                    ?: return@withContext Result.Error(Exception("Warranty not found"))
+                Result.Success(warranty)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: SQLiteException) {
                 Result.Error(e)
             }
         }

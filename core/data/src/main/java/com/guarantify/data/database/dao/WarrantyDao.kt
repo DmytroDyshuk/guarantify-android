@@ -17,7 +17,7 @@ interface WarrantyDao {
     suspend fun createOrUpdateWarranty(warranty: WarrantyEntity)
 
     @Query("SELECT * FROM warranties WHERE id = :id")
-    suspend fun getWarrantyById(id: String): WarrantyEntity
+    suspend fun getWarrantyById(id: String): WarrantyEntity?
 
     @Delete
     suspend fun deleteWarranty(warranty: WarrantyEntity)
