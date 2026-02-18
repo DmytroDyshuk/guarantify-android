@@ -12,6 +12,6 @@ dependencies {
     //Modules
     implementation(projects.core.common)
 
-    implementation(libs.javax.inject)
+    implementation(libs.jakarta.inject)
     implementation(libs.kotlinx.coroutines.core)
 }
