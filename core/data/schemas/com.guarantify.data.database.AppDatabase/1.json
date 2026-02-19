@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c1f8a43be80f7d74c380c2d59a8955d2",
+    "identityHash": "44cef23e6d71bf77e61a2d1e695db2ea",
     "entities": [
       {
         "tableName": "warranties",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `userId` TEXT NOT NULL, `title` TEXT NOT NULL, `purchaseDate` INTEGER NOT NULL, `expirationDate` INTEGER NOT NULL, `storeName` TEXT, `brand` TEXT, `amount` INTEGER, `serialNumber` TEXT, `currency` TEXT NOT NULL, `photoUrl` TEXT, `notes` TEXT, `updatedAt` INTEGER NOT NULL, `isSynced` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `userId` TEXT NOT NULL, `title` TEXT NOT NULL, `purchaseDate` INTEGER NOT NULL, `expirationDate` INTEGER NOT NULL, `storeName` TEXT, `brand` TEXT, `amount` INTEGER, `serialNumber` TEXT, `currency` TEXT NOT NULL, `localPhotoUri` TEXT, `remotePhotoUrl` TEXT, `notes` TEXT, `updatedAt` INTEGER NOT NULL, `syncStatus` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -65,8 +65,13 @@
             "notNull": true
           },
           {
-            "fieldPath": "photoUrl",
-            "columnName": "photoUrl",
+            "fieldPath": "localPhotoUri",
+            "columnName": "localPhotoUri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "remotePhotoUrl",
+            "columnName": "remotePhotoUrl",
             "affinity": "TEXT"
           },
           {
@@ -81,9 +86,9 @@
             "notNull": true
           },
           {
-            "fieldPath": "isSynced",
-            "columnName": "isSynced",
-            "affinity": "INTEGER",
+            "fieldPath": "syncStatus",
+            "columnName": "syncStatus",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -97,7 +102,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c1f8a43be80f7d74c380c2d59a8955d2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '44cef23e6d71bf77e61a2d1e695db2ea')"
     ]
   }
 }

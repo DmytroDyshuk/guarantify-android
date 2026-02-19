@@ -227,7 +227,7 @@ class CreateWarrantyViewModel @Inject constructor(
             brand = brand.takeIf { it.isNotBlank() },
             amount = MoneyParser.parseToMinorUnits(price, selectedCurrency),
             currency = selectedCurrency,
-            photoUrl = photoUri,
+            localPhotoUri = photoUri,
             purchaseDate = purchaseDate,
             expirationDate = expirationDate,
             notes = notes.takeIf { it.isNotBlank() },

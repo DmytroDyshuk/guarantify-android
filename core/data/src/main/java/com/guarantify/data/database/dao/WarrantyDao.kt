@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.guarantify.data.database.entity.WarrantyEntity
+import com.guarantify.domain.model.SyncStatus
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -22,9 +23,9 @@ interface WarrantyDao {
     @Delete
     suspend fun deleteWarranty(warranty: WarrantyEntity)
 
-    @Query("SELECT * FROM warranties WHERE isSynced = 0")
+    @Query("SELECT * FROM warranties WHERE syncStatus != 'COMPLETED'")
     suspend fun getUnsyncedWarranties(): List<WarrantyEntity>
 
-    @Query("UPDATE warranties SET isSynced = :isSynced WHERE id = :id")
-    suspend fun updateSyncStatus(id: String, isSynced: Boolean)
+    @Query("UPDATE warranties SET syncStatus = :syncStatus WHERE id = :id")
+    suspend fun updateSyncStatus(id: String, syncStatus: SyncStatus)
 }

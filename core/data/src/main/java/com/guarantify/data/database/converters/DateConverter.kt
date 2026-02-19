@@ -3,7 +3,7 @@ package com.guarantify.data.database.converters
 import androidx.room.TypeConverter
 import java.time.LocalDate
 
-object DataConverter {
+object DateConverter {
     @TypeConverter
     @JvmStatic
     fun fromLocalDateToEpochDay(date: LocalDate): Long {

@@ -65,7 +65,7 @@ class WarrantyUiMapper @Inject constructor(
             expirationDate = dateFormatter.formatToShortText(w.expirationDate),
             warrantyExpirationProgress = computed.warrantyProgress,
             priceText = w.amount?.let { MoneyFormatter.minorUnitsToString(it, w.currency) },
-            photoUrl = w.photoUrl,
+            photoUrl = w.remotePhotoUrl ?: w.localPhotoUri,
             serialNumber = w.serialNumber,
             notes = w.notes,
             status = computed.status,

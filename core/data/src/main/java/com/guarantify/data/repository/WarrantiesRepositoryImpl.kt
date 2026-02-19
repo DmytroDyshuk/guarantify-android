@@ -10,6 +10,7 @@ import com.guarantify.data.mapper.toDomain
 import com.guarantify.data.mapper.toDto
 import com.guarantify.data.mapper.toEntityWithGeneratedIdIfNeeded
 import com.guarantify.data.network.firebase.firestore.FirebaseWarrantyDataSource
+import com.guarantify.domain.model.SyncStatus
 import com.guarantify.domain.model.Warranty
 import com.guarantify.domain.repository.WarrantiesRepository
 import jakarta.inject.Inject
@@ -50,7 +51,7 @@ class WarrantiesRepositoryImpl @Inject constructor(
 
             try {
                 firebaseWarrantyDataSource.createOrUpdateWarranty(warrantyEntity.toDto())
-                warrantyDao.updateSyncStatus(warrantyEntity.id, isSynced = true)
+                warrantyDao.updateSyncStatus(warrantyEntity.id, syncStatus = SyncStatus.COMPLETED)
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e

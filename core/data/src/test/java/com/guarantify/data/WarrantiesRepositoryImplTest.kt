@@ -9,6 +9,7 @@ import com.guarantify.data.mapper.toDomain
 import com.guarantify.data.network.firebase.firestore.FirebaseWarrantyDataSource
 import com.guarantify.data.repository.WarrantiesRepositoryImpl
 import com.guarantify.domain.model.Warranty
+import com.guarantify.domain.model.SyncStatus
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -129,11 +130,11 @@ class WarrantiesRepositoryImplTest {
             assertTrue(result is Result.Success)
 
             coVerifyOrder {
-                warrantyDao.createOrUpdateWarranty(match { !it.isSynced })
+                warrantyDao.createOrUpdateWarranty(match { it.syncStatus != SyncStatus.COMPLETED })
 
                 firebaseDataSource.createOrUpdateWarranty(any())
 
-                warrantyDao.updateSyncStatus(id = warranty.id, isSynced = match { true })
+                warrantyDao.updateSyncStatus(id = warranty.id, syncStatus = SyncStatus.COMPLETED)
             }
 
             confirmVerified(warrantyDao, firebaseDataSource)
@@ -197,7 +198,7 @@ class WarrantiesRepositoryImplTest {
         }
 
     @Test
-    fun `createOrUpdateWarranty should save with isSynced FALSE when firebase fails`() = runTest {
+    fun `createOrUpdateWarranty should save with syncStatus PENDING when firebase fails`() = runTest {
         val warranty = createFakeWarranty()
 
         coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
@@ -207,7 +208,7 @@ class WarrantiesRepositoryImplTest {
 
         coVerify(exactly = 1) {
             warrantyDao.createOrUpdateWarranty(match { entity ->
-                !entity.isSynced && entity.title == "Samsung Galaxy S21"
+                entity.syncStatus == SyncStatus.PENDING && entity.title == "Samsung Galaxy S21"
             })
         }
         coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }

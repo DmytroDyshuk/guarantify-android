@@ -2,6 +2,7 @@ package com.guarantify.data.database.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.guarantify.domain.model.SyncStatus
 import java.time.LocalDate
 
 @Entity(tableName = "warranties")
@@ -16,8 +17,9 @@ data class WarrantyEntity(
     val amount: Long? = null,
     val serialNumber: String? = null,
     val currency: String = "USD",
-    val photoUrl: String? = null,
+    val localPhotoUri: String? = null,
+    val remotePhotoUrl: String? = null,
     val notes: String? = null,
     val updatedAt: Long = 0,
-    val isSynced: Boolean = false
+    val syncStatus: SyncStatus = SyncStatus.PENDING
 )
