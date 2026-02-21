@@ -51,7 +51,7 @@ class WarrantiesRepositoryImpl @Inject constructor(
 
             try {
                 firebaseWarrantyDataSource.createOrUpdateWarranty(warrantyEntity.toDto())
-                warrantyDao.updateSyncStatus(warrantyEntity.id, syncStatus = SyncStatus.COMPLETED)
+                warrantyDao.updateSyncStatus(warrantyEntity.id, syncStatus = SyncStatus.SYNCED)
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
@@ -83,13 +83,27 @@ class WarrantiesRepositoryImpl @Inject constructor(
 
     override suspend fun deleteWarranty(warranty: Warranty) {
         withContext(ioDispatcher) {
+            val now = System.currentTimeMillis()
             val warrantyEntity = warranty.toEntityWithGeneratedIdIfNeeded()
-            warrantyDao.deleteWarranty(warrantyEntity)
+            
+            // Mark as deleted locally
+            warrantyDao.markAsDeleted(
+                id = warrantyEntity.id,
+                updatedAt = now,
+                syncStatus = SyncStatus.PENDING
+            )
 
             try {
-                firebaseWarrantyDataSource.deleteWarranty(warranty.id)
+                //TODO implement delete sync worker??
+                val deletedDto = warrantyEntity.copy(
+                    isDeleted = true,
+                    updatedAt = now
+                ).toDto()
+                firebaseWarrantyDataSource.createOrUpdateWarranty(deletedDto)
+                warrantyDao.updateSyncStatus(warrantyEntity.id, SyncStatus.SYNCED)
             } catch (e: Exception) {
-                Log.e(WARRANTIES_REPO, "Failed to delete warranty on firebase: ${warranty.id}", e)
+                Log.e(WARRANTIES_REPO, "Failed to sync warranty deletion to firebase: ${warranty.id}", e)
+                // Status remains PENDING, will be retried by periodic sync worker
             }
         }
     }

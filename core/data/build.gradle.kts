@@ -19,12 +19,14 @@ dependencies {
     //Modules
     implementation(projects.core.domain)
     implementation(projects.core.common)
+    implementation(projects.core.util)
 
     implementation(libs.androidx.core.ktx)
 
     //Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
 
     //Room
     implementation(libs.room.runtime)
@@ -37,6 +39,10 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
+
+    //WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.hilt.work)
 
     //JUnit5
     testImplementation(libs.junit.jupiter.engine)

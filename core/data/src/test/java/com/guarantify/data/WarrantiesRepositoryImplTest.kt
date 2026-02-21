@@ -130,11 +130,11 @@ class WarrantiesRepositoryImplTest {
             assertTrue(result is Result.Success)
 
             coVerifyOrder {
-                warrantyDao.createOrUpdateWarranty(match { it.syncStatus != SyncStatus.COMPLETED })
+                warrantyDao.createOrUpdateWarranty(match { it.syncStatus != SyncStatus.SYNCED })
 
                 firebaseDataSource.createOrUpdateWarranty(any())
 
-                warrantyDao.updateSyncStatus(id = warranty.id, syncStatus = SyncStatus.COMPLETED)
+                warrantyDao.updateSyncStatus(id = warranty.id, syncStatus = SyncStatus.SYNCED)
             }
 
             confirmVerified(warrantyDao, firebaseDataSource)
@@ -280,7 +280,7 @@ class WarrantiesRepositoryImplTest {
         // ARRANGE
         val warranty = createFakeWarranty()
 
-        coEvery { warrantyDao.deleteWarranty(any()) } just Runs
+        coEvery { warrantyDao.hardDeleteWarranty(any()) } just Runs
         coEvery { firebaseDataSource.deleteWarranty(any()) } just Runs
 
         // ACT
@@ -288,7 +288,7 @@ class WarrantiesRepositoryImplTest {
 
         // ASSERT
         coVerify(exactly = 1) {
-            warrantyDao.deleteWarranty(match { it.id == warranty.id })
+            warrantyDao.hardDeleteWarranty(match { it.id == warranty.id })
         }
         coVerify(exactly = 1) {
             firebaseDataSource.deleteWarranty(any())
@@ -299,12 +299,12 @@ class WarrantiesRepositoryImplTest {
     fun `deleteWarranty should delete locally even if firebase fails`() = runTest {
         val warranty = createFakeWarranty()
 
-        coEvery { warrantyDao.deleteWarranty(any()) } just Runs
+        coEvery { warrantyDao.hardDeleteWarranty(any()) } just Runs
         coEvery { firebaseDataSource.deleteWarranty(any()) } throws RuntimeException("No Internet")
 
         repository.deleteWarranty(warranty)
 
-        coVerify { warrantyDao.deleteWarranty(any()) }
+        coVerify { warrantyDao.hardDeleteWarranty(any()) }
         verify { Log.e(any(), any(), any()) }
     }
 

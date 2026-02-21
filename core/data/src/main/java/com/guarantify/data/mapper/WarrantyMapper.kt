@@ -21,7 +21,8 @@ fun Warranty.toDto(): WarrantyDto {
         serialNumber = this.serialNumber,
         photoUrl = this.remotePhotoUrl,
         notes = this.notes,
-        updatedAt = this.updatedAt
+        updatedAt = this.updatedAt,
+        isDeleted = false
     )
 }
 
@@ -43,7 +44,8 @@ fun Warranty.toEntityWithGeneratedIdIfNeeded(): WarrantyEntity {
         serialNumber = this.serialNumber,
         notes = this.notes,
         updatedAt = System.currentTimeMillis(),
-        syncStatus = SyncStatus.PENDING
+        syncStatus = SyncStatus.PENDING,
+        isDeleted = false
     )
 }
 
@@ -60,7 +62,8 @@ fun WarrantyDto.toEntity(): WarrantyEntity {
         serialNumber = this.serialNumber,
         remotePhotoUrl = this.photoUrl,
         notes = this.notes,
-        updatedAt = this.updatedAt
+        updatedAt = this.updatedAt,
+        isDeleted = this.isDeleted
     )
 }
 
@@ -78,7 +81,8 @@ fun WarrantyEntity.toDto(): WarrantyDto {
         serialNumber = this.serialNumber,
         photoUrl = this.remotePhotoUrl,
         notes = this.notes,
-        updatedAt = this.updatedAt
+        updatedAt = this.updatedAt,
+        isDeleted = this.isDeleted
     )
 }
 

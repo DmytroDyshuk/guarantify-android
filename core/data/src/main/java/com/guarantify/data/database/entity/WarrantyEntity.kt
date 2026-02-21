@@ -21,5 +21,6 @@ data class WarrantyEntity(
     val remotePhotoUrl: String? = null,
     val notes: String? = null,
     val updatedAt: Long = 0,
-    val syncStatus: SyncStatus = SyncStatus.PENDING
+    val syncStatus: SyncStatus = SyncStatus.PENDING,
+    val isDeleted: Boolean = false
 )
