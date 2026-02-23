@@ -6,7 +6,7 @@ import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.database.entity.WarrantyEntity
 import com.guarantify.data.mapper.toDomain
-import com.guarantify.data.network.firebase.firestore.FirebaseWarrantyDataSource
+import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSource
 import com.guarantify.data.repository.WarrantiesRepositoryImpl
 import com.guarantify.domain.model.Warranty
 import com.guarantify.domain.model.SyncStatus
@@ -39,7 +39,7 @@ import kotlin.test.assertIs
 @OptIn(ExperimentalCoroutinesApi::class)
 class WarrantiesRepositoryImplTest {
     @MockK
-    private lateinit var firebaseDataSource: FirebaseWarrantyDataSource
+    private lateinit var firebaseDataSource: FirestoreWarrantyDataSource
 
     @MockK(relaxed = true)
     private lateinit var warrantyDao: WarrantyDao
@@ -55,7 +55,7 @@ class WarrantiesRepositoryImplTest {
         every { Log.e(any(), any(), any()) } returns 0
         every { Log.e(any(), any()) } returns 0
         repository = WarrantiesRepositoryImpl(
-            firebaseWarrantyDataSource = firebaseDataSource,
+            firestoreWarrantyDataSource = firebaseDataSource,
             warrantyDao = warrantyDao,
             ioDispatcher = testDispatcher
         )

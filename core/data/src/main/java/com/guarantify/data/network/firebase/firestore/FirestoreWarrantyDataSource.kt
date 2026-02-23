@@ -2,7 +2,7 @@ package com.guarantify.data.network.firebase.firestore
 
 import com.guarantify.data.network.dto.WarrantyDto
 
-interface FirebaseWarrantyDataSource {
+interface FirestoreWarrantyDataSource {
     suspend fun createOrUpdateWarranty(warranty: WarrantyDto)
     suspend fun getAllWarranties(): List<WarrantyDto>
     suspend fun getUpdatedSince(timestamp: Long): List<WarrantyDto>

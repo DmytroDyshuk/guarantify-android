@@ -6,10 +6,10 @@ import com.guarantify.data.network.dto.WarrantyDto
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
 
-class FirebaseWarrantyDataSourceImpl @Inject constructor(
+class FirestoreWarrantyDataSourceImpl @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
-) : FirebaseWarrantyDataSource {
+) : FirestoreWarrantyDataSource {
 
     private val userId: String
         get() = firebaseAuth.currentUser?.uid

@@ -1,0 +1,46 @@
+package com.guarantify.data.network.firebase.storage
+
+import android.net.Uri
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
+import com.google.firebase.storage.storageMetadata
+import com.guarantify.common.result.Result
+import jakarta.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.tasks.await
+
+class WarrantyPhotoStorageImpl @Inject constructor(
+    private val firebaseStorage: FirebaseStorage,
+    private val firebaseAuth: FirebaseAuth
+) : WarrantyPhotoStorage {
+
+    private val storageRef = firebaseStorage.reference
+
+    override suspend fun uploadImage(imageUri: Uri, warrantyId: String): Result<String> {
+        return try {
+            val userId = firebaseAuth.currentUser?.uid
+                ?: return Result.Error(Exception("User not authenticated"))
+
+            val fileName = imageUri.lastPathSegment
+            val imageRef = storageRef.child("users/$userId/warranties/$warrantyId/$fileName")
+
+            val metadata = storageMetadata {
+                contentType = "image/jpeg"
+            }
+
+            imageRef.putFile(imageUri, metadata).await()
+
+            val downloadUrl = imageRef.downloadUrl.await()
+
+            Result.Success(downloadUrl.toString())
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            Result.Error(e)
+        }
+    }
+
+    override suspend fun deleteImage(imageUrl: String) {
+        TODO("Not yet implemented")
+    }
+}

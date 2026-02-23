@@ -9,7 +9,7 @@ import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.mapper.toDomain
 import com.guarantify.data.mapper.toDto
 import com.guarantify.data.mapper.toEntityWithGeneratedIdIfNeeded
-import com.guarantify.data.network.firebase.firestore.FirebaseWarrantyDataSource
+import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSource
 import com.guarantify.domain.model.SyncStatus
 import com.guarantify.domain.model.Warranty
 import com.guarantify.domain.repository.WarrantiesRepository
@@ -22,10 +22,10 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
-const val WARRANTIES_REPO = "WarrantiesRepo"
+const val WARRANTIES_REPO = "WarrantiesRepository"
 
 class WarrantiesRepositoryImpl @Inject constructor(
-    private val firebaseWarrantyDataSource: FirebaseWarrantyDataSource,
+    private val firestoreWarrantyDataSource: FirestoreWarrantyDataSource,
     private val warrantyDao: WarrantyDao,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : WarrantiesRepository {
@@ -50,7 +50,7 @@ class WarrantiesRepositoryImpl @Inject constructor(
             }
 
             try {
-                firebaseWarrantyDataSource.createOrUpdateWarranty(warrantyEntity.toDto())
+                firestoreWarrantyDataSource.createOrUpdateWarranty(warrantyEntity.toDto())
                 warrantyDao.updateSyncStatus(warrantyEntity.id, syncStatus = SyncStatus.SYNCED)
             } catch (e: Exception) {
                 when (e) {
@@ -94,12 +94,11 @@ class WarrantiesRepositoryImpl @Inject constructor(
             )
 
             try {
-                //TODO implement delete sync worker??
                 val deletedDto = warrantyEntity.copy(
                     isDeleted = true,
                     updatedAt = now
                 ).toDto()
-                firebaseWarrantyDataSource.createOrUpdateWarranty(deletedDto)
+                firestoreWarrantyDataSource.createOrUpdateWarranty(deletedDto)
                 warrantyDao.updateSyncStatus(warrantyEntity.id, SyncStatus.SYNCED)
             } catch (e: Exception) {
                 Log.e(WARRANTIES_REPO, "Failed to sync warranty deletion to firebase: ${warranty.id}", e)
