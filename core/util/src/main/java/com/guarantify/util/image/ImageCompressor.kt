@@ -5,7 +5,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
+import android.util.Log
 import androidx.exifinterface.media.ExifInterface
+import com.guarantify.common.result.Result
+import com.guarantify.common.result.Result.Error
+import com.guarantify.common.result.Result.Success
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.ByteArrayOutputStream
 import jakarta.inject.Inject
@@ -18,7 +22,8 @@ class ImageCompressor @Inject constructor(
     private val maxSize = 1024f
     private val quality = 80
 
-    fun compress(imageUri: Uri): ByteArray? {
+    fun compress(imageUri: Uri): Result<ByteArray> {
+        var bitmap: Bitmap? = null
         return try {
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
@@ -30,19 +35,21 @@ class ImageCompressor @Inject constructor(
             options.inSampleSize = calculateInSampleSize(options, maxSize.toInt(), maxSize.toInt())
             options.inJustDecodeBounds = false
 
-            var bitmap = context.contentResolver.openInputStream(imageUri)?.use {
+            bitmap = context.contentResolver.openInputStream(imageUri)?.use {
                 BitmapFactory.decodeStream(it, null, options)
-            } ?: return null
+            } ?: return Error(IllegalStateException("Failed to decode bitmap"))
 
             bitmap = rotateImageIfRequired(bitmap, imageUri)
 
             val outputStream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
 
-            outputStream.toByteArray()
+            Success(outputStream.toByteArray())
         } catch (e: Exception) {
-            e.printStackTrace()
-            null
+            Log.e("ImageCompressor", "Failed to compress image", e)
+            Error(e)
+        } finally {
+            bitmap?.recycle()
         }
     }
 
@@ -66,20 +73,21 @@ class ImageCompressor @Inject constructor(
 
     private fun rotateImageIfRequired(img: Bitmap, uri: Uri): Bitmap {
         val input = context.contentResolver.openInputStream(uri) ?: return img
-        val exifInterface = ExifInterface(input)
-        val orientation = exifInterface.getAttributeInt(
-            ExifInterface.TAG_ORIENTATION,
-            ExifInterface.ORIENTATION_NORMAL
-        )
+        return input.use {
+            val exifInterface = ExifInterface(it)
+            val orientation = exifInterface.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
 
-        val rotatedBitmap = when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90f)
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180f)
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270f)
-            else -> img
+            val rotatedBitmap = when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180f)
+                ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270f)
+                else -> img
+            }
+            rotatedBitmap
         }
-        input.close()
-        return rotatedBitmap
     }
 
     private fun rotateImage(img: Bitmap, degree: Float): Bitmap {

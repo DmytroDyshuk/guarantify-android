@@ -11,6 +11,9 @@ configure<LibraryExtension> {
 }
 
 dependencies {
+    //Modules
+    implementation(projects.core.common)
+
     //Core
     implementation(libs.androidx.core.ktx)
 
