@@ -7,14 +7,13 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.google.firebase.FirebaseException
 import com.guarantify.common.di.IoDispatcher
 import com.guarantify.data.network.firebase.storage.WarrantyPhotoStorage
+import com.guarantify.domain.model.FirebaseStorageError
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import androidx.work.ListenableWorker.Result as WorkResult
 import com.guarantify.common.result.Result as CommonResult
 
@@ -27,10 +26,13 @@ class UploadImageWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): WorkResult {
-        val warrantyId =
-            inputData.getString(WorkerKeys.KEY_WARRANTY_ID) ?: return WorkResult.failure()
-        val compressedImageUri =
-            inputData.getString(WorkerKeys.KEY_COMPRESSED_IMAGE_URI) ?: return WorkResult.failure()
+        val warrantyId = inputData.getString(WorkerKeys.KEY_WARRANTY_ID)
+        val compressedImageUri = inputData.getString(WorkerKeys.KEY_COMPRESSED_IMAGE_URI)
+
+        if (warrantyId.isNullOrBlank() || compressedImageUri.isNullOrBlank()) {
+            Log.w("UploadImageWorker", "Missing required input data")
+            return WorkResult.failure()
+        }
 
         val uploadResult = withContext(ioDispatcher) {
             warrantyPhotoStorage.uploadImage(compressedImageUri.toUri(), warrantyId)
@@ -44,32 +46,23 @@ class UploadImageWorker @AssistedInject constructor(
                 )
                 WorkResult.success(outputData)
             }
+
             is CommonResult.Error -> {
-                val exception = uploadResult.throwable
-                Log.e("UploadImageWorker", "Upload failed for $warrantyId", exception)
+                val error = uploadResult.throwable
+                Log.e("UploadImageWorker", "Upload failed: $error")
 
-                when (exception) {
-                    is IOException -> {
-                        WorkResult.retry()
-                    }
+                when (error) {
+                    is FirebaseStorageError.NetworkError,
+                    is FirebaseStorageError.QuotaExceeded -> WorkResult.retry()
 
-                    is FirebaseException -> {
-                        if (isRecoverable(exception)) {
-                            WorkResult.retry()
-                        } else {
-                            WorkResult.failure()
-                        }
+                    is FirebaseStorageError.Unauthorized -> {
+                        WorkResult.failure()
                     }
 
                     else -> WorkResult.failure()
                 }
             }
         }
-    }
-
-    private fun isRecoverable(e: FirebaseException): Boolean {
-        val msg = e.message?.lowercase() ?: ""
-        return msg.contains("retry-limit-exceeded") || msg.contains("quota-exceeded")
     }
 
 }
