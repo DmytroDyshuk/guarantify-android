@@ -7,7 +7,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.storageMetadata
 import com.guarantify.common.result.Result
-import com.guarantify.domain.model.FirebaseStorageError
+import com.guarantify.domain.model.StorageError
 import jakarta.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
@@ -42,8 +42,8 @@ class WarrantyPhotoStorageImpl @Inject constructor(
 
             val mappedError = when (e) {
                 is FirebaseException -> mapFirebaseError(e)
-                is IOException -> FirebaseStorageError.NetworkError()
-                else -> FirebaseStorageError.Unknown(e)
+                is IOException -> StorageError.NetworkError()
+                else -> StorageError.Unknown(e)
             }
             Result.Error(mappedError)
         }
@@ -53,18 +53,18 @@ class WarrantyPhotoStorageImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    private fun mapFirebaseError(e: FirebaseException): FirebaseStorageError {
+    private fun mapFirebaseError(e: FirebaseException): StorageError {
         return when (e) {
             is StorageException -> {
                 when (e.errorCode) {
-                    StorageException.ERROR_QUOTA_EXCEEDED -> FirebaseStorageError.QuotaExceeded()
-                    StorageException.ERROR_NOT_AUTHENTICATED -> FirebaseStorageError.Unauthorized()
-                    StorageException.ERROR_OBJECT_NOT_FOUND -> FirebaseStorageError.NotFound()
-                    else -> FirebaseStorageError.NetworkError()
+                    StorageException.ERROR_QUOTA_EXCEEDED -> StorageError.QuotaExceeded()
+                    StorageException.ERROR_NOT_AUTHENTICATED -> StorageError.Unauthorized()
+                    StorageException.ERROR_OBJECT_NOT_FOUND -> StorageError.NotFound()
+                    else -> StorageError.NetworkError()
                 }
             }
 
-            else -> FirebaseStorageError.Unknown(e)
+            else -> StorageError.Unknown(e)
         }
     }
 }

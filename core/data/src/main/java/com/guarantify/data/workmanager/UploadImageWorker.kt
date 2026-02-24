@@ -9,7 +9,7 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.guarantify.common.di.IoDispatcher
 import com.guarantify.data.network.firebase.storage.WarrantyPhotoStorage
-import com.guarantify.domain.model.FirebaseStorageError
+import com.guarantify.domain.model.StorageError
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -52,10 +52,10 @@ class UploadImageWorker @AssistedInject constructor(
                 Log.e("UploadImageWorker", "Upload failed: $error")
 
                 when (error) {
-                    is FirebaseStorageError.NetworkError,
-                    is FirebaseStorageError.QuotaExceeded -> WorkResult.retry()
+                    is StorageError.NetworkError,
+                    is StorageError.QuotaExceeded -> WorkResult.retry()
 
-                    is FirebaseStorageError.Unauthorized -> {
+                    is StorageError.Unauthorized -> {
                         WorkResult.failure()
                     }
 
