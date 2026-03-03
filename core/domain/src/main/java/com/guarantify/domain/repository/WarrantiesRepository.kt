@@ -9,5 +9,4 @@ interface WarrantiesRepository {
     suspend fun createOrUpdateWarranty(warranty: Warranty): Result<Unit>
     suspend fun getWarranty(warrantyId: String): Result<Warranty>
     suspend fun deleteWarranty(warranty: Warranty)
-    suspend fun syncWarranties()
 }

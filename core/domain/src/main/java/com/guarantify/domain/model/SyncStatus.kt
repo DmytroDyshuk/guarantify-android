@@ -2,7 +2,7 @@ package com.guarantify.domain.model
 
 enum class SyncStatus {
     PENDING,
-    IN_PROGRESS,
+    READY_TO_SYNC,
     SYNCED,
     FAILED
 }

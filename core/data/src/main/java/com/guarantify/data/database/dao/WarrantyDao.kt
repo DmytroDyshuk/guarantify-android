@@ -24,10 +24,10 @@ interface WarrantyDao {
     suspend fun getUnsyncedWarranties(): List<WarrantyEntity>
 
     @Query("UPDATE warranties SET syncStatus = :syncStatus WHERE id = :id")
-    suspend fun updateSyncStatus(id: String, syncStatus: SyncStatus)
+    suspend fun updateWarrantySyncStatus(id: String, syncStatus: SyncStatus)
 
     @Query("UPDATE warranties SET isDeleted = 1, updatedAt = :updatedAt, syncStatus = :syncStatus WHERE id = :id")
-    suspend fun markAsDeleted(
+    suspend fun markWarrantyAsDeleted(
         id: String,
         updatedAt: Long,
         syncStatus: SyncStatus = SyncStatus.PENDING

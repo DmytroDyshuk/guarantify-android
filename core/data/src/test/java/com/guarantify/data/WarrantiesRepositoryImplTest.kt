@@ -121,7 +121,7 @@ class WarrantiesRepositoryImplTest {
 
             coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
             coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } just Runs
-            coEvery { warrantyDao.updateSyncStatus(any(), any()) } just Runs
+            coEvery { warrantyDao.updateWarrantySyncStatus(any(), any()) } just Runs
 
             // ACT
             val result = repository.createOrUpdateWarranty(warranty)
@@ -134,7 +134,7 @@ class WarrantiesRepositoryImplTest {
 
                 firebaseDataSource.createOrUpdateWarranty(any())
 
-                warrantyDao.updateSyncStatus(id = warranty.id, syncStatus = SyncStatus.SYNCED)
+                warrantyDao.updateWarrantySyncStatus(id = warranty.id, syncStatus = SyncStatus.SYNCED)
             }
 
             confirmVerified(warrantyDao, firebaseDataSource)
@@ -173,7 +173,7 @@ class WarrantiesRepositoryImplTest {
 
             coVerify(exactly = 1) { warrantyDao.createOrUpdateWarranty(any()) }
             coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }
-            coVerify(exactly = 0) { warrantyDao.updateSyncStatus(any(), any()) }
+            coVerify(exactly = 0) { warrantyDao.updateWarrantySyncStatus(any(), any()) }
 
             confirmVerified(warrantyDao, firebaseDataSource)
         }
@@ -192,7 +192,7 @@ class WarrantiesRepositoryImplTest {
 
             coVerify(exactly = 1) { warrantyDao.createOrUpdateWarranty(any()) }
             coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }
-            coVerify(exactly = 0) { warrantyDao.updateSyncStatus(any(), any()) }
+            coVerify(exactly = 0) { warrantyDao.updateWarrantySyncStatus(any(), any()) }
 
             confirmVerified(warrantyDao, firebaseDataSource)
         }
@@ -212,7 +212,7 @@ class WarrantiesRepositoryImplTest {
             })
         }
         coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }
-        coVerify(exactly = 0) { warrantyDao.updateSyncStatus(any(), any()) }
+        coVerify(exactly = 0) { warrantyDao.updateWarrantySyncStatus(any(), any()) }
 
         confirmVerified(warrantyDao, firebaseDataSource)
     }
