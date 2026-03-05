@@ -4,6 +4,6 @@ import android.net.Uri
 import com.guarantify.common.result.Result
 
 interface WarrantyPhotoStorage {
-    suspend fun uploadImage(imageUri: Uri, warrantyId: String): Result<String>
+    suspend fun uploadImage(warrantyId: String, imageUri: Uri): Result<String>
     suspend fun deleteImage(imageUrl: String)
 }

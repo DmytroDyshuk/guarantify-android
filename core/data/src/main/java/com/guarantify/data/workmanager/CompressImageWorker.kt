@@ -24,7 +24,7 @@ import androidx.work.ListenableWorker.Result as WorkResult
 import com.guarantify.common.result.Result as CommonResult
 
 @HiltWorker
-class CompressWorker @AssistedInject constructor(
+class CompressImageWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
     private val imageCompressor: ImageCompressor,

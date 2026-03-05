@@ -7,7 +7,7 @@ import java.io.File
 
 fun Context.createTempImageUri(): Uri {
     val imagesDir = File(cacheDir, "images").apply { mkdirs() }
-    val file = File.createTempFile("warranty_", ".jpg", imagesDir)
+    val file = File.createTempFile("warranty_${System.currentTimeMillis()}", ".jpg", imagesDir)
 
     return FileProvider.getUriForFile(
         this,

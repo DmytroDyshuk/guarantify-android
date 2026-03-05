@@ -4,5 +4,6 @@ enum class SyncStatus {
     PENDING,
     READY_TO_SYNC,
     SYNCED,
-    FAILED
+    UPLOAD_IMAGE_FAILED,
+    SYNC_FAILED
 }

@@ -20,7 +20,7 @@ class WarrantyPhotoStorageImpl @Inject constructor(
 
     private val storageRef = firebaseStorage.reference
 
-    override suspend fun uploadImage(imageUri: Uri, warrantyId: String): Result<String> {
+    override suspend fun uploadImage(warrantyId: String, imageUri: Uri): Result<String> {
         return try {
             val userId = firebaseAuth.currentUser?.uid
                 ?: return Result.Error(Exception("User not authenticated"))

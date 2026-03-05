@@ -2,18 +2,14 @@ package com.guarantify.data.workmanager
 
 import android.content.Context
 import android.util.Log
-import androidx.core.net.toUri
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.guarantify.common.di.IoDispatcher
-import com.guarantify.data.network.firebase.storage.WarrantyPhotoStorage
 import com.guarantify.domain.model.StorageError
+import com.guarantify.domain.repository.WarrantiesRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
 import androidx.work.ListenableWorker.Result as WorkResult
 import com.guarantify.common.result.Result as CommonResult
 
@@ -21,8 +17,7 @@ import com.guarantify.common.result.Result as CommonResult
 class UploadImageWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
-    private val warrantyPhotoStorage: WarrantyPhotoStorage,
-    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    private val warrantiesRepository: WarrantiesRepository
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): WorkResult {
@@ -34,21 +29,20 @@ class UploadImageWorker @AssistedInject constructor(
             return WorkResult.failure()
         }
 
-        val uploadResult = withContext(ioDispatcher) {
-            warrantyPhotoStorage.uploadImage(compressedImageUri.toUri(), warrantyId)
-        }
+        return when (val result =
+            warrantiesRepository.uploadWarrantyPhoto(warrantyId, compressedImageUri)) {
 
-        return when (uploadResult) {
             is CommonResult.Success -> {
                 val outputData = workDataOf(
-                    WorkerKeys.KEY_UPLOADED_IMAGE_URL to uploadResult.data,
+                    WorkerKeys.KEY_UPLOADED_IMAGE_URL to result.data,
                     WorkerKeys.KEY_WARRANTY_ID to warrantyId
                 )
+
                 WorkResult.success(outputData)
             }
 
             is CommonResult.Error -> {
-                val error = uploadResult.throwable
+                val error = result.throwable
                 Log.e("UploadImageWorker", "Upload failed: $error")
 
                 when (error) {
