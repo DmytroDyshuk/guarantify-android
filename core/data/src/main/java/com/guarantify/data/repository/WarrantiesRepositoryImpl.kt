@@ -2,12 +2,21 @@ package com.guarantify.data.repository
 
 import android.database.sqlite.SQLiteException
 import androidx.core.net.toUri
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.guarantify.common.di.IoDispatcher
 import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.mapper.toDomain
 import com.guarantify.data.mapper.toEntityWithGeneratedIdIfNeeded
 import com.guarantify.data.network.firebase.storage.WarrantyPhotoStorage
+import com.guarantify.data.workmanager.CompletePhotoUploadWorker
+import com.guarantify.data.workmanager.CompressImageWorker
+import com.guarantify.data.workmanager.UploadImageWorker
+import com.guarantify.data.workmanager.WorkerKeys
 import com.guarantify.domain.model.DatabaseError
 import com.guarantify.domain.model.StorageError
 import com.guarantify.domain.model.SyncStatus
@@ -24,6 +33,7 @@ import kotlinx.coroutines.withContext
 class WarrantiesRepositoryImpl @Inject constructor(
     private val warrantyDao: WarrantyDao,
     private val warrantyPhotoStorage: WarrantyPhotoStorage,
+    private val workManager: WorkManager,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : WarrantiesRepository {
     override val latestWarranties: Flow<List<Warranty>>
@@ -99,7 +109,10 @@ class WarrantiesRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun updateRemoteUrlPhotoLocaly(warrantyId: String, photoUrl: String): Result<Unit> =
+    override suspend fun updateRemoteUrlPhotoLocally(
+        warrantyId: String,
+        photoUrl: String
+    ): Result<Unit> =
         withContext(ioDispatcher) {
             try {
                 val warranty = warrantyDao.getWarrantyById(warrantyId)
@@ -120,7 +133,29 @@ class WarrantiesRepositoryImpl @Inject constructor(
         }
 
     private fun startImageUploadChain(warrantyId: String, photoUri: String) {
-        //TODO: start work chain compress and upload image + update SyncStatus to READY_TO_SYNC
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val imageData = workDataOf(
+            WorkerKeys.KEY_WARRANTY_ID to warrantyId,
+            WorkerKeys.KEY_IMAGE_URI to photoUri
+        )
+
+        val compressImageRequest = OneTimeWorkRequestBuilder<CompressImageWorker>()
+            .setInputData(imageData)
+            .build()
+        val uploadImageRequest = OneTimeWorkRequestBuilder<UploadImageWorker>()
+            .setConstraints(constraints)
+            .build()
+        val completeUploadRequest = OneTimeWorkRequestBuilder<CompletePhotoUploadWorker>()
+            .build()
+
+        workManager
+            .beginWith(compressImageRequest)
+            .then(uploadImageRequest)
+            .then(completeUploadRequest)
+            .enqueue()
     }
 
 }

@@ -10,5 +10,5 @@ interface WarrantiesRepository {
     suspend fun getWarranty(warrantyId: String): Result<Warranty>
     suspend fun deleteWarranty(warranty: Warranty)
     suspend fun uploadWarrantyPhoto(warrantyId: String, photoUri: String): Result<String>
-    suspend fun updateRemoteUrlPhotoLocaly(warrantyId: String, photoUrl: String): Result<Unit>
+    suspend fun updateRemoteUrlPhotoLocally(warrantyId: String, photoUrl: String): Result<Unit>
 }

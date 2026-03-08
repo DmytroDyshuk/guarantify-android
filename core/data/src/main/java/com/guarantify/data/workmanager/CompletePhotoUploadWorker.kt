@@ -37,7 +37,7 @@ class CompletePhotoUploadWorker @AssistedInject constructor(
                 }
 
                 return@withContext when (val result =
-                    warrantiesRepository.updateRemoteUrlPhotoLocaly(warrantyId, uploadedImageUrl)) {
+                    warrantiesRepository.updateRemoteUrlPhotoLocally(warrantyId, uploadedImageUrl)) {
                     is CommonResult.Success -> {
                         Log.i(TAG, "Successfully completed photo upload for warranty $warrantyId")
                         WorkResult.success()

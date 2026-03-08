@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 @HiltAndroidApp
 class GuarantifyApp : Application(), Configuration.Provider {
