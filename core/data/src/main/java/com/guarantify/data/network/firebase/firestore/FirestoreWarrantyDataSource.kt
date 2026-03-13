@@ -7,4 +7,5 @@ interface FirestoreWarrantyDataSource {
     suspend fun getAllWarranties(): List<WarrantyDto>
     suspend fun getUpdatedSince(timestamp: Long): List<WarrantyDto>
     suspend fun deleteWarranty(id: String)
+    suspend fun pushChangesBatch(toUpload: List<WarrantyDto>, toDelete: List<String>)
 }

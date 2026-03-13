@@ -15,23 +15,18 @@ class FirestoreWarrantyDataSourceImpl @Inject constructor(
         get() = firebaseAuth.currentUser?.uid
             ?: throw IllegalStateException("User not authenticated")
 
-    override suspend fun createOrUpdateWarranty(warranty: WarrantyDto) {
-        firebaseFirestore
+    private val warrantiesCollection
+        get() = firebaseFirestore
             .collection(FirestoreConstants.COLLECTION_USERS)
             .document(userId)
             .collection(FirestoreConstants.COLLECTION_WARRANTIES)
-            .document(warranty.id)
-            .set(warranty)
-            .await()
+
+    override suspend fun createOrUpdateWarranty(warranty: WarrantyDto) {
+        warrantiesCollection.document(warranty.id).set(warranty).await()
     }
 
     override suspend fun getAllWarranties(): List<WarrantyDto> {
-        val snapshot = firebaseFirestore
-            .collection(FirestoreConstants.COLLECTION_USERS)
-            .document(userId)
-            .collection(FirestoreConstants.COLLECTION_WARRANTIES)
-            .get()
-            .await()
+        val snapshot = warrantiesCollection.get().await()
 
         return snapshot.documents.mapNotNull {
             val dto = it.toObject(WarrantyDto::class.java)
@@ -40,10 +35,7 @@ class FirestoreWarrantyDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getUpdatedSince(timestamp: Long): List<WarrantyDto> {
-        val snapshot = firebaseFirestore
-            .collection(FirestoreConstants.COLLECTION_USERS)
-            .document(userId)
-            .collection(FirestoreConstants.COLLECTION_WARRANTIES)
+        val snapshot = warrantiesCollection
             .whereGreaterThan(FirestoreConstants.FIELD_UPDATED_AT, timestamp)
             .get()
             .await()
@@ -55,12 +47,21 @@ class FirestoreWarrantyDataSourceImpl @Inject constructor(
     }
 
     override suspend fun deleteWarranty(id: String) {
-        firebaseFirestore
-            .collection(FirestoreConstants.COLLECTION_USERS)
-            .document(userId)
-            .collection(FirestoreConstants.COLLECTION_WARRANTIES)
-            .document(id)
-            .delete()
-            .await()
+        warrantiesCollection.document(id).delete().await()
     }
+
+    override suspend fun pushChangesBatch(toUpload: List<WarrantyDto>, toDelete: List<String>) {
+        val batch = firebaseFirestore.batch()
+
+        toUpload.forEach { dto ->
+            batch.set(warrantiesCollection.document(dto.id), dto)
+        }
+
+        toDelete.forEach { id ->
+            batch.delete(warrantiesCollection.document(id))
+        }
+
+        batch.commit().await()
+    }
+
 }
