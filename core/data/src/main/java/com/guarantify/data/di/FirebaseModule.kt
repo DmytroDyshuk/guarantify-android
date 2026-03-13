@@ -4,8 +4,6 @@ import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSourc
 import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSourceImpl
 import com.guarantify.data.network.firebase.storage.WarrantyPhotoStorage
 import com.guarantify.data.network.firebase.storage.WarrantyPhotoStorageImpl
-import com.guarantify.data.repository.GoogleAuthRepositoryImpl
-import com.guarantify.domain.repository.GoogleAuthRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,12 +13,6 @@ import jakarta.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 interface FirebaseModule {
-
-    @Binds
-    @Singleton
-    fun bindGoogleAuthRepository(
-        impl: GoogleAuthRepositoryImpl
-    ): GoogleAuthRepository
 
     @Binds
     @Singleton

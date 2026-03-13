@@ -2,7 +2,7 @@ package com.guarantify.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.guarantify.domain.repository.GoogleAuthRepository
+import com.guarantify.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    private val googleAuthRepository: GoogleAuthRepository
+    private val authRepository: AuthRepository
 ) : ViewModel() {
-    val uiState: StateFlow<MainActivityUiState> = googleAuthRepository.observeAuthState()
+    val uiState: StateFlow<MainActivityUiState> = authRepository.observeAuthState()
         .map {
             MainActivityUiState.Success(it)
         }

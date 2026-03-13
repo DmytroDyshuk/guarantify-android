@@ -1,12 +1,12 @@
 package com.guarantify.domain.usecase
 
 import com.guarantify.domain.model.auth.AuthResult
-import com.guarantify.domain.repository.GoogleAuthRepository
+import com.guarantify.domain.repository.AuthRepository
 import jakarta.inject.Inject
 
 class SignInWithGoogleUseCase @Inject constructor(
-    private val googleAuthRepository: GoogleAuthRepository
+    private val authRepository: AuthRepository
 ) {
     suspend operator fun invoke(idToken: String): AuthResult? =
-        googleAuthRepository.signInWithGoogle(idToken)
+        authRepository.signInWithGoogle(idToken)
 }
