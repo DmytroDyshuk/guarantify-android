@@ -26,13 +26,19 @@ interface WarrantyDao {
     @Query("UPDATE warranties SET syncStatus = :syncStatus WHERE id = :id")
     suspend fun updateWarrantySyncStatus(id: String, syncStatus: SyncStatus)
 
+    @Query("UPDATE warranties SET syncStatus = :status WHERE id IN (:ids)")
+    suspend fun updateSyncStatusForIds(ids: List<String>, status: SyncStatus)
+
     @Query("UPDATE warranties SET isDeleted = 1, updatedAt = :updatedAt, syncStatus = :syncStatus WHERE id = :id")
     suspend fun markWarrantyAsDeleted(
         id: String,
         updatedAt: Long,
-        syncStatus: SyncStatus = SyncStatus.PENDING
+        syncStatus: SyncStatus = SyncStatus.READY_TO_SYNC
     )
 
     @Delete
-    suspend fun hardDeleteWarranty(warranty: WarrantyEntity)
+    suspend fun hardDeleteWarranties(warranties: List<WarrantyEntity>)
+
+    @Query("SELECT MAX(updatedAt) FROM warranties")
+    suspend fun getLastUpdatedTimestamp(): Long?
 }
