@@ -8,7 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.guarantify.data.database.entity.WarrantyEntity
 import com.guarantify.data.mapper.toEntityWithGeneratedIdIfNeeded
-import com.guarantify.domain.model.SyncStatus
+import com.guarantify.domain.model.sync.SyncStatus
 import com.guarantify.domain.model.Warranty
 import kotlinx.coroutines.flow.Flow
 
@@ -56,7 +56,7 @@ interface WarrantyDao {
     suspend fun updateSyncStatusForIds(ids: List<String>, status: SyncStatus)
 
     @Query("UPDATE warranties SET isDeleted = 1, updatedAt = :updatedAt, syncStatus = :syncStatus WHERE id = :id")
-    suspend fun markWarrantyAsDeleted(
+    suspend fun softDeleteWarranty(
         id: String,
         updatedAt: Long,
         syncStatus: SyncStatus = SyncStatus.READY_TO_SYNC

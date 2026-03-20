@@ -2,7 +2,7 @@ package com.guarantify.data.mapper
 
 import com.guarantify.data.database.entity.WarrantyEntity
 import com.guarantify.data.network.dto.WarrantyDto
-import com.guarantify.domain.model.SyncStatus
+import com.guarantify.domain.model.sync.SyncStatus
 import com.guarantify.domain.model.Warranty
 import java.time.LocalDate
 import java.util.UUID

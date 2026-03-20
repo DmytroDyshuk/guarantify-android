@@ -1,12 +1,15 @@
 package com.guarantify.data.repository
 
+import androidx.sqlite.SQLiteException
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.guarantify.common.di.IoDispatcher
 import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.mapper.toDto
 import com.guarantify.data.mapper.toEntity
 import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSource
-import com.guarantify.domain.model.SyncStatus
+import com.guarantify.domain.model.sync.SyncError
+import com.guarantify.domain.model.sync.SyncStatus
 import com.guarantify.domain.repository.SyncWarrantiesRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -73,7 +76,15 @@ class SyncWarrantiesRepositoryImpl @Inject constructor(
             Result.Success(Unit)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
-            Result.Error(e)
+
+            val mappedError = when (e) {
+                is FirebaseFirestoreException -> SyncError.NetworkError()
+                is IllegalStateException -> SyncError.AuthError()
+                is SQLiteException -> SyncError.DatabaseError(e)
+                else -> SyncError.UnknownError(e)
+            }
+
+            Result.Error(mappedError)
         }
     }
 

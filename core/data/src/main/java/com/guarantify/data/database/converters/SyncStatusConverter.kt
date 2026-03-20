@@ -1,7 +1,7 @@
 package com.guarantify.data.database.converters
 
 import androidx.room.TypeConverter
-import com.guarantify.domain.model.SyncStatus
+import com.guarantify.domain.model.sync.SyncStatus
 
 object SyncStatusConverter {
 

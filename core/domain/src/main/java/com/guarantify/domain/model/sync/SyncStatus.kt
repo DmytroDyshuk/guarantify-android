@@ -1,4 +1,4 @@
-package com.guarantify.domain.model
+package com.guarantify.domain.model.sync
 
 enum class SyncStatus {
     PENDING,

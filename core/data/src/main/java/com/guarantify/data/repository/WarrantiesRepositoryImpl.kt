@@ -19,7 +19,7 @@ import com.guarantify.data.workmanager.UploadImageWorker
 import com.guarantify.data.workmanager.WorkerKeys
 import com.guarantify.domain.model.DatabaseError
 import com.guarantify.domain.model.StorageError
-import com.guarantify.domain.model.SyncStatus
+import com.guarantify.domain.model.sync.SyncStatus
 import com.guarantify.domain.model.Warranty
 import com.guarantify.domain.repository.WarrantiesRepository
 import jakarta.inject.Inject
@@ -75,7 +75,7 @@ class WarrantiesRepositoryImpl @Inject constructor(
             val now = System.currentTimeMillis()
             val warrantyEntity = warranty.toEntityWithGeneratedIdIfNeeded()
 
-            warrantyDao.markWarrantyAsDeleted(
+            warrantyDao.softDeleteWarranty(
                 id = warrantyEntity.id,
                 updatedAt = now,
                 syncStatus = SyncStatus.PENDING

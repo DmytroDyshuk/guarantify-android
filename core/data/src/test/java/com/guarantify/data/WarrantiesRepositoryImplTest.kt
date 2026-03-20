@@ -9,7 +9,7 @@ import com.guarantify.data.mapper.toDomain
 import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSource
 import com.guarantify.data.repository.WarrantiesRepositoryImpl
 import com.guarantify.domain.model.Warranty
-import com.guarantify.domain.model.SyncStatus
+import com.guarantify.domain.model.sync.SyncStatus
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery

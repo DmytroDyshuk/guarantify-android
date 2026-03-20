@@ -2,7 +2,7 @@ package com.guarantify.data.database.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.guarantify.domain.model.SyncStatus
+import com.guarantify.domain.model.sync.SyncStatus
 import java.time.LocalDate
 
 @Entity(tableName = "warranties")
