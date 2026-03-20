@@ -5,8 +5,11 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.guarantify.data.database.entity.WarrantyEntity
+import com.guarantify.data.mapper.toEntityWithGeneratedIdIfNeeded
 import com.guarantify.domain.model.SyncStatus
+import com.guarantify.domain.model.Warranty
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -16,6 +19,29 @@ interface WarrantyDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun createOrUpdateWarranty(warranty: WarrantyEntity)
+
+    @Transaction
+    suspend fun upsertWithPhotoLogic(warranty: Warranty): WarrantyEntity {
+        val oldWarranty = getWarrantyById(warranty.id)
+
+        val photoUri = warranty.localPhotoUri?.takeUnless { it.isBlank() }
+        val isPhotoChanged = oldWarranty?.localPhotoUri != photoUri
+
+        val syncStatus = if (photoUri != null && isPhotoChanged) {
+            SyncStatus.PENDING
+        } else {
+            SyncStatus.READY_TO_SYNC
+        }
+
+        val entity = warranty.toEntityWithGeneratedIdIfNeeded().copy(
+            syncStatus = syncStatus,
+            remotePhotoUrl = if (isPhotoChanged) null else oldWarranty?.remotePhotoUrl
+        )
+
+        createOrUpdateWarranty(entity)
+
+        return entity
+    }
 
     @Query("SELECT * FROM warranties WHERE id = :id AND isDeleted = 0")
     suspend fun getWarrantyById(id: String): WarrantyEntity?

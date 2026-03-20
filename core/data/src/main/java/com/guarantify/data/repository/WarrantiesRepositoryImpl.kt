@@ -57,26 +57,10 @@ class WarrantiesRepositoryImpl @Inject constructor(
     override suspend fun createOrUpdateWarranty(warranty: Warranty): Result<Unit> =
         withContext(ioDispatcher) {
             try {
-                val oldWarranty = warrantyDao.getWarrantyById(warranty.id)
+                val warrantyEntity = warrantyDao.upsertWithPhotoLogic(warranty)
 
-                val photoUri = warranty.localPhotoUri?.takeUnless { it.isBlank() }
-
-                val isPhotoChanged = oldWarranty?.localPhotoUri != photoUri
-
-                val syncStatus = if (photoUri != null && isPhotoChanged) {
-                    SyncStatus.PENDING
-                } else {
-                    SyncStatus.READY_TO_SYNC
-                }
-
-                val warrantyEntity = warranty.toEntityWithGeneratedIdIfNeeded().copy(
-                    syncStatus = syncStatus,
-                    remotePhotoUrl = if (isPhotoChanged) null else oldWarranty?.remotePhotoUrl
-                )
-
-                warrantyDao.createOrUpdateWarranty(warrantyEntity)
-
-                if (photoUri != null && isPhotoChanged) {
+                val photoUri = warrantyEntity.localPhotoUri
+                if (photoUri != null && warrantyEntity.syncStatus == SyncStatus.PENDING) {
                     startImageUploadChain(warrantyEntity.id, photoUri)
                 }
 
