@@ -34,7 +34,7 @@ class FirestoreWarrantyDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getUpdatedSince(timestamp: Long): List<WarrantyDto> {
+    override suspend fun getWarrantiesUpdatedSince(timestamp: Long): List<WarrantyDto> {
         val snapshot = warrantiesCollection
             .whereGreaterThan(FirestoreConstants.FIELD_UPDATED_AT, timestamp)
             .get()

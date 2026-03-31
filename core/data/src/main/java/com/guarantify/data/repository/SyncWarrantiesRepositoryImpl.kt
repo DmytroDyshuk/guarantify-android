@@ -24,55 +24,8 @@ class SyncWarrantiesRepositoryImpl @Inject constructor(
 
     override suspend fun syncWarranties(): Result<Unit> = withContext(ioDispatcher) {
         try {
-            val lastLocalUpdate = warrantyDao.getLastUpdatedTimestamp() ?: 0L
-            val remoteChanges = firestoreWarrantyDataSource.getUpdatedSince(lastLocalUpdate)
-
-            remoteChanges.forEach { remoteDto ->
-                val localEntity = warrantyDao.getWarrantyById(remoteDto.id)
-
-                if (localEntity == null) {
-                    warrantyDao.createOrUpdateWarranty(remoteDto.toEntity().copy(
-                        syncStatus = SyncStatus.SYNCED
-                    ))
-                } else {
-                    if (remoteDto.updatedAt > localEntity.updatedAt) {
-                        warrantyDao.createOrUpdateWarranty(remoteDto.toEntity().copy(
-                            syncStatus = SyncStatus.SYNCED
-                        ))
-                    }
-                }
-
-            }
-
-            val unsyncedWarranties = warrantyDao.getUnsyncedWarranties()
-            if (unsyncedWarranties.isEmpty()) return@withContext Result.Success(Unit)
-
-            val entitiesToUpload = unsyncedWarranties.filter { 
-                !it.isDeleted && it.syncStatus == SyncStatus.READY_TO_SYNC 
-            }
-            
-            val entitiesToDelete = unsyncedWarranties.filter { 
-                it.isDeleted 
-            }
-
-            if (entitiesToUpload.isEmpty() && entitiesToDelete.isEmpty()) {
-                return@withContext Result.Success(Unit)
-            }
-
-            firestoreWarrantyDataSource.pushChangesBatch(
-                toUpload = entitiesToUpload.map { it.toDto() },
-                toDelete = entitiesToDelete.map { it.id }
-            )
-
-            if (entitiesToUpload.isNotEmpty()) {
-                val uploadedIds = entitiesToUpload.map { it.id }
-                warrantyDao.updateSyncStatusForIds(uploadedIds, SyncStatus.SYNCED)
-            }
-
-            if (entitiesToDelete.isNotEmpty()) {
-                warrantyDao.hardDeleteWarranties(entitiesToDelete)
-            }
-
+            pullRemoteChanges()
+            pushLocalChanges()
             Result.Success(Unit)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
@@ -85,6 +38,61 @@ class SyncWarrantiesRepositoryImpl @Inject constructor(
             }
 
             Result.Error(mappedError)
+        }
+    }
+
+    private suspend fun pullRemoteChanges() {
+        val lastLocalUpdate = warrantyDao.getLastUpdatedTimestamp() ?: 0L
+        val remoteChanges =
+            firestoreWarrantyDataSource.getWarrantiesUpdatedSince(lastLocalUpdate)
+
+        remoteChanges.forEach { remoteDto ->
+            val localEntity = warrantyDao.getWarrantyById(remoteDto.id)
+
+            if (localEntity == null) {
+                warrantyDao.createOrUpdateWarranty(
+                    remoteDto.toEntity().copy(
+                        syncStatus = SyncStatus.SYNCED
+                    )
+                )
+            } else {
+                if (remoteDto.updatedAt > localEntity.updatedAt) {
+                    warrantyDao.createOrUpdateWarranty(
+                        remoteDto.toEntity().copy(
+                            syncStatus = SyncStatus.SYNCED
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun pushLocalChanges() {
+        val unsyncedWarranties = warrantyDao.getUnsyncedWarranties()
+        if (unsyncedWarranties.isEmpty()) return
+
+        val entitiesToUpload = unsyncedWarranties.filter {
+            !it.isDeleted && it.syncStatus == SyncStatus.READY_TO_SYNC
+        }
+
+        val entitiesToDelete = unsyncedWarranties.filter {
+            it.isDeleted
+        }
+
+        if (entitiesToUpload.isEmpty() && entitiesToDelete.isEmpty()) return
+
+        firestoreWarrantyDataSource.pushChangesBatch(
+            toUpload = entitiesToUpload.map { it.toDto() },
+            toDelete = entitiesToDelete.map { it.id }
+        )
+
+        if (entitiesToUpload.isNotEmpty()) {
+            val uploadedIds = entitiesToUpload.map { it.id }
+            warrantyDao.updateSyncStatusForIds(uploadedIds, SyncStatus.SYNCED)
+        }
+
+        if (entitiesToDelete.isNotEmpty()) {
+            warrantyDao.hardDeleteWarranties(entitiesToDelete)
         }
     }
 
