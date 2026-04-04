@@ -70,8 +70,8 @@ class WarrantiesRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun deleteWarranty(warranty: Warranty) {
-        withContext(ioDispatcher) {
+    override suspend fun deleteWarranty(warranty: Warranty): Result<Unit> = withContext(ioDispatcher) {
+        try {
             val now = System.currentTimeMillis()
             val warrantyEntity = warranty.toEntityWithGeneratedIdIfNeeded()
 
@@ -80,6 +80,10 @@ class WarrantiesRepositoryImpl @Inject constructor(
                 updatedAt = now,
                 syncStatus = SyncStatus.PENDING
             )
+
+            Result.Success(Unit)
+        } catch (e: SQLiteException) {
+            Result.Error(e)
         }
     }
 

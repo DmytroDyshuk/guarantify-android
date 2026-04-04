@@ -1,29 +1,35 @@
 package com.guarantify.data
 
 import android.database.sqlite.SQLiteException
+import android.net.Uri
 import android.util.Log
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.database.entity.WarrantyEntity
 import com.guarantify.data.mapper.toDomain
-import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSource
+import com.guarantify.data.network.firebase.storage.WarrantyPhotoStorage
 import com.guarantify.data.repository.WarrantiesRepositoryImpl
+import com.guarantify.domain.model.DatabaseError
+import com.guarantify.domain.model.StorageError
 import com.guarantify.domain.model.Warranty
 import com.guarantify.domain.model.sync.SyncStatus
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.coVerifyOrder
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.just
+import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -32,14 +38,16 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.io.IOException
 import java.time.LocalDate
 import kotlin.test.assertIs
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class WarrantiesRepositoryImplTest {
     @MockK
-    private lateinit var firebaseDataSource: FirestoreWarrantyDataSource
+    private lateinit var warrantyPhotoStorage: WarrantyPhotoStorage
+
+    @MockK(relaxed = true)
+    private lateinit var workManager: WorkManager
 
     @MockK(relaxed = true)
     private lateinit var warrantyDao: WarrantyDao
@@ -55,8 +63,9 @@ class WarrantiesRepositoryImplTest {
         every { Log.e(any(), any(), any()) } returns 0
         every { Log.e(any(), any()) } returns 0
         repository = WarrantiesRepositoryImpl(
-            firestoreWarrantyDataSource = firebaseDataSource,
             warrantyDao = warrantyDao,
+            warrantyPhotoStorage = warrantyPhotoStorage,
+            workManager = workManager,
             ioDispatcher = testDispatcher
         )
     }
@@ -64,6 +73,7 @@ class WarrantiesRepositoryImplTest {
     @AfterEach
     fun tearDown() {
         unmockkStatic(Log::class)
+        unmockkStatic(Uri::class)
     }
 
     private fun createFakeWarranty(
@@ -114,14 +124,35 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `createOrUpdateWarranty should save to dao, sync to firebase and update sync status on SUCCESS`() =
+    fun `latestWarranties should emit empty list when dao fails`() = runTest {
+        // ARRANGE
+        every { warrantyDao.getAllWarranties() } returns flow { throw Exception("DB error") }
+
+        // ACT
+        val resultList = repository.latestWarranties.first()
+
+        // ASSERT
+        assertTrue(resultList.isEmpty())
+        verify { warrantyDao.getAllWarranties() }
+    }
+
+    @Test
+    fun `createOrUpdateWarranty should save to dao and start upload chain when photo is pending`() =
         runTest {
             // ARRANGE
             val warranty = createFakeWarranty()
+            val savedEntity = WarrantyEntity(
+                id = warranty.id,
+                userId = warranty.userId,
+                title = warranty.productName,
+                purchaseDate = warranty.purchaseDate,
+                expirationDate = warranty.expirationDate,
+                storeName = warranty.storeName,
+                localPhotoUri = "file://photo.jpg",
+                syncStatus = SyncStatus.PENDING
+            )
 
-            coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
-            coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } just Runs
-            coEvery { warrantyDao.updateWarrantySyncStatus(any(), any()) } just Runs
+            coEvery { warrantyDao.upsertWithPhotoLogic(any()) } returns savedEntity
 
             // ACT
             val result = repository.createOrUpdateWarranty(warranty)
@@ -129,15 +160,9 @@ class WarrantiesRepositoryImplTest {
             // ASSERT
             assertTrue(result is Result.Success)
 
-            coVerifyOrder {
-                warrantyDao.createOrUpdateWarranty(match { it.syncStatus != SyncStatus.SYNCED })
-
-                firebaseDataSource.createOrUpdateWarranty(any())
-
-                warrantyDao.updateWarrantySyncStatus(id = warranty.id, syncStatus = SyncStatus.SYNCED)
-            }
-
-            confirmVerified(warrantyDao, firebaseDataSource)
+            coVerify(exactly = 1) { warrantyDao.upsertWithPhotoLogic(any()) }
+            verify { workManager.beginWith(any<OneTimeWorkRequest>()) }
+            confirmVerified(warrantyDao)
         }
 
     @Test
@@ -145,7 +170,7 @@ class WarrantiesRepositoryImplTest {
         val warranty = createFakeWarranty()
         val expectedException = SQLiteException("Database error")
 
-        coEvery { warrantyDao.createOrUpdateWarranty(any()) } throws expectedException
+        coEvery { warrantyDao.upsertWithPhotoLogic(any()) } throws expectedException
 
         val result = repository.createOrUpdateWarranty(warranty)
 
@@ -153,69 +178,59 @@ class WarrantiesRepositoryImplTest {
         assertEquals(expectedException, (result as Result.Error).throwable)
 
         coVerify(exactly = 1) {
-            warrantyDao.createOrUpdateWarranty(any())
+            warrantyDao.upsertWithPhotoLogic(any())
         }
 
-        confirmVerified(warrantyDao, firebaseDataSource)
+        confirmVerified(warrantyDao)
     }
 
     @Test
-    fun `createOrUpdateWarranty should return Success even if firebase fails with IOException`() =
+    fun `createOrUpdateWarranty should save to dao without starting upload when no photo`() =
         runTest {
             val warranty = createFakeWarranty()
+            val savedEntity = WarrantyEntity(
+                id = warranty.id,
+                userId = warranty.userId,
+                title = warranty.productName,
+                purchaseDate = warranty.purchaseDate,
+                expirationDate = warranty.expirationDate,
+                storeName = warranty.storeName,
+                localPhotoUri = null,
+                syncStatus = SyncStatus.READY_TO_SYNC
+            )
 
-            coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
-            coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } throws IOException("No internet")
+            coEvery { warrantyDao.upsertWithPhotoLogic(any()) } returns savedEntity
 
             val result = repository.createOrUpdateWarranty(warranty)
 
             assertTrue(result is Result.Success)
-
-            coVerify(exactly = 1) { warrantyDao.createOrUpdateWarranty(any()) }
-            coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }
-            coVerify(exactly = 0) { warrantyDao.updateWarrantySyncStatus(any(), any()) }
-
-            confirmVerified(warrantyDao, firebaseDataSource)
+            coVerify(exactly = 1) { warrantyDao.upsertWithPhotoLogic(any()) }
+            confirmVerified(warrantyDao)
         }
 
     @Test
-    fun `createOrUpdateWarranty should succeed when local saves but Firebase fails with Exception`() =
+    fun `createOrUpdateWarranty should save with READY_TO_SYNC when photo unchanged`() =
         runTest {
             val warranty = createFakeWarranty()
+            val savedEntity = WarrantyEntity(
+                id = warranty.id,
+                userId = warranty.userId,
+                title = warranty.productName,
+                purchaseDate = warranty.purchaseDate,
+                expirationDate = warranty.expirationDate,
+                storeName = warranty.storeName,
+                localPhotoUri = "file://existing_photo.jpg",
+                syncStatus = SyncStatus.READY_TO_SYNC
+            )
 
-            coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
-            coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } throws Exception("Firebase exception")
+            coEvery { warrantyDao.upsertWithPhotoLogic(any()) } returns savedEntity
 
             val result = repository.createOrUpdateWarranty(warranty)
 
-            assertIs<Result.Success<Unit>>(result)
-
-            coVerify(exactly = 1) { warrantyDao.createOrUpdateWarranty(any()) }
-            coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }
-            coVerify(exactly = 0) { warrantyDao.updateWarrantySyncStatus(any(), any()) }
-
-            confirmVerified(warrantyDao, firebaseDataSource)
+            assertTrue(result is Result.Success)
+            coVerify(exactly = 1) { warrantyDao.upsertWithPhotoLogic(any()) }
+            confirmVerified(warrantyDao)
         }
-
-    @Test
-    fun `createOrUpdateWarranty should save with syncStatus PENDING when firebase fails`() = runTest {
-        val warranty = createFakeWarranty()
-
-        coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
-        coEvery { firebaseDataSource.createOrUpdateWarranty(any()) } throws Exception("No internet")
-
-        repository.createOrUpdateWarranty(warranty)
-
-        coVerify(exactly = 1) {
-            warrantyDao.createOrUpdateWarranty(match { entity ->
-                entity.syncStatus == SyncStatus.PENDING && entity.title == "Samsung Galaxy S21"
-            })
-        }
-        coVerify(exactly = 1) { firebaseDataSource.createOrUpdateWarranty(any()) }
-        coVerify(exactly = 0) { warrantyDao.updateWarrantySyncStatus(any(), any()) }
-
-        confirmVerified(warrantyDao, firebaseDataSource)
-    }
 
     @Test
     fun `getWarranty should return Success with mapped data when DAO returns entity`() = runTest {
@@ -243,16 +258,15 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `getWarranty should return Error when database return null`() = runTest {
+    fun `getWarranty should return Error with NotFound when database return null`() = runTest {
         val warrantyId = "123"
-        val expectedException = Exception("Warranty not found")
 
         coEvery { warrantyDao.getWarrantyById(warrantyId) } returns null
 
         val result = repository.getWarranty(warrantyId)
 
         assertIs<Result.Error>(result)
-        assertEquals(expectedException.message, result.throwable.message)
+        assertIs<DatabaseError.NotFound>(result.throwable)
 
         coVerify(exactly = 1) { warrantyDao.getWarrantyById(warrantyId) }
 
@@ -276,36 +290,108 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `deleteWarranty should delete warranty with dao and firebase`() = runTest {
+    fun `deleteWarranty should soft delete warranty with dao`() = runTest {
         // ARRANGE
         val warranty = createFakeWarranty()
 
-        coEvery { warrantyDao.hardDeleteWarranty(any()) } just Runs
-        coEvery { firebaseDataSource.deleteWarranty(any()) } just Runs
+        coEvery { warrantyDao.softDeleteWarranty(any(), any(), any()) } just Runs
 
         // ACT
         repository.deleteWarranty(warranty)
 
         // ASSERT
         coVerify(exactly = 1) {
-            warrantyDao.hardDeleteWarranty(match { it.id == warranty.id })
+            warrantyDao.softDeleteWarranty(
+                id = warranty.id,
+                updatedAt = any(),
+                syncStatus = SyncStatus.PENDING
+            )
         }
-        coVerify(exactly = 1) {
-            firebaseDataSource.deleteWarranty(any())
+        confirmVerified(warrantyDao)
+    }
+
+    @Test
+    fun `deleteWarranty should handle database errors gracefully`() = runTest {
+        val warranty = createFakeWarranty()
+        val exception = SQLiteException("DB error")
+
+        coEvery { warrantyDao.softDeleteWarranty(any(), any(), any()) } throws exception
+
+        val result = repository.deleteWarranty(warranty)
+
+        assertIs<Result.Error>(result)
+        assertEquals(exception, result.throwable)
+        coVerify { warrantyDao.softDeleteWarranty(any(), any(), any()) }
+        confirmVerified(warrantyDao)
+    }
+
+    @Test
+    fun `uploadWarrantyPhoto should return Success when storage succeeds`() = runTest {
+        val warrantyId = "1"
+        val photoUri = "file://test.jpg"
+        val expectedUrl = "https://firebasestorage.com/1.jpg"
+        val mockUri = mockk<Uri>()
+
+        mockkStatic(Uri::class)
+        every { Uri.parse(photoUri) } returns mockUri
+
+        coEvery { warrantyPhotoStorage.uploadImage(warrantyId, mockUri) } returns Result.Success(
+            expectedUrl
+        )
+
+        val result = repository.uploadWarrantyPhoto(warrantyId, photoUri)
+
+        assertIs<Result.Success<String>>(result)
+        assertEquals(expectedUrl, result.data)
+
+        unmockkStatic(Uri::class)
+    }
+
+    @Test
+    fun `uploadWarrantyPhoto should return Error when storage fails`() = runTest {
+        val exception = Exception("Upload failed")
+        coEvery { warrantyPhotoStorage.uploadImage(any(), any()) } throws exception
+
+        val result = repository.uploadWarrantyPhoto("1", "uri")
+
+        assertIs<Result.Error>(result)
+        assertIs<StorageError.Unknown>(result.throwable)
+    }
+
+    @Test
+    fun `updateRemoteUrlPhotoLocally should update dao and return success`() = runTest {
+        val warrantyId = "1"
+        val photoUrl = "https://example.com/photo.jpg"
+        val existingEntity = WarrantyEntity(
+            id = warrantyId,
+            userId = "u1",
+            title = "T",
+            purchaseDate = LocalDate.now(),
+            expirationDate = LocalDate.now(),
+            storeName = "S"
+        )
+
+        coEvery { warrantyDao.getWarrantyById(warrantyId) } returns existingEntity
+        coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
+
+        val result = repository.updateRemoteUrlPhotoLocally(warrantyId, photoUrl)
+
+        assertIs<Result.Success<Unit>>(result)
+        coVerify {
+            warrantyDao.createOrUpdateWarranty(match {
+                it.id == warrantyId && it.remotePhotoUrl == photoUrl && it.syncStatus == SyncStatus.READY_TO_SYNC
+            })
         }
     }
 
     @Test
-    fun `deleteWarranty should delete locally even if firebase fails`() = runTest {
-        val warranty = createFakeWarranty()
+    fun `updateRemoteUrlPhotoLocally should return Error when warranty not found`() = runTest {
+        coEvery { warrantyDao.getWarrantyById(any()) } returns null
 
-        coEvery { warrantyDao.hardDeleteWarranty(any()) } just Runs
-        coEvery { firebaseDataSource.deleteWarranty(any()) } throws RuntimeException("No Internet")
+        val result = repository.updateRemoteUrlPhotoLocally("1", "url")
 
-        repository.deleteWarranty(warranty)
-
-        coVerify { warrantyDao.hardDeleteWarranty(any()) }
-        verify { Log.e(any(), any(), any()) }
+        assertIs<Result.Error>(result)
+        assertIs<DatabaseError.NotFound>(result.throwable)
     }
 
 }
