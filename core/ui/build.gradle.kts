@@ -39,6 +39,6 @@ dependencies {
     //Lottie
     implementation(libs.lottie.compose)
 
-    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

@@ -9,6 +9,15 @@ plugins {
 
 configure<LibraryExtension> {
     namespace = "com.guarantify.data"
+
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md"
+            )
+        }
+    }
 }
 
 room {
@@ -51,10 +60,21 @@ dependencies {
 
     //Kotlin Test
     testImplementation(libs.jetbrains.kotlin.test)
+    androidTestImplementation(libs.jetbrains.kotlin.test)
 
     //Mockk
     testImplementation(libs.mockk)
+    androidTestImplementation(libs.mockk.android)
 
     //Coroutines test
     testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+
+    //WorkManager test
+    androidTestImplementation(libs.work.testing)
+
+    //JUnit4
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.junit)
+
 }

@@ -47,7 +47,7 @@ dependencies {
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
 
-    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
     debugImplementation(libs.androidx.ui.tooling)

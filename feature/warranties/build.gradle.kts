@@ -55,6 +55,6 @@ dependencies {
     //Coil
     implementation(libs.coil)
 
-    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

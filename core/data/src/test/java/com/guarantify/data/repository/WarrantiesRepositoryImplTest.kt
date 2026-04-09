@@ -1,4 +1,4 @@
-package com.guarantify.data
+package com.guarantify.data.repository
 
 import android.database.sqlite.SQLiteException
 import android.net.Uri
@@ -10,7 +10,6 @@ import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.database.entity.WarrantyEntity
 import com.guarantify.data.mapper.toDomain
 import com.guarantify.data.network.firebase.storage.WarrantyPhotoStorage
-import com.guarantify.data.repository.WarrantiesRepositoryImpl
 import com.guarantify.domain.model.DatabaseError
 import com.guarantify.domain.model.StorageError
 import com.guarantify.domain.model.Warranty
@@ -34,8 +33,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -118,9 +116,9 @@ class WarrantiesRepositoryImplTest {
         val resultList = repository.latestWarranties.first()
 
         // ASSERT
-        assertEquals(2, resultList.size)
-        assertEquals("Samsung Galaxy S21", resultList[0].productName)
-        assertEquals("2", resultList[1].userId)
+        Assertions.assertEquals(2, resultList.size)
+        Assertions.assertEquals("Samsung Galaxy S21", resultList[0].productName)
+        Assertions.assertEquals("2", resultList[1].userId)
     }
 
     @Test
@@ -132,7 +130,7 @@ class WarrantiesRepositoryImplTest {
         val resultList = repository.latestWarranties.first()
 
         // ASSERT
-        assertTrue(resultList.isEmpty())
+        Assertions.assertTrue(resultList.isEmpty())
         verify { warrantyDao.getAllWarranties() }
     }
 
@@ -158,7 +156,7 @@ class WarrantiesRepositoryImplTest {
             val result = repository.createOrUpdateWarranty(warranty)
 
             // ASSERT
-            assertTrue(result is Result.Success)
+            Assertions.assertTrue(result is Result.Success)
 
             coVerify(exactly = 1) { warrantyDao.upsertWithPhotoLogic(any()) }
             verify { workManager.beginWith(any<OneTimeWorkRequest>()) }
@@ -174,8 +172,8 @@ class WarrantiesRepositoryImplTest {
 
         val result = repository.createOrUpdateWarranty(warranty)
 
-        assertTrue(result is Result.Error)
-        assertEquals(expectedException, (result as Result.Error).throwable)
+        Assertions.assertTrue(result is Result.Error)
+        Assertions.assertEquals(expectedException, (result as Result.Error).throwable)
 
         coVerify(exactly = 1) {
             warrantyDao.upsertWithPhotoLogic(any())
@@ -203,7 +201,7 @@ class WarrantiesRepositoryImplTest {
 
             val result = repository.createOrUpdateWarranty(warranty)
 
-            assertTrue(result is Result.Success)
+            Assertions.assertTrue(result is Result.Success)
             coVerify(exactly = 1) { warrantyDao.upsertWithPhotoLogic(any()) }
             confirmVerified(warrantyDao)
         }
@@ -227,7 +225,7 @@ class WarrantiesRepositoryImplTest {
 
             val result = repository.createOrUpdateWarranty(warranty)
 
-            assertTrue(result is Result.Success)
+            Assertions.assertTrue(result is Result.Success)
             coVerify(exactly = 1) { warrantyDao.upsertWithPhotoLogic(any()) }
             confirmVerified(warrantyDao)
         }
@@ -250,7 +248,7 @@ class WarrantiesRepositoryImplTest {
         val result = repository.getWarranty(warrantyId)
 
         assertIs<Result.Success<Warranty>>(result)
-        assertEquals(expectedDomain, result.data)
+        Assertions.assertEquals(expectedDomain, result.data)
 
         coVerify(exactly = 1) { warrantyDao.getWarrantyById(warrantyId) }
 
@@ -282,7 +280,7 @@ class WarrantiesRepositoryImplTest {
         val result = repository.getWarranty("123")
 
         assertIs<Result.Error>(result)
-        assertEquals(sqliteException, result.throwable)
+        Assertions.assertEquals(sqliteException, result.throwable)
 
         coVerify(exactly = 1) { warrantyDao.getWarrantyById(any()) }
 
@@ -320,7 +318,7 @@ class WarrantiesRepositoryImplTest {
         val result = repository.deleteWarranty(warranty)
 
         assertIs<Result.Error>(result)
-        assertEquals(exception, result.throwable)
+        Assertions.assertEquals(exception, result.throwable)
         coVerify { warrantyDao.softDeleteWarranty(any(), any(), any()) }
         confirmVerified(warrantyDao)
     }
@@ -342,7 +340,7 @@ class WarrantiesRepositoryImplTest {
         val result = repository.uploadWarrantyPhoto(warrantyId, photoUri)
 
         assertIs<Result.Success<String>>(result)
-        assertEquals(expectedUrl, result.data)
+        Assertions.assertEquals(expectedUrl, result.data)
 
         unmockkStatic(Uri::class)
     }
