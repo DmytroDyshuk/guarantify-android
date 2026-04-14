@@ -8,6 +8,7 @@ import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.mapper.toDto
 import com.guarantify.data.mapper.toEntity
 import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSource
+import com.guarantify.domain.model.auth.AuthRequiredException
 import com.guarantify.domain.model.sync.SyncError
 import com.guarantify.domain.model.sync.SyncStatus
 import com.guarantify.domain.repository.SyncWarrantiesRepository
@@ -32,7 +33,7 @@ class SyncWarrantiesRepositoryImpl @Inject constructor(
 
             val mappedError = when (e) {
                 is FirebaseFirestoreException -> SyncError.NetworkError()
-                is IllegalStateException -> SyncError.AuthError()
+                is AuthRequiredException -> SyncError.AuthError()
                 is SQLiteException -> SyncError.DatabaseError(e)
                 else -> SyncError.UnknownError(e)
             }

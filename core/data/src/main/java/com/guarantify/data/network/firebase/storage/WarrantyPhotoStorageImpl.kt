@@ -8,6 +8,7 @@ import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.storageMetadata
 import com.guarantify.common.result.Result
 import com.guarantify.domain.model.StorageError
+import com.guarantify.domain.model.auth.AuthRequiredException
 import jakarta.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
@@ -23,7 +24,7 @@ class WarrantyPhotoStorageImpl @Inject constructor(
     override suspend fun uploadImage(warrantyId: String, imageUri: Uri): Result<String> {
         return try {
             val userId = firebaseAuth.currentUser?.uid
-                ?: return Result.Error(Exception("User not authenticated"))
+                ?: return Result.Error(AuthRequiredException())
 
             val fileName = imageUri.lastPathSegment
             val imageRef = storageRef.child("users/$userId/warranties/$warrantyId/$fileName")

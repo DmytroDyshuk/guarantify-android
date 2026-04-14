@@ -3,6 +3,7 @@ package com.guarantify.data.network.firebase.firestore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.guarantify.data.network.dto.WarrantyDto
+import com.guarantify.domain.model.auth.AuthRequiredException
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
 
@@ -13,7 +14,7 @@ class FirestoreWarrantyDataSourceImpl @Inject constructor(
 
     private val userId: String
         get() = firebaseAuth.currentUser?.uid
-            ?: throw IllegalStateException("User not authenticated")
+            ?: throw AuthRequiredException()
 
     private val warrantiesCollection
         get() = firebaseFirestore

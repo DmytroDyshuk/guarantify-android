@@ -40,7 +40,7 @@ import java.time.LocalDate
 import kotlin.test.assertIs
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class WarrantiesRepositoryImplTest {
+class WarrantiesRepositoryTest {
     @MockK
     private lateinit var warrantyPhotoStorage: WarrantyPhotoStorage
 
@@ -90,7 +90,7 @@ class WarrantiesRepositoryImplTest {
 
 
     @Test
-    fun `latestWarranties should emit mapped domain models`() = runTest {
+    fun latestWarranties_should_emit_mapped_domain_models() = runTest {
         // ARRANGE
         val entity1 = WarrantyEntity(
             id = "1",
@@ -122,7 +122,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `latestWarranties should emit empty list when dao fails`() = runTest {
+    fun latestWarranties_should_emit_empty_list_when_dao_fails() = runTest {
         // ARRANGE
         every { warrantyDao.getAllWarranties() } returns flow { throw Exception("DB error") }
 
@@ -135,7 +135,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `createOrUpdateWarranty should save to dao and start upload chain when photo is pending`() =
+    fun createOrUpdateWarranty_should_save_to_dao_and_start_upload_chain_when_photo_is_pending() =
         runTest {
             // ARRANGE
             val warranty = createFakeWarranty()
@@ -164,7 +164,7 @@ class WarrantiesRepositoryImplTest {
         }
 
     @Test
-    fun `createOrUpdateWarranty should return Error when database fails`() = runTest {
+    fun createOrUpdateWarranty_should_return_Error_when_database_fails() = runTest {
         val warranty = createFakeWarranty()
         val expectedException = SQLiteException("Database error")
 
@@ -183,7 +183,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `createOrUpdateWarranty should save to dao without starting upload when no photo`() =
+    fun createOrUpdateWarranty_should_save_to_dao_without_starting_upload_when_no_photo() =
         runTest {
             val warranty = createFakeWarranty()
             val savedEntity = WarrantyEntity(
@@ -207,7 +207,7 @@ class WarrantiesRepositoryImplTest {
         }
 
     @Test
-    fun `createOrUpdateWarranty should save with READY_TO_SYNC when photo unchanged`() =
+    fun createOrUpdateWarranty_should_save_with_READY_TO_SYNC_when_photo_unchanged() =
         runTest {
             val warranty = createFakeWarranty()
             val savedEntity = WarrantyEntity(
@@ -231,7 +231,7 @@ class WarrantiesRepositoryImplTest {
         }
 
     @Test
-    fun `getWarranty should return Success with mapped data when DAO returns entity`() = runTest {
+    fun getWarranty_should_return_Success_with_mapped_data_when_DAO_returns_entity() = runTest {
         val warrantyId = "23"
         val warrantyEntity = WarrantyEntity(
             id = warrantyId,
@@ -256,7 +256,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `getWarranty should return Error with NotFound when database return null`() = runTest {
+    fun getWarranty_should_return_Error_with_NotFound_when_database_return_null() = runTest {
         val warrantyId = "123"
 
         coEvery { warrantyDao.getWarrantyById(warrantyId) } returns null
@@ -272,7 +272,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `getWarranty should return Error when database fails`() = runTest {
+    fun getWarranty_should_return_Error_when_database_fails() = runTest {
         val sqliteException = SQLiteException()
 
         coEvery { warrantyDao.getWarrantyById(any()) } throws sqliteException
@@ -288,7 +288,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `deleteWarranty should soft delete warranty with dao`() = runTest {
+    fun deleteWarranty_should_soft_delete_warranty_with_dao() = runTest {
         // ARRANGE
         val warranty = createFakeWarranty()
 
@@ -309,7 +309,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `deleteWarranty should handle database errors gracefully`() = runTest {
+    fun deleteWarranty_should_handle_database_errors_gracefully() = runTest {
         val warranty = createFakeWarranty()
         val exception = SQLiteException("DB error")
 
@@ -324,7 +324,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `uploadWarrantyPhoto should return Success when storage succeeds`() = runTest {
+    fun uploadWarrantyPhoto_should_return_Success_when_storage_succeeds() = runTest {
         val warrantyId = "1"
         val photoUri = "file://test.jpg"
         val expectedUrl = "https://firebasestorage.com/1.jpg"
@@ -346,7 +346,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `uploadWarrantyPhoto should return Error when storage fails`() = runTest {
+    fun uploadWarrantyPhoto_should_return_Error_when_storage_fails() = runTest {
         val exception = Exception("Upload failed")
         coEvery { warrantyPhotoStorage.uploadImage(any(), any()) } throws exception
 
@@ -357,7 +357,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `updateRemoteUrlPhotoLocally should update dao and return success`() = runTest {
+    fun updateRemoteUrlPhotoLocally_should_update_dao_and_return_success() = runTest {
         val warrantyId = "1"
         val photoUrl = "https://example.com/photo.jpg"
         val existingEntity = WarrantyEntity(
@@ -383,7 +383,7 @@ class WarrantiesRepositoryImplTest {
     }
 
     @Test
-    fun `updateRemoteUrlPhotoLocally should return Error when warranty not found`() = runTest {
+    fun updateRemoteUrlPhotoLocally_should_return_Error_when_warranty_not_found() = runTest {
         coEvery { warrantyDao.getWarrantyById(any()) } returns null
 
         val result = repository.updateRemoteUrlPhotoLocally("1", "url")
