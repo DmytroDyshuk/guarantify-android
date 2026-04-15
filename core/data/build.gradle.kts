@@ -77,4 +77,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.junit)
 
+    //DataStore
+    implementation(libs.androidx.datastore.preferences)
 }

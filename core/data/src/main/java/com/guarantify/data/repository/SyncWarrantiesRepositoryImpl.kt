@@ -11,6 +11,7 @@ import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSourc
 import com.guarantify.domain.model.auth.AuthRequiredException
 import com.guarantify.domain.model.sync.SyncError
 import com.guarantify.domain.model.sync.SyncStatus
+import com.guarantify.domain.preferences.SyncPreferencesManager
 import com.guarantify.domain.repository.SyncWarrantiesRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -20,13 +21,17 @@ import kotlinx.coroutines.withContext
 class SyncWarrantiesRepositoryImpl @Inject constructor(
     private val firestoreWarrantyDataSource: FirestoreWarrantyDataSource,
     private val warrantyDao: WarrantyDao,
+    private val syncPreferencesManager: SyncPreferencesManager,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : SyncWarrantiesRepository {
 
     override suspend fun syncWarranties(): Result<Unit> = withContext(ioDispatcher) {
         try {
-            pullRemoteChanges()
+            val newSyncTimestamp= pullRemoteChanges()
             pushLocalChanges()
+
+            syncPreferencesManager.updateLastSyncTimestamp(newSyncTimestamp)
+
             Result.Success(Unit)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
@@ -42,10 +47,10 @@ class SyncWarrantiesRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun pullRemoteChanges() {
-        val lastLocalUpdate = warrantyDao.getLastUpdatedTimestamp() ?: 0L
+    private suspend fun pullRemoteChanges(): Long {
+        val lastSyncUpdate = syncPreferencesManager.getLastSyncTimestamp()
         val remoteChanges =
-            firestoreWarrantyDataSource.getWarrantiesUpdatedSince(lastLocalUpdate)
+            firestoreWarrantyDataSource.getWarrantiesUpdatedSince(lastSyncUpdate)
 
         remoteChanges.forEach { remoteDto ->
             val localEntity = warrantyDao.getWarrantyById(remoteDto.id)
@@ -66,6 +71,8 @@ class SyncWarrantiesRepositoryImpl @Inject constructor(
                 }
             }
         }
+
+        return remoteChanges.maxOfOrNull { it.updatedAt } ?: lastSyncUpdate
     }
 
     private suspend fun pushLocalChanges() {

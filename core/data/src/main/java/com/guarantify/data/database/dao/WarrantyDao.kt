@@ -64,7 +64,4 @@ interface WarrantyDao {
 
     @Delete
     suspend fun hardDeleteWarranties(warranties: List<WarrantyEntity>)
-
-    @Query("SELECT MAX(updatedAt) FROM warranties")
-    suspend fun getLastUpdatedTimestamp(): Long?
 }
