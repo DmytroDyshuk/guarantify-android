@@ -20,6 +20,34 @@ interface WarrantyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun createOrUpdateWarranty(warranty: WarrantyEntity)
 
+    @Query("SELECT * FROM warranties WHERE id = :id AND isDeleted = 0")
+    suspend fun getWarrantyById(id: String): WarrantyEntity?
+
+    @Query("SELECT * FROM warranties WHERE syncStatus != 'SYNCED'")
+    suspend fun getUnsyncedWarranties(): List<WarrantyEntity>
+
+    @Query("UPDATE warranties SET syncStatus = :syncStatus WHERE id = :id")
+    suspend fun updateWarrantySyncStatus(id: String, syncStatus: SyncStatus)
+
+    @Query("UPDATE warranties SET syncStatus = :status WHERE id IN (:ids)")
+    suspend fun updateSyncStatusForIds(ids: List<String>, status: SyncStatus)
+
+    @Query("UPDATE warranties SET isDeleted = 1, updatedAt = :updatedAt, syncStatus = :syncStatus WHERE id = :id")
+    suspend fun softDeleteWarranty(
+        id: String,
+        updatedAt: Long,
+        syncStatus: SyncStatus = SyncStatus.READY_TO_SYNC
+    )
+
+    @Query("DELETE FROM warranties WHERE id = :id")
+    suspend fun hardDeleteWarrantyById(id: String)
+
+    @Delete
+    suspend fun hardDeleteWarranties(warranties: List<WarrantyEntity>)
+
+    @Query("SELECT * FROM warranties WHERE id IN (:ids)")
+    suspend fun getWarrantiesByIds(ids: List<String>): List<WarrantyEntity>
+
     @Transaction
     suspend fun upsertWithPhotoLogic(warranty: Warranty): WarrantyEntity {
         val oldWarranty = getWarrantyById(warranty.id)
@@ -43,25 +71,15 @@ interface WarrantyDao {
         return entity
     }
 
-    @Query("SELECT * FROM warranties WHERE id = :id AND isDeleted = 0")
-    suspend fun getWarrantyById(id: String): WarrantyEntity?
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdateWarranties(warranties: List<WarrantyEntity>)
 
-    @Query("SELECT * FROM warranties WHERE syncStatus != 'SYNCED'")
-    suspend fun getUnsyncedWarranties(): List<WarrantyEntity>
+    @Query("DELETE FROM warranties WHERE id IN (:ids)")
+    suspend fun hardDeleteWarrantiesByIds(ids: List<String>)
 
-    @Query("UPDATE warranties SET syncStatus = :syncStatus WHERE id = :id")
-    suspend fun updateWarrantySyncStatus(id: String, syncStatus: SyncStatus)
-
-    @Query("UPDATE warranties SET syncStatus = :status WHERE id IN (:ids)")
-    suspend fun updateSyncStatusForIds(ids: List<String>, status: SyncStatus)
-
-    @Query("UPDATE warranties SET isDeleted = 1, updatedAt = :updatedAt, syncStatus = :syncStatus WHERE id = :id")
-    suspend fun softDeleteWarranty(
-        id: String,
-        updatedAt: Long,
-        syncStatus: SyncStatus = SyncStatus.READY_TO_SYNC
-    )
-
-    @Delete
-    suspend fun hardDeleteWarranties(warranties: List<WarrantyEntity>)
+    @Transaction
+    suspend fun applyRemoteChanges(upsertList: List<WarrantyEntity>, deleteIds: List<String>) {
+        if (upsertList.isNotEmpty()) insertOrUpdateWarranties(upsertList)
+        if (deleteIds.isNotEmpty()) hardDeleteWarrantiesByIds(deleteIds)
+    }
 }

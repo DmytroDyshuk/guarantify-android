@@ -5,6 +5,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
 import com.guarantify.data.database.entity.WarrantyEntity
+import com.guarantify.data.mapper.toDto
+import com.guarantify.data.mapper.toEntity
 import com.guarantify.data.network.dto.WarrantyDto
 import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSource
 import com.guarantify.domain.model.auth.AuthRequiredException
@@ -54,99 +56,16 @@ class SyncWarrantiesRepositoryTest {
     }
 
     @Test
-    fun pullRemoteChanges_should_update_local_warranty_when_remote_is_newer() = runTest {
-        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
-
-        val localWarranty = WarrantyEntity(
-            id = "1",
-            userId = "1",
-            updatedAt = 1000L,
-            purchaseDate = LocalDate.of(2024, 1, 1),
-            expirationDate = LocalDate.of(2026, 1, 1),
-            currency = "USD",
-            title = "Test"
-        )
-
-        val remoteWarranty = WarrantyDto(
-            id = "1",
-            updatedAt = 1500L,
-            purchaseDate = "2024-01-01",
-            expirationDate = "2026-01-01",
-            currency = "USD"
-        )
-
-        coEvery {
-            firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1000L)
-        } returns listOf(remoteWarranty)
-        coEvery { warrantyDao.getWarrantyById("1") } returns localWarranty
-        coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
-        coEvery { warrantyDao.getUnsyncedWarranties() } returns emptyList()
-
-        val result = repository.syncWarranties()
-        assertTrue(result is Result.Success)
-
-        coVerify { syncPreferencesManager.updateLastSyncTimestamp(any()) }
-        coVerify(exactly = 1) { warrantyDao.createOrUpdateWarranty(any()) }
-        coVerify {
-            warrantyDao.createOrUpdateWarranty(
-                match { entity ->
-                    entity.id == "1" && entity.syncStatus == SyncStatus.SYNCED
-                }
-            )
-        }
-        coVerify(exactly = 1) { warrantyDao.getUnsyncedWarranties() }
-    }
-
-    @Test
-    fun pullRemoteChanges_local_entity_should_not_be_updated_when_remote_older_than_local() =
-        runTest {
-            coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
-
-            val remoteWarranty = WarrantyDto(
-                id = "1",
-                updatedAt = 700L,
-                purchaseDate = "2024-01-01",
-                expirationDate = "2026-01-01",
-                currency = "USD"
-            )
-
-            val localWarranty = WarrantyEntity(
-                id = "1",
-                userId = "1",
-                updatedAt = 1000L,
-                purchaseDate = LocalDate.of(2024, 1, 1),
-                expirationDate = LocalDate.of(2026, 1, 1),
-                currency = "USD",
-                title = "Test"
-            )
-
-            coEvery {
-                firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1000L)
-            } returns listOf(remoteWarranty)
-            coEvery { warrantyDao.getWarrantyById("1") } returns localWarranty
-            coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
-            coEvery { warrantyDao.getUnsyncedWarranties() } returns emptyList()
-
-            val result = repository.syncWarranties()
-            assertTrue(result is Result.Success)
-
-            coVerify(exactly = 0) { warrantyDao.createOrUpdateWarranty(any()) }
-        }
-
-    @Test
     fun syncWarranties_should_return_result_success_when_sync_succeed() = runTest {
-        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
-
         val listWarrantiesDto = listOf(
             WarrantyDto(
                 id = "1",
-                updatedAt = 1000L,
+                updatedAt = 1200L,
                 currency = "USD",
                 purchaseDate = "2024-01-01",
                 expirationDate = "2026-01-01"
             )
         )
-
         val localWarranty = WarrantyEntity(
             id = "1",
             userId = "1",
@@ -157,20 +76,98 @@ class SyncWarrantiesRepositoryTest {
             title = "Test"
         )
 
+        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
         coEvery {
             firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1000L)
         } returns listWarrantiesDto
-        coEvery { warrantyDao.getWarrantyById("1") } returns localWarranty
-        coEvery { warrantyDao.createOrUpdateWarranty(any()) } just Runs
+        coEvery { warrantyDao.getWarrantiesByIds(listOf("1")) } returns listOf(localWarranty)
+        coEvery { warrantyDao.applyRemoteChanges(any(), any()) } just Runs
         coEvery { warrantyDao.getUnsyncedWarranties() } returns emptyList()
 
         val result = repository.syncWarranties()
         assertTrue { result is Result.Success }
 
-        coVerify { syncPreferencesManager.updateLastSyncTimestamp(any()) }
-        coVerify(exactly = 1) { warrantyDao.createOrUpdateWarranty(any()) }
+        coVerify(atLeast = 1) { syncPreferencesManager.updateLastSyncTimestamp(any()) }
+        coVerify(exactly = 1) { warrantyDao.applyRemoteChanges(any(), any()) }
         coVerify(exactly = 1) { warrantyDao.getUnsyncedWarranties() }
     }
+
+    @Test
+    fun pullRemoteChanges_should_update_local_warranty_when_remote_is_newer() = runTest {
+        val localWarranty = WarrantyEntity(
+            id = "1",
+            userId = "1",
+            updatedAt = 1000L,
+            purchaseDate = LocalDate.of(2024, 1, 1),
+            expirationDate = LocalDate.of(2026, 1, 1),
+            currency = "USD",
+            title = "Test"
+        )
+        val remoteWarranty = WarrantyDto(
+            id = "1",
+            updatedAt = 1500L,
+            purchaseDate = "2024-01-01",
+            expirationDate = "2026-01-01",
+            currency = "USD"
+        )
+
+        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
+        coEvery {
+            firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1000L)
+        } returns listOf(remoteWarranty)
+        coEvery { warrantyDao.getWarrantiesByIds(listOf("1")) } returns listOf(localWarranty)
+        coEvery { warrantyDao.applyRemoteChanges(any(), any()) } just Runs
+        coEvery { warrantyDao.getUnsyncedWarranties() } returns emptyList()
+
+        val result = repository.syncWarranties()
+        assertTrue(result is Result.Success)
+
+        coVerify { syncPreferencesManager.updateLastSyncTimestamp(any()) }
+        coVerify(exactly = 1) { warrantyDao.getWarrantiesByIds(listOf("1")) }
+        coVerify(exactly = 1) {
+            warrantyDao.applyRemoteChanges(
+                upsertList = match {
+                    it.isNotEmpty() && it.all { entity -> entity.syncStatus == SyncStatus.SYNCED }
+                },
+                deleteIds = any()
+            )
+        }
+        coVerify(exactly = 1) { warrantyDao.getUnsyncedWarranties() }
+    }
+
+    @Test
+    fun pullRemoteChanges_local_entity_should_not_be_updated_when_remote_older_than_local() =
+        runTest {
+            val remoteWarranty = WarrantyDto(
+                id = "1",
+                updatedAt = 700L,
+                purchaseDate = "2024-01-01",
+                expirationDate = "2026-01-01",
+                currency = "USD"
+            )
+            val localWarranty = WarrantyEntity(
+                id = "1",
+                userId = "1",
+                updatedAt = 1000L,
+                purchaseDate = LocalDate.of(2024, 1, 1),
+                expirationDate = LocalDate.of(2026, 1, 1),
+                currency = "USD",
+                title = "Test"
+            )
+
+            coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
+            coEvery {
+                firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1000L)
+            } returns listOf(remoteWarranty)
+            coEvery { warrantyDao.getWarrantiesByIds(listOf("1")) } returns listOf(localWarranty)
+            coEvery { warrantyDao.applyRemoteChanges(any(), any()) } just Runs
+            coEvery { warrantyDao.getUnsyncedWarranties() } returns emptyList()
+
+            val result = repository.syncWarranties()
+            assertTrue(result is Result.Success)
+
+            coVerify(exactly = 0) { warrantyDao.applyRemoteChanges(any(), any()) }
+        }
 
     @Test
     fun syncWarranties_should_return_network_error_when_firestore_fails() = runTest {
@@ -188,6 +185,8 @@ class SyncWarrantiesRepositoryTest {
         assertTrue { error is SyncError.NetworkError }
 
         coVerify(exactly = 0) { syncPreferencesManager.updateLastSyncTimestamp(any()) }
+        coVerify(exactly = 0) { warrantyDao.getWarrantiesByIds(any()) }
+        coVerify(exactly = 0) { warrantyDao.applyRemoteChanges(any(), any()) }
     }
 
     @Test
@@ -206,6 +205,8 @@ class SyncWarrantiesRepositoryTest {
         assertTrue { error is SyncError.AuthError }
 
         coVerify(exactly = 0) { syncPreferencesManager.updateLastSyncTimestamp(any()) }
+        coVerify(exactly = 0) { warrantyDao.getWarrantiesByIds(any()) }
+        coVerify(exactly = 0) { warrantyDao.applyRemoteChanges(any(), any()) }
     }
 
     @Test
@@ -222,11 +223,11 @@ class SyncWarrantiesRepositoryTest {
             )
         )
 
-        coEvery { warrantyDao.createOrUpdateWarranty(any()) } throws mockSQLiteException
         coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1200L
         coEvery {
             firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1200L)
         } returns listWarrantiesDto
+        coEvery { warrantyDao.getWarrantiesByIds(listOf("1")) } throws mockSQLiteException
 
         val result = repository.syncWarranties()
         assertTrue { result is Result.Error }
@@ -235,6 +236,149 @@ class SyncWarrantiesRepositoryTest {
         assertTrue { error is SyncError.DatabaseError }
 
         coVerify(exactly = 0) { syncPreferencesManager.updateLastSyncTimestamp(any()) }
+        coVerify(exactly = 0) { warrantyDao.applyRemoteChanges(any(), any()) }
+    }
+
+    @Test
+    fun pullRemoteChanges_should_create_new_entity_when_local_is_null() = runTest {
+        val remoteWarranty = WarrantyDto(
+            id = "1",
+            updatedAt = 1200L,
+            purchaseDate = "2024-01-01",
+            expirationDate = "2026-01-01",
+            currency = "USD"
+        )
+
+        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
+        coEvery { syncPreferencesManager.updateLastSyncTimestamp(any()) } just Runs
+        coEvery { firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1000L) } returns listOf(
+            remoteWarranty
+        )
+        coEvery { warrantyDao.getWarrantiesByIds(listOf("1")) } returns emptyList()
+        coEvery { warrantyDao.applyRemoteChanges(any(), any()) } just Runs
+
+        val result = repository.syncWarranties()
+        assertTrue { result is Result.Success }
+
+        coVerify(atLeast = 1) { syncPreferencesManager.updateLastSyncTimestamp(any()) }
+        coVerify(exactly = 1) { warrantyDao.getWarrantiesByIds(listOf("1")) }
+        coVerify(exactly = 1) {
+            warrantyDao.applyRemoteChanges(
+                upsertList = listOf(remoteWarranty.toEntity().copy(syncStatus = SyncStatus.SYNCED)),
+                deleteIds = emptyList()
+            )
+        }
+    }
+
+    @Test
+    fun pullRemoteChanges_should_delete_local_when_remote_is_deleted() = runTest {
+        val remoteWarranty =
+            WarrantyDto(id = "1", updatedAt = 1500L, isDeleted = true, currency = "USD")
+        val localWarranty = WarrantyEntity(
+            id = "1",
+            userId = "1",
+            updatedAt = 1000L,
+            purchaseDate = LocalDate.of(2024, 1, 1),
+            expirationDate = LocalDate.of(2026, 1, 1),
+            currency = "USD",
+            title = "Test"
+        )
+
+        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
+        coEvery { firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1000L) } returns listOf(
+            remoteWarranty
+        )
+        coEvery { warrantyDao.getWarrantiesByIds(listOf("1")) } returns listOf(localWarranty)
+        coEvery { warrantyDao.applyRemoteChanges(any(), any()) } just Runs
+        coEvery { warrantyDao.getUnsyncedWarranties() } returns emptyList()
+
+        val result = repository.syncWarranties()
+        assertTrue(result is Result.Success)
+
+        coVerify(exactly = 1) {
+            warrantyDao.applyRemoteChanges(emptyList(), listOf("1"))
+        }
+    }
+
+    @Test
+    fun pushLocalChanges_should_upload_unsynced_warranties() = runTest {
+        val toUpload = listOf(
+            WarrantyEntity(
+                id = "1",
+                userId = "1",
+                updatedAt = 900L,
+                purchaseDate = LocalDate.of(2024, 1, 1),
+                expirationDate = LocalDate.of(2026, 1, 1),
+                currency = "USD",
+                title = "Test",
+                syncStatus = SyncStatus.READY_TO_SYNC,
+                isDeleted = false
+            )
+        )
+
+        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
+        coEvery { firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1000L) } returns emptyList()
+        coEvery { warrantyDao.getUnsyncedWarranties() } returns toUpload
+        coEvery {
+            firestoreWarrantyDataSource.pushChangesBatch(
+                toUpload.map { it.toDto() },
+                any()
+            )
+        } just Runs
+        coEvery {
+            warrantyDao.updateSyncStatusForIds(
+                toUpload.map { it.id },
+                SyncStatus.SYNCED
+            )
+        } just Runs
+
+        val result = repository.syncWarranties()
+        assertTrue { result is Result.Success }
+
+        coVerify(exactly = 1) {
+            firestoreWarrantyDataSource.pushChangesBatch(
+                match { it.size == 1 && it[0].id == "1" },
+                emptyList()
+            )
+        }
+        coVerify(exactly = 1) { warrantyDao.updateSyncStatusForIds(listOf("1"), SyncStatus.SYNCED) }
+        coVerify(exactly = 0) { warrantyDao.hardDeleteWarranties(any()) }
+    }
+
+    @Test
+    fun pushLocalChanges_should_hard_delete_marked_warranty() = runTest {
+        val toDelete = listOf(
+            WarrantyEntity(
+                id = "1",
+                userId = "1",
+                updatedAt = 900L,
+                purchaseDate = LocalDate.of(2024, 1, 1),
+                expirationDate = LocalDate.of(2026, 1, 1),
+                currency = "USD",
+                title = "Test",
+                syncStatus = SyncStatus.READY_TO_SYNC,
+                isDeleted = true
+            )
+        )
+
+        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
+        coEvery { firestoreWarrantyDataSource.getWarrantiesUpdatedSince(any()) } returns emptyList()
+        coEvery { warrantyDao.getUnsyncedWarranties() } returns toDelete
+        coEvery { firestoreWarrantyDataSource.pushChangesBatch(any(), any()) } just Runs
+        coEvery { warrantyDao.hardDeleteWarranties(toDelete) } just Runs
+
+        val result = repository.syncWarranties()
+        assertTrue { result is Result.Success }
+
+        coVerify(exactly = 1) {
+            firestoreWarrantyDataSource.pushChangesBatch(emptyList(), listOf("1"))
+        }
+        coVerify(exactly = 1) {
+            warrantyDao.hardDeleteWarranties(
+                match { it.size == 1 && it[0].id == "1" }
+            )
+        }
+        coVerify(exactly = 0) { warrantyDao.updateSyncStatusForIds(any(), any()) }
     }
 
 }

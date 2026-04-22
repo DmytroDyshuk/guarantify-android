@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.guarantify.common.di.IoDispatcher
 import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
+import com.guarantify.data.database.entity.WarrantyEntity
 import com.guarantify.data.mapper.toDto
 import com.guarantify.data.mapper.toEntity
 import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSource
@@ -27,10 +28,9 @@ class SyncWarrantiesRepositoryImpl @Inject constructor(
 
     override suspend fun syncWarranties(): Result<Unit> = withContext(ioDispatcher) {
         try {
-            val newSyncTimestamp= pullRemoteChanges()
-            pushLocalChanges()
-
+            val newSyncTimestamp = pullRemoteChanges()
             syncPreferencesManager.updateLastSyncTimestamp(newSyncTimestamp)
+            pushLocalChanges()
 
             Result.Success(Unit)
         } catch (e: Exception) {
@@ -49,34 +49,50 @@ class SyncWarrantiesRepositoryImpl @Inject constructor(
 
     private suspend fun pullRemoteChanges(): Long {
         val lastSyncUpdate = syncPreferencesManager.getLastSyncTimestamp()
-        val remoteChanges =
+        val remoteWarranties =
             firestoreWarrantyDataSource.getWarrantiesUpdatedSince(lastSyncUpdate)
 
-        remoteChanges.forEach { remoteDto ->
-            val localEntity = warrantyDao.getWarrantyById(remoteDto.id)
+        if (remoteWarranties.isEmpty()) return lastSyncUpdate
 
-            if (localEntity == null) {
-                warrantyDao.createOrUpdateWarranty(
-                    remoteDto.toEntity().copy(
-                        syncStatus = SyncStatus.SYNCED
-                    )
-                )
+        val remoteIds = remoteWarranties.map { it.id }
+        val localEntitiesMap = warrantyDao.getWarrantiesByIds(remoteIds).associateBy { it.id }
+
+        val entitiesToUpsert = mutableListOf<WarrantyEntity>()
+        val idsToDelete = mutableListOf<String>()
+
+        remoteWarranties.forEach { remoteDto ->
+            val localEntity = localEntitiesMap[remoteDto.id]
+
+            if (localEntity != null && remoteDto.updatedAt <= localEntity.updatedAt) {
+                return@forEach
+            }
+
+            if (localEntity == null && remoteDto.isDeleted) {
+                return@forEach
+            }
+
+            if (remoteDto.isDeleted) {
+                idsToDelete.add(remoteDto.id)
             } else {
-                if (remoteDto.updatedAt > localEntity.updatedAt) {
-                    warrantyDao.createOrUpdateWarranty(
-                        remoteDto.toEntity().copy(
-                            syncStatus = SyncStatus.SYNCED
-                        )
-                    )
-                }
+                entitiesToUpsert.add(
+                    remoteDto.toEntity().copy(syncStatus = SyncStatus.SYNCED)
+                )
             }
         }
 
-        return remoteChanges.maxOfOrNull { it.updatedAt } ?: lastSyncUpdate
+        if (entitiesToUpsert.isNotEmpty() || idsToDelete.isNotEmpty()) {
+            warrantyDao.applyRemoteChanges(
+                upsertList = entitiesToUpsert,
+                deleteIds = idsToDelete
+            )
+        }
+
+        return remoteWarranties.maxOfOrNull { it.updatedAt } ?: lastSyncUpdate
     }
 
     private suspend fun pushLocalChanges() {
         val unsyncedWarranties = warrantyDao.getUnsyncedWarranties()
+
         if (unsyncedWarranties.isEmpty()) return
 
         val entitiesToUpload = unsyncedWarranties.filter {
