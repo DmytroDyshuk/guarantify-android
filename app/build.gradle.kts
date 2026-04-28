@@ -87,6 +87,9 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
 
+    //DataStore
+    implementation(libs.androidx.datastore.preferences)
+
     //JUnit5
     testImplementation(libs.junit.jupiter.engine)
     testImplementation(libs.junit.jupiter.api)

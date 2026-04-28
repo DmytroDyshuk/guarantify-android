@@ -26,6 +26,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -379,6 +381,22 @@ class SyncWarrantiesRepositoryTest {
             )
         }
         coVerify(exactly = 0) { warrantyDao.updateSyncStatusForIds(any(), any()) }
+    }
+
+    @Test
+    fun syncWarranties_should_propagate_cancellation_exception() = runTest {
+        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
+        coEvery {
+            firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1000L)
+        } throws CancellationException()
+
+        assertFailsWith<CancellationException> {
+            repository.syncWarranties()
+        }
+
+        coVerify(exactly = 0) { syncPreferencesManager.updateLastSyncTimestamp(any()) }
+        coVerify(exactly = 0) { warrantyDao.getWarrantiesByIds(any()) }
+        coVerify(exactly = 0) { warrantyDao.applyRemoteChanges(any(), any()) }
     }
 
 }
