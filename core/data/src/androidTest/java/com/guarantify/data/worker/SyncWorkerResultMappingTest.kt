@@ -20,7 +20,7 @@ import kotlin.test.assertEquals
 import androidx.work.ListenableWorker.Result as WorkResult
 
 @RunWith(AndroidJUnit4::class)
-class SyncWorkerTest {
+class SyncWorkerResultMappingTest {
     private val appContext = ApplicationProvider.getApplicationContext<Context>()
     private val syncWarrantiesRepository: SyncWarrantiesRepository = mockk()
 
