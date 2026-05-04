@@ -31,6 +31,15 @@ configure<ApplicationExtension> {
     buildFeatures {
         compose = true
     }
+
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md"
+            )
+        }
+    }
 }
 
 hilt {
@@ -73,13 +82,25 @@ dependencies {
     //Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+
+    //WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.hilt.work)
+
+    //WorkManager test
+    androidTestImplementation(libs.work.testing)
 
     //Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+
+    //DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     //JUnit5
     testImplementation(libs.junit.jupiter.engine)
@@ -94,6 +115,10 @@ dependencies {
 
     //JUnit4
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    //Mockk
+    testImplementation(libs.mockk)
+    androidTestImplementation(libs.mockk.android)
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.tooling.preview)

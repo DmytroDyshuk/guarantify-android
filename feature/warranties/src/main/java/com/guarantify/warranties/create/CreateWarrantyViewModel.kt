@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guarantify.common.result.Result
 import com.guarantify.domain.model.Warranty
-import com.guarantify.domain.repository.GoogleAuthRepository
+import com.guarantify.domain.repository.AuthRepository
 import com.guarantify.domain.repository.WarrantiesRepository
 import com.guarantify.util.date.DateFormatter
 import com.guarantify.util.extensions.toLocalDate
@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class CreateWarrantyViewModel @Inject constructor(
     private val warrantiesRepository: WarrantiesRepository,
-    private val authRepository: GoogleAuthRepository,
+    private val authRepository: AuthRepository,
     private val dateFormatter: DateFormatter
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CreateWarrantyUiState())
@@ -227,7 +227,7 @@ class CreateWarrantyViewModel @Inject constructor(
             brand = brand.takeIf { it.isNotBlank() },
             amount = MoneyParser.parseToMinorUnits(price, selectedCurrency),
             currency = selectedCurrency,
-            photoUrl = photoUri,
+            localPhotoUri = photoUri,
             purchaseDate = purchaseDate,
             expirationDate = expirationDate,
             notes = notes.takeIf { it.isNotBlank() },

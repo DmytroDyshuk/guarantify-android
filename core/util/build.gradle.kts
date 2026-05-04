@@ -11,6 +11,9 @@ configure<LibraryExtension> {
 }
 
 dependencies {
+    //Modules
+    implementation(projects.core.common)
+
     //Core
     implementation(libs.androidx.core.ktx)
 
@@ -18,6 +21,8 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    androidTestImplementation(libs.androidx.junit)
+    implementation(libs.androidx.exifinterface)
+
+    androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

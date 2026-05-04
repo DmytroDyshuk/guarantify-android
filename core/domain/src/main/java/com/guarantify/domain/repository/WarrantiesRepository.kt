@@ -8,6 +8,7 @@ interface WarrantiesRepository {
     val latestWarranties: Flow<List<Warranty>>
     suspend fun createOrUpdateWarranty(warranty: Warranty): Result<Unit>
     suspend fun getWarranty(warrantyId: String): Result<Warranty>
-    suspend fun deleteWarranty(warranty: Warranty)
-    suspend fun syncWarranties()
+    suspend fun deleteWarranty(warranty: Warranty): Result<Unit>
+    suspend fun uploadWarrantyPhoto(warrantyId: String, photoUri: String): Result<String>
+    suspend fun updateRemoteUrlPhotoLocally(warrantyId: String, photoUrl: String): Result<Unit>
 }

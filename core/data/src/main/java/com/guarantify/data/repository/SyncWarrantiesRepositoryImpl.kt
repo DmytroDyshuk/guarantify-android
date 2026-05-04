@@ -1,0 +1,123 @@
+package com.guarantify.data.repository
+
+import androidx.sqlite.SQLiteException
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.guarantify.common.di.IoDispatcher
+import com.guarantify.common.result.Result
+import com.guarantify.data.database.dao.WarrantyDao
+import com.guarantify.data.database.entity.WarrantyEntity
+import com.guarantify.data.mapper.toDto
+import com.guarantify.data.mapper.toEntity
+import com.guarantify.data.network.firebase.firestore.FirestoreWarrantyDataSource
+import com.guarantify.domain.model.auth.AuthRequiredException
+import com.guarantify.domain.model.sync.SyncError
+import com.guarantify.domain.model.sync.SyncStatus
+import com.guarantify.domain.preferences.SyncPreferencesManager
+import com.guarantify.domain.repository.SyncWarrantiesRepository
+import jakarta.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+
+class SyncWarrantiesRepositoryImpl @Inject constructor(
+    private val firestoreWarrantyDataSource: FirestoreWarrantyDataSource,
+    private val warrantyDao: WarrantyDao,
+    private val syncPreferencesManager: SyncPreferencesManager,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
+) : SyncWarrantiesRepository {
+
+    override suspend fun syncWarranties(): Result<Unit> = withContext(ioDispatcher) {
+        try {
+            val newSyncTimestamp = pullRemoteChanges()
+            syncPreferencesManager.updateLastSyncTimestamp(newSyncTimestamp)
+            pushLocalChanges()
+
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+
+            val mappedError = when (e) {
+                is FirebaseFirestoreException -> SyncError.NetworkError()
+                is AuthRequiredException -> SyncError.AuthError()
+                is SQLiteException -> SyncError.DatabaseError(e)
+                else -> SyncError.UnknownError(e)
+            }
+
+            Result.Error(mappedError)
+        }
+    }
+
+    private suspend fun pullRemoteChanges(): Long {
+        val lastSyncUpdate = syncPreferencesManager.getLastSyncTimestamp()
+        val remoteWarranties =
+            firestoreWarrantyDataSource.getWarrantiesUpdatedSince(lastSyncUpdate)
+
+        if (remoteWarranties.isEmpty()) return lastSyncUpdate
+
+        val remoteIds = remoteWarranties.map { it.id }
+        val localEntitiesMap = warrantyDao.getWarrantiesByIds(remoteIds).associateBy { it.id }
+
+        val entitiesToUpsert = mutableListOf<WarrantyEntity>()
+        val idsToDelete = mutableListOf<String>()
+
+        remoteWarranties.forEach { remoteDto ->
+            val localEntity = localEntitiesMap[remoteDto.id]
+
+            if (localEntity != null && remoteDto.updatedAt <= localEntity.updatedAt) {
+                return@forEach
+            }
+
+            if (localEntity == null && remoteDto.isDeleted) {
+                return@forEach
+            }
+
+            if (remoteDto.isDeleted) {
+                idsToDelete.add(remoteDto.id)
+            } else {
+                entitiesToUpsert.add(
+                    remoteDto.toEntity().copy(syncStatus = SyncStatus.SYNCED)
+                )
+            }
+        }
+
+        if (entitiesToUpsert.isNotEmpty() || idsToDelete.isNotEmpty()) {
+            warrantyDao.applyRemoteChanges(
+                upsertList = entitiesToUpsert,
+                deleteIds = idsToDelete
+            )
+        }
+
+        return remoteWarranties.maxOfOrNull { it.updatedAt } ?: lastSyncUpdate
+    }
+
+    private suspend fun pushLocalChanges() {
+        val unsyncedWarranties = warrantyDao.getUnsyncedWarranties()
+
+        if (unsyncedWarranties.isEmpty()) return
+
+        val entitiesToUpload = unsyncedWarranties.filter {
+            !it.isDeleted && it.syncStatus == SyncStatus.READY_TO_SYNC
+        }
+
+        val entitiesToDelete = unsyncedWarranties.filter {
+            it.isDeleted
+        }
+
+        if (entitiesToUpload.isEmpty() && entitiesToDelete.isEmpty()) return
+
+        firestoreWarrantyDataSource.pushChangesBatch(
+            toUpload = entitiesToUpload.map { it.toDto() },
+            toDelete = entitiesToDelete.map { it.id }
+        )
+
+        if (entitiesToUpload.isNotEmpty()) {
+            val uploadedIds = entitiesToUpload.map { it.id }
+            warrantyDao.updateSyncStatusForIds(uploadedIds, SyncStatus.SYNCED)
+        }
+
+        if (entitiesToDelete.isNotEmpty()) {
+            warrantyDao.hardDeleteWarranties(entitiesToDelete)
+        }
+    }
+
+}

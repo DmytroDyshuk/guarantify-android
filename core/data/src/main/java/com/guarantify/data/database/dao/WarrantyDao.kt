@@ -5,26 +5,81 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.guarantify.data.database.entity.WarrantyEntity
+import com.guarantify.data.mapper.toEntityWithGeneratedIdIfNeeded
+import com.guarantify.domain.model.sync.SyncStatus
+import com.guarantify.domain.model.Warranty
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WarrantyDao {
-    @Query("SELECT * FROM warranties")
+    @Query("SELECT * FROM warranties WHERE isDeleted = 0")
     fun getAllWarranties(): Flow<List<WarrantyEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun createOrUpdateWarranty(warranty: WarrantyEntity)
 
-    @Query("SELECT * FROM warranties WHERE id = :id")
+    @Query("SELECT * FROM warranties WHERE id = :id AND isDeleted = 0")
     suspend fun getWarrantyById(id: String): WarrantyEntity?
 
-    @Delete
-    suspend fun deleteWarranty(warranty: WarrantyEntity)
-
-    @Query("SELECT * FROM warranties WHERE isSynced = 0")
+    @Query("SELECT * FROM warranties WHERE syncStatus != 'SYNCED'")
     suspend fun getUnsyncedWarranties(): List<WarrantyEntity>
 
-    @Query("UPDATE warranties SET isSynced = :isSynced WHERE id = :id")
-    suspend fun updateSyncStatus(id: String, isSynced: Boolean)
+    @Query("UPDATE warranties SET syncStatus = :syncStatus WHERE id = :id")
+    suspend fun updateWarrantySyncStatus(id: String, syncStatus: SyncStatus)
+
+    @Query("UPDATE warranties SET syncStatus = :status WHERE id IN (:ids)")
+    suspend fun updateSyncStatusForIds(ids: List<String>, status: SyncStatus)
+
+    @Query("UPDATE warranties SET isDeleted = 1, updatedAt = :updatedAt, syncStatus = :syncStatus WHERE id = :id")
+    suspend fun softDeleteWarranty(
+        id: String,
+        updatedAt: Long,
+        syncStatus: SyncStatus = SyncStatus.READY_TO_SYNC
+    )
+
+    @Query("DELETE FROM warranties WHERE id = :id")
+    suspend fun hardDeleteWarrantyById(id: String)
+
+    @Delete
+    suspend fun hardDeleteWarranties(warranties: List<WarrantyEntity>)
+
+    @Query("SELECT * FROM warranties WHERE id IN (:ids)")
+    suspend fun getWarrantiesByIds(ids: List<String>): List<WarrantyEntity>
+
+    @Transaction
+    suspend fun upsertWithPhotoLogic(warranty: Warranty): WarrantyEntity {
+        val oldWarranty = getWarrantyById(warranty.id)
+
+        val photoUri = warranty.localPhotoUri?.takeUnless { it.isBlank() }
+        val isPhotoChanged = oldWarranty?.localPhotoUri != photoUri
+
+        val syncStatus = if (photoUri != null && isPhotoChanged) {
+            SyncStatus.PENDING
+        } else {
+            SyncStatus.READY_TO_SYNC
+        }
+
+        val entity = warranty.toEntityWithGeneratedIdIfNeeded().copy(
+            syncStatus = syncStatus,
+            remotePhotoUrl = if (isPhotoChanged) null else oldWarranty?.remotePhotoUrl
+        )
+
+        createOrUpdateWarranty(entity)
+
+        return entity
+    }
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdateWarranties(warranties: List<WarrantyEntity>)
+
+    @Query("DELETE FROM warranties WHERE id IN (:ids)")
+    suspend fun hardDeleteWarrantiesByIds(ids: List<String>)
+
+    @Transaction
+    suspend fun applyRemoteChanges(upsertList: List<WarrantyEntity>, deleteIds: List<String>) {
+        if (upsertList.isNotEmpty()) insertOrUpdateWarranties(upsertList)
+        if (deleteIds.isNotEmpty()) hardDeleteWarrantiesByIds(deleteIds)
+    }
 }

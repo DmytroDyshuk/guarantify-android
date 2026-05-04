@@ -16,5 +16,6 @@ data class WarrantyDto(
     val serialNumber: String? = null,
     val photoUrl: String? = null,
     val notes: String? = null,
-    val updatedAt: Long = 0
+    val updatedAt: Long = 0,
+    val isDeleted: Boolean = false
 )

@@ -5,7 +5,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.guarantify.domain.model.auth.AuthResult
 import com.guarantify.domain.model.auth.AuthState
 import com.guarantify.domain.model.UserData
-import com.guarantify.domain.repository.GoogleAuthRepository
+import com.guarantify.domain.repository.AuthRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
@@ -13,9 +13,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
-class GoogleAuthRepositoryImpl @Inject constructor(
+class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth
-) : GoogleAuthRepository {
+) : AuthRepository {
 
     override fun observeAuthState(): Flow<AuthState> = callbackFlow {
         val authListener = FirebaseAuth.AuthStateListener { auth ->

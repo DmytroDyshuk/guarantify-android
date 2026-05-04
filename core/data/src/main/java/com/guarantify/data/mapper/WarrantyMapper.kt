@@ -2,6 +2,7 @@ package com.guarantify.data.mapper
 
 import com.guarantify.data.database.entity.WarrantyEntity
 import com.guarantify.data.network.dto.WarrantyDto
+import com.guarantify.domain.model.sync.SyncStatus
 import com.guarantify.domain.model.Warranty
 import java.time.LocalDate
 import java.util.UUID
@@ -18,9 +19,10 @@ fun Warranty.toDto(): WarrantyDto {
         amount = this.amount,
         currency = this.currency,
         serialNumber = this.serialNumber,
-        photoUrl = this.photoUrl,
+        photoUrl = this.remotePhotoUrl,
         notes = this.notes,
-        updatedAt = this.updatedAt
+        updatedAt = this.updatedAt,
+        isDeleted = false
     )
 }
 
@@ -37,11 +39,13 @@ fun Warranty.toEntityWithGeneratedIdIfNeeded(): WarrantyEntity {
         brand = this.brand,
         amount = this.amount,
         currency = this.currency,
-        photoUrl = this.photoUrl,
+        localPhotoUri = this.localPhotoUri,
+        remotePhotoUrl = this.remotePhotoUrl,
         serialNumber = this.serialNumber,
         notes = this.notes,
         updatedAt = System.currentTimeMillis(),
-        isSynced = false
+        syncStatus = SyncStatus.PENDING,
+        isDeleted = false
     )
 }
 
@@ -56,9 +60,10 @@ fun WarrantyDto.toEntity(): WarrantyEntity {
         brand = this.brand,
         amount = this.amount,
         serialNumber = this.serialNumber,
-        photoUrl = this.photoUrl,
+        remotePhotoUrl = this.photoUrl,
         notes = this.notes,
-        updatedAt = this.updatedAt
+        updatedAt = this.updatedAt,
+        isDeleted = this.isDeleted
     )
 }
 
@@ -74,9 +79,10 @@ fun WarrantyEntity.toDto(): WarrantyDto {
         amount = this.amount,
         currency = this.currency,
         serialNumber = this.serialNumber,
-        photoUrl = this.photoUrl,
+        photoUrl = this.remotePhotoUrl,
         notes = this.notes,
-        updatedAt = this.updatedAt
+        updatedAt = this.updatedAt,
+        isDeleted = this.isDeleted
     )
 }
 
@@ -91,7 +97,8 @@ fun WarrantyEntity.toDomain(): Warranty {
         brand = this.brand,
         amount = this.amount,
         serialNumber = this.serialNumber,
-        photoUrl = this.photoUrl,
+        localPhotoUri = this.localPhotoUri,
+        remotePhotoUrl = this.remotePhotoUrl,
         notes = this.notes,
         updatedAt = this.updatedAt,
         currency = this.currency
