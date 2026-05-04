@@ -27,4 +27,8 @@ class SyncPreferencesManagerImpl @Inject constructor(
         }
     }
 
+    override suspend fun isFirstSyncCompleted(): Boolean {
+        return getLastSyncTimestamp() > 0L
+    }
+
 }

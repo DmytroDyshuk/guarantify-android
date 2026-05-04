@@ -2,6 +2,7 @@ package com.guarantify.warranties.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.guarantify.domain.preferences.SyncPreferencesManager
 import com.guarantify.domain.repository.WarrantiesRepository
 import com.guarantify.warranties.list.state.WarrantiesUiState
 import com.guarantify.warranties.mapper.WarrantyUiMapper
@@ -17,13 +18,27 @@ import kotlinx.coroutines.flow.stateIn
 @HiltViewModel
 class WarrantiesViewModel @Inject constructor(
     warrantiesRepository: WarrantiesRepository,
-    private val warrantyUiMapper: WarrantyUiMapper
+    private val warrantyUiMapper: WarrantyUiMapper,
+    private val syncPreferencesManager: SyncPreferencesManager
 ) : ViewModel() {
 
     val uiState: StateFlow<WarrantiesUiState> = warrantiesRepository.latestWarranties
         .map { warranties ->
-            if (warranties.isEmpty()) WarrantiesUiState.Empty
-            else WarrantiesUiState.Success(warranties.map(warrantyUiMapper::toListItem))
+            val isFirstSyncDone = syncPreferencesManager.isFirstSyncCompleted()
+
+            when {
+                !isFirstSyncDone -> {
+                    WarrantiesUiState.Loading
+                }
+
+                warranties.isNotEmpty() -> {
+                    WarrantiesUiState.Success(warranties.map(warrantyUiMapper::toListItem))
+                }
+
+                else -> {
+                    WarrantiesUiState.Empty
+                }
+            }
         }
         .distinctUntilChanged()
         .catch {
