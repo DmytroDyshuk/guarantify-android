@@ -86,7 +86,8 @@ fun WarrantyDetailsScreen(
 fun WarrantyDetailsScreenContent(
     warranty: WarrantyDetailsUi, modifier: Modifier = Modifier
 ) {
-    val statusColor by remember { mutableStateOf(warranty.status.toColor()) }
+    val statusColor = warranty.status.toColor()
+    val remainingDays = warranty.remainingDays
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -116,7 +117,7 @@ fun WarrantyDetailsScreenContent(
                     modifier = Modifier.padding(top = 8.dp),
                     label = {
                         Text(
-                            text = "${warranty.remainingDays} days left",
+                            text = if (remainingDays <= 0) "EXPIRED" else "$remainingDays days left",
                             color = Color.White,
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )

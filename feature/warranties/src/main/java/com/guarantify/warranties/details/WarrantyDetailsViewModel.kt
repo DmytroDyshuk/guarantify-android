@@ -22,7 +22,6 @@ class WarrantyDetailsViewModel @Inject constructor(
     warrantiesRepository: WarrantiesRepository,
     warrantyUiMapper: WarrantyUiMapper
 ) : ViewModel() {
-
     private val warrantyId = savedStateHandle.toRoute<RootDestinations.WarrantyDetails>().id
 
     private val _uiState: MutableStateFlow<DetailsUiState> =
