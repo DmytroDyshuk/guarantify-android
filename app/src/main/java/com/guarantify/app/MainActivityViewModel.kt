@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.stateIn
 class MainActivityViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val workManager: WorkManager
-) : ViewModel() {
+) : ViewModel() { //test
     val uiState: StateFlow<MainActivityUiState> = authRepository.observeAuthState()
         .onEach {
             if (it is AuthState.Authenticated) {
