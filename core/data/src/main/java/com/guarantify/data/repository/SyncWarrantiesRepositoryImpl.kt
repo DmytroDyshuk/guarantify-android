@@ -31,10 +31,14 @@ class SyncWarrantiesRepositoryImpl @Inject constructor(
             val newSyncTimestamp = pullRemoteChanges()
             syncPreferencesManager.updateLastSyncTimestamp(newSyncTimestamp)
             pushLocalChanges()
+            syncPreferencesManager.markFirstSyncAttempted()
 
             Result.Success(Unit)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
+
+            // A failed attempt still ends the initial loading state, otherwise the UI waits forever
+            markFirstSyncAttemptedIgnoringErrors()
 
             val mappedError = when (e) {
                 is FirebaseFirestoreException -> SyncError.NetworkError()
@@ -44,6 +48,14 @@ class SyncWarrantiesRepositoryImpl @Inject constructor(
             }
 
             Result.Error(mappedError)
+        }
+    }
+
+    private suspend fun markFirstSyncAttemptedIgnoringErrors() {
+        try {
+            syncPreferencesManager.markFirstSyncAttempted()
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
         }
     }
 

@@ -414,6 +414,31 @@ class SyncWarrantiesRepositoryTest {
     }
 
     @Test
+    fun syncWarranties_should_mark_first_sync_attempted_when_remote_is_empty() = runTest {
+        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 0L
+        coEvery { firestoreWarrantyDataSource.getWarrantiesUpdatedSince(0L) } returns emptyList()
+        coEvery { warrantyDao.getUnsyncedWarranties() } returns emptyList()
+
+        val result = repository.syncWarranties()
+        assertTrue { result is Result.Success }
+
+        coVerify(exactly = 1) { syncPreferencesManager.markFirstSyncAttempted() }
+    }
+
+    @Test
+    fun syncWarranties_should_mark_first_sync_attempted_when_sync_fails() = runTest {
+        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 0L
+        coEvery {
+            firestoreWarrantyDataSource.getWarrantiesUpdatedSince(0L)
+        } throws mockk<FirebaseFirestoreException>()
+
+        val result = repository.syncWarranties()
+        assertTrue { result is Result.Error }
+
+        coVerify(exactly = 1) { syncPreferencesManager.markFirstSyncAttempted() }
+    }
+
+    @Test
     fun syncWarranties_should_propagate_cancellation_exception() = runTest {
         coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
         coEvery {
@@ -424,6 +449,7 @@ class SyncWarrantiesRepositoryTest {
             repository.syncWarranties()
         }
 
+        coVerify(exactly = 0) { syncPreferencesManager.markFirstSyncAttempted() }
         coVerify(exactly = 0) { syncPreferencesManager.updateLastSyncTimestamp(any()) }
         coVerify(exactly = 0) { warrantyDao.getWarrantiesByIds(any()) }
         coVerify(exactly = 0) { warrantyDao.applyRemoteChanges(any(), any()) }

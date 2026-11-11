@@ -11,8 +11,8 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
@@ -22,24 +22,24 @@ class WarrantiesViewModel @Inject constructor(
     private val syncPreferencesManager: SyncPreferencesManager
 ) : ViewModel() {
 
-    val uiState: StateFlow<WarrantiesUiState> = warrantiesRepository.latestWarranties
-        .map { warranties ->
-            val isFirstSyncDone = syncPreferencesManager.isFirstSyncCompleted()
+    val uiState: StateFlow<WarrantiesUiState> = combine(
+        warrantiesRepository.latestWarranties,
+        syncPreferencesManager.observeFirstSyncAttempted()
+    ) { warranties, isFirstSyncAttempted ->
+        when {
+            warranties.isNotEmpty() -> {
+                WarrantiesUiState.Success(warranties.map(warrantyUiMapper::toListItem))
+            }
 
-            when {
-                !isFirstSyncDone -> {
-                    WarrantiesUiState.Loading
-                }
+            !isFirstSyncAttempted -> {
+                WarrantiesUiState.Loading
+            }
 
-                warranties.isNotEmpty() -> {
-                    WarrantiesUiState.Success(warranties.map(warrantyUiMapper::toListItem))
-                }
-
-                else -> {
-                    WarrantiesUiState.Empty
-                }
+            else -> {
+                WarrantiesUiState.Empty
             }
         }
+    }
         .distinctUntilChanged()
         .catch {
             emit(WarrantiesUiState.Error(message = it.message ?: "Something went wrong"))
