@@ -59,6 +59,7 @@ fun WarrantyDto.toEntity(): WarrantyEntity {
         storeName = this.storeName,
         brand = this.brand,
         amount = this.amount,
+        currency = this.currency,
         serialNumber = this.serialNumber,
         remotePhotoUrl = this.photoUrl,
         notes = this.notes,

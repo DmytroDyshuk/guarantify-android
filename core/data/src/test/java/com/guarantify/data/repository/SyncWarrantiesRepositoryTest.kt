@@ -273,6 +273,36 @@ class SyncWarrantiesRepositoryTest {
     }
 
     @Test
+    fun pullRemoteChanges_should_keep_remote_currency() = runTest {
+        val remoteWarranty = WarrantyDto(
+            id = "1",
+            updatedAt = 1200L,
+            purchaseDate = "2024-01-01",
+            expirationDate = "2026-01-01",
+            amount = 1999L,
+            currency = "EUR"
+        )
+
+        coEvery { syncPreferencesManager.getLastSyncTimestamp() } returns 1000L
+        coEvery { firestoreWarrantyDataSource.getWarrantiesUpdatedSince(1000L) } returns listOf(
+            remoteWarranty
+        )
+        coEvery { warrantyDao.getWarrantiesByIds(listOf("1")) } returns emptyList()
+        coEvery { warrantyDao.applyRemoteChanges(any(), any()) } just Runs
+        coEvery { warrantyDao.getUnsyncedWarranties() } returns emptyList()
+
+        val result = repository.syncWarranties()
+        assertTrue { result is Result.Success }
+
+        coVerify(exactly = 1) {
+            warrantyDao.applyRemoteChanges(
+                upsertList = match { it.size == 1 && it[0].currency == "EUR" },
+                deleteIds = emptyList()
+            )
+        }
+    }
+
+    @Test
     fun pullRemoteChanges_should_delete_local_when_remote_is_deleted() = runTest {
         val remoteWarranty =
             WarrantyDto(id = "1", updatedAt = 1500L, isDeleted = true, currency = "USD")
