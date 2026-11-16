@@ -7,4 +7,5 @@ interface SyncPreferencesManager {
     suspend fun updateLastSyncTimestamp(timestamp: Long)
     fun observeFirstSyncAttempted(): Flow<Boolean>
     suspend fun markFirstSyncAttempted()
+    suspend fun clear()
 }

@@ -43,4 +43,11 @@ class SyncPreferencesManagerImpl @Inject constructor(
         }
     }
 
+    override suspend fun clear() {
+        dataStore.edit { preferences ->
+            preferences.remove(lastSyncKey)
+            preferences.remove(firstSyncAttemptedKey)
+        }
+    }
+
 }

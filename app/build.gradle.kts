@@ -62,6 +62,7 @@ dependencies {
     //Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.activity.compose)
     implementation(libs.core.splashscreen)
 
@@ -118,6 +119,7 @@ dependencies {
 
     //Mockk
     testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.mockk.android)
 
     debugImplementation(libs.androidx.ui.tooling)

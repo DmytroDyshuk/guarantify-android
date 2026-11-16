@@ -1,9 +1,11 @@
 package com.guarantify.data.di
 
 import com.guarantify.data.repository.AuthRepositoryImpl
+import com.guarantify.data.repository.LocalDataRepositoryImpl
 import com.guarantify.data.repository.SyncWarrantiesRepositoryImpl
 import com.guarantify.data.repository.WarrantiesRepositoryImpl
 import com.guarantify.domain.repository.AuthRepository
+import com.guarantify.domain.repository.LocalDataRepository
 import com.guarantify.domain.repository.SyncWarrantiesRepository
 import com.guarantify.domain.repository.WarrantiesRepository
 import dagger.Binds
@@ -27,5 +29,9 @@ interface RepositoryModule {
     @Binds
     @Singleton
     fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
+
+    @Binds
+    @Singleton
+    fun bindLocalDataRepository(impl: LocalDataRepositoryImpl): LocalDataRepository
 
 }

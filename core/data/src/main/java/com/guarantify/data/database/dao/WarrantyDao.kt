@@ -77,6 +77,9 @@ interface WarrantyDao {
     @Query("DELETE FROM warranties WHERE id IN (:ids)")
     suspend fun hardDeleteWarrantiesByIds(ids: List<String>)
 
+    @Query("DELETE FROM warranties")
+    suspend fun deleteAllWarranties()
+
     @Transaction
     suspend fun applyRemoteChanges(upsertList: List<WarrantyEntity>, deleteIds: List<String>) {
         if (upsertList.isNotEmpty()) insertOrUpdateWarranties(upsertList)
