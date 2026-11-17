@@ -332,7 +332,6 @@ fun CreateWarrantyScreenContent(
             openSheet = showBottomSheet,
             onPhotoPick = { uri ->
                 uri?.let { onEvent(CreateWarrantyEvent.PhotoPicked(it)) }
-
             },
             onDismissSheet = {
                 showBottomSheet = false

@@ -93,8 +93,8 @@ class CompressImageWorker @AssistedInject constructor(
 
     private fun handleError(throwable: Throwable?): WorkResult {
         return when (throwable) {
-            is IOException, is SecurityException -> WorkResult.retry()
-            is IllegalStateException -> WorkResult.failure()
+            is IOException -> WorkResult.retry()
+            is IllegalStateException, is SecurityException -> WorkResult.failure()
             else -> WorkResult.failure()
         }
     }
