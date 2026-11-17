@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.guarantify.common.result.Result
 import com.guarantify.domain.model.Warranty
+import com.guarantify.domain.photo.PhotoStorage
 import com.guarantify.domain.repository.AuthRepository
 import com.guarantify.domain.repository.WarrantiesRepository
 import com.guarantify.util.date.DateFormatter
@@ -15,6 +16,7 @@ import com.guarantify.warranties.create.state.CreateWarrantyEvent
 import com.guarantify.warranties.create.state.CreateWarrantyUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,10 +27,13 @@ import kotlinx.coroutines.launch
 class CreateWarrantyViewModel @Inject constructor(
     private val warrantiesRepository: WarrantiesRepository,
     private val authRepository: AuthRepository,
-    private val dateFormatter: DateFormatter
+    private val dateFormatter: DateFormatter,
+    private val photoStorage: PhotoStorage
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CreateWarrantyUiState())
     val uiState: StateFlow<CreateWarrantyUiState> = _uiState.asStateFlow()
+
+    private var photoCopyJob: Job? = null
 
     fun onEvent(event: CreateWarrantyEvent) {
         when (event) {
@@ -91,24 +96,23 @@ class CreateWarrantyViewModel @Inject constructor(
             }
 
             is CreateWarrantyEvent.PhotoPicked -> {
-                _uiState.update {
-                    it.copy(
-                        photoUri = event.value.toString(),
-                        photoUploadError = null
-                    )
-                }
+                copyPickedPhoto(event.value.toString())
             }
 
             is CreateWarrantyEvent.PhotoRemoved -> {
+                photoCopyJob?.cancel()
                 _uiState.update {
                     it.copy(
                         photoUri = null,
-                        photoUploadError = null
+                        photoUploadError = null,
+                        isPhotoProcessing = false
                     )
                 }
             }
 
             is CreateWarrantyEvent.SaveClicked -> {
+                if (_uiState.value.isPhotoProcessing) return
+
                 val errors = validate(_uiState.value)
 
                 _uiState.update {
@@ -185,6 +189,40 @@ class CreateWarrantyViewModel @Inject constructor(
             expirationDateError,
             priceError
         ).any { it != null }
+    }
+
+    private fun copyPickedPhoto(sourceUri: String) {
+        photoCopyJob?.cancel()
+        _uiState.update {
+            it.copy(
+                photoUri = null,
+                photoUploadError = null,
+                isPhotoProcessing = true
+            )
+        }
+
+        photoCopyJob = viewModelScope.launch {
+            when (val result = photoStorage.copyPhoto(sourceUri)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            photoUri = result.data,
+                            isPhotoProcessing = false
+                        )
+                    }
+                }
+
+                is Result.Error -> {
+                    Log.e("CreateWarrantyViewModel", "Failed to copy photo", result.throwable)
+                    _uiState.update {
+                        it.copy(
+                            photoUploadError = "Couldn't add the photo, please choose it again",
+                            isPhotoProcessing = false
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun saveWarranty(warranty: Warranty) {

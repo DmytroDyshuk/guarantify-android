@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteException
 import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
+import com.guarantify.data.photo.PhotoStorageImpl
 import com.guarantify.data.workmanager.WarrantyWork
 import com.guarantify.domain.model.DatabaseError
 import com.guarantify.domain.preferences.SyncPreferencesManager
@@ -43,6 +44,9 @@ class LocalDataRepositoryTest {
     @TempDir
     lateinit var cacheDir: File
 
+    @TempDir
+    lateinit var filesDir: File
+
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var repository: LocalDataRepositoryImpl
@@ -52,6 +56,7 @@ class LocalDataRepositoryTest {
         MockKAnnotations.init(this)
 
         every { context.cacheDir } returns cacheDir
+        every { context.filesDir } returns filesDir
 
         repository = LocalDataRepositoryImpl(
             context = context,
@@ -82,6 +87,19 @@ class LocalDataRepositoryTest {
         repository.clearLocalData()
 
         Assertions.assertFalse(compressedPhoto.exists())
+        Assertions.assertTrue(otherFile.exists())
+    }
+
+    @Test
+    fun `clearLocalData deletes local photos and keeps other files`() = runTest(testDispatcher) {
+        val photosDir = File(filesDir, PhotoStorageImpl.PHOTOS_DIR).apply { mkdirs() }
+        val photo = File(photosDir, "photo.jpg").apply { writeText("x") }
+        val otherFile = File(filesDir, "datastore.preferences_pb").apply { writeText("x") }
+
+        repository.clearLocalData()
+
+        Assertions.assertFalse(photo.exists())
+        Assertions.assertFalse(photosDir.exists())
         Assertions.assertTrue(otherFile.exists())
     }
 

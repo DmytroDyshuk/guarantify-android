@@ -125,7 +125,7 @@ fun CreateWarrantyScreenContent(
                 onClick = {
                     onEvent(CreateWarrantyEvent.SaveClicked)
                 },
-                enabled = !uiState.isSaving
+                enabled = !uiState.isSaving && !uiState.isPhotoProcessing
             ) {
                 if (uiState.isSaving) {
                     CircularProgressIndicator(
@@ -286,6 +286,8 @@ fun CreateWarrantyScreenContent(
             )
             WarrantyPhotoField(
                 photoUri = uiState.photoUri,
+                isProcessing = uiState.isPhotoProcessing,
+                error = uiState.photoUploadError,
                 onAddOrReplace = {
                     showBottomSheet = true
                 },
@@ -343,10 +345,27 @@ fun CreateWarrantyScreenContent(
 @Composable
 private fun WarrantyPhotoField(
     photoUri: String? = null,
+    isProcessing: Boolean = false,
+    error: String? = null,
     onAddOrReplace: () -> Unit,
     onRemove: () -> Unit
 ) {
-    if (photoUri == null) {
+    if (isProcessing) {
+        DashedCard(
+            modifier = Modifier
+                .height(124.dp)
+                .fillMaxWidth(),
+            color = MaterialTheme.colorScheme.primary
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(32.dp))
+            }
+        }
+    } else if (photoUri == null) {
         DashedCard(
             modifier = Modifier
                 .height(124.dp)
@@ -411,6 +430,15 @@ private fun WarrantyPhotoField(
                 }
             }
         }
+    }
+
+    if (error != null) {
+        Text(
+            modifier = Modifier.padding(top = 8.dp),
+            text = error,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
 

@@ -4,6 +4,7 @@ import android.content.Context
 import com.guarantify.common.di.IoDispatcher
 import com.guarantify.common.result.Result
 import com.guarantify.data.database.dao.WarrantyDao
+import com.guarantify.data.photo.PhotoStorageImpl
 import com.guarantify.data.workmanager.WarrantyWork
 import com.guarantify.domain.model.DatabaseError
 import com.guarantify.domain.preferences.SyncPreferencesManager
@@ -14,6 +15,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class LocalDataRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -30,6 +32,7 @@ class LocalDataRepositoryImpl @Inject constructor(
             warrantyDao.deleteAllWarranties()
             syncPreferencesManager.clear()
             deleteCompressedPhotos()
+            deleteLocalPhotos()
 
             Result.Success(Unit)
         } catch (e: Exception) {
@@ -42,6 +45,10 @@ class LocalDataRepositoryImpl @Inject constructor(
         context.cacheDir
             ?.listFiles { file -> file.isFile && file.name.startsWith(WarrantyWork.COMPRESSED_PHOTO_PREFIX) }
             ?.forEach { it.delete() }
+    }
+
+    private fun deleteLocalPhotos() {
+        File(context.filesDir, PhotoStorageImpl.PHOTOS_DIR).deleteRecursively()
     }
 
 }
