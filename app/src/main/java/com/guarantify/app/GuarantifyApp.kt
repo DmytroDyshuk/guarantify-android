@@ -2,50 +2,34 @@ package com.guarantify.app
 
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import com.guarantify.data.workmanager.SyncWorker
+import com.guarantify.app.sync.SyncInitializer
 import dagger.hilt.android.HiltAndroidApp
 import jakarta.inject.Inject
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.flow.map
 
 @HiltAndroidApp
 class GuarantifyApp : Application(), Configuration.Provider {
 
-    override fun onCreate() {
-        super.onCreate()
-        schedulePeriodicWork()
-    }
-
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject
+    lateinit var syncInitializer: SyncInitializer
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
 
-    private fun schedulePeriodicWork() {
-        val syncWorkRequest = PeriodicWorkRequestBuilder<SyncWorker>(
-            repeatInterval = 5,
-            repeatIntervalTimeUnit = TimeUnit.HOURS,
-            flexTimeInterval = 1,
-            flexTimeIntervalUnit = TimeUnit.HOURS
-        ).setConstraints(
-            constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
-        ).build()
+    override fun onCreate() {
+        super.onCreate()
 
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            uniqueWorkName = "sync_warranties_work",
-            existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.KEEP,
-            request = syncWorkRequest
-        )
+        val isAppInForeground = ProcessLifecycleOwner.get().lifecycle.currentStateFlow
+            .map { it.isAtLeast(Lifecycle.State.STARTED) }
+        syncInitializer.start(isAppInForeground)
     }
 
 }

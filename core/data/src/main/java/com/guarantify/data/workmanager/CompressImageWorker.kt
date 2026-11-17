@@ -78,7 +78,7 @@ class CompressImageWorker @AssistedInject constructor(
             cacheDir.mkdirs()
         }
 
-        val fileName = "warranty_${warrantyId}.jpg"
+        val fileName = "${WarrantyWork.COMPRESSED_PHOTO_PREFIX}${warrantyId}.jpg"
         val compressedFile = File(cacheDir, fileName)
         compressedFile.writeBytes(compressedBytes)
 

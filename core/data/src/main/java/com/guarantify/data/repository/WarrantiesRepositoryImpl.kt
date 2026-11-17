@@ -16,6 +16,7 @@ import com.guarantify.data.network.firebase.storage.WarrantyPhotoStorage
 import com.guarantify.data.workmanager.CompletePhotoUploadWorker
 import com.guarantify.data.workmanager.CompressImageWorker
 import com.guarantify.data.workmanager.UploadImageWorker
+import com.guarantify.data.workmanager.WarrantyWork
 import com.guarantify.data.workmanager.WorkerKeys
 import com.guarantify.domain.model.DatabaseError
 import com.guarantify.domain.model.StorageError
@@ -132,11 +133,14 @@ class WarrantiesRepositoryImpl @Inject constructor(
 
         val compressImageRequest = OneTimeWorkRequestBuilder<CompressImageWorker>()
             .setInputData(imageData)
+            .addTag(WarrantyWork.TAG)
             .build()
         val uploadImageRequest = OneTimeWorkRequestBuilder<UploadImageWorker>()
             .setConstraints(constraints)
+            .addTag(WarrantyWork.TAG)
             .build()
         val completeUploadRequest = OneTimeWorkRequestBuilder<CompletePhotoUploadWorker>()
+            .addTag(WarrantyWork.TAG)
             .build()
 
         workManager
